@@ -1,7 +1,5 @@
-// Originally from: CSCI 1300 Fall 2022
 // Author: Rodolfo Martinez-Maldonado
-// Project 1 - Dungeon Escape Game
-
+// Personal Project 1 - Party Implementation
 
 //Check if you actually need all of these libraries
 #include <iostream>

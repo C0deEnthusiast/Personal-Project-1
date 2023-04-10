@@ -1,7 +1,5 @@
-// CSCI 1300 Fall 2022
 // Author: Rodolfo Martinez-Maldonado
-// Recitation: 303 – Xuefei Sun
-// Project 3 - Item Implementation
+// Personal Project 1 - Item Implementation
 
 #include <iostream>
 #include <fstream>

@@ -1,5 +1,5 @@
 // Author: Rodolfo Martinez-Maldonado
-// Map Implementation
+// Personal Project 1 - Map Implementation
 
 #include <iostream>
 #include <cstdlib>

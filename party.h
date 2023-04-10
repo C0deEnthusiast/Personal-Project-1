@@ -1,7 +1,5 @@
-// CSCI 1300 Fall 2022
 // Author: Rodolfo Martinez-Maldonado
-// Recitation: 303 – Xuefei Sun
-// Project 3 - Party Class
+// Personal Project 1 - Party Class
 
 #include <iostream>
 #include <cstdlib>

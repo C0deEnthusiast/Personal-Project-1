@@ -1,5 +1,5 @@
 // Author: Rodolfo Martinez-Maldonado
-// Personal Project 1 -
+// Personal Project 1 - Map Class
 
 #ifndef MAP_H
 #define MAP_H
