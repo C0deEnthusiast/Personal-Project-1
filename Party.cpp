@@ -4,12 +4,12 @@
 //Check if you actually need all of these libraries
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstdlib>
 #include <cmath>
 #include <vector>
 #include <ctype.h>
 #include "party.h"
-#include "split.h" //Scrap with getline() and vector combo
 
 //Overhaul everything in this cpp file AND main driver
 
