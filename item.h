@@ -45,12 +45,12 @@
 using namespace std;
 
 //General Functions to use
-namespace functions{
+struct Functions{
     int createRand(int min, int max){
         srand(time(0));
         return (rand() % (max - min + 1)) + min;
     }
-}
+};
 
 //Used by both items and monsters
 class Effect{

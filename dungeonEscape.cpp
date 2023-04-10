@@ -13,6 +13,7 @@
 
 using namespace std;
 
+
 /*
  * This is to let player read exposition; also stops stream from entering 'player' input
  * Intended to let player read what everything goddamn says*/
@@ -21,12 +22,6 @@ void convenientStop(string stop = ""){
     getline(cin, stop);
 
     return;
-}
-
-//Outputs a random value in a range
-int createRand(int min, int max){
-    srand(time(0));
-    return (rand() % (max - min + 1)) + min;
 }
 
 /*Algorithm: Prints a desired count of lines from the story text file, starting from first_line (INCLUSIVE)
@@ -205,7 +200,9 @@ int main(int argc, char *argv[]){
 
     //Room Generation
     for (int i = 0; i < dungeon.getMaxRoom(); i++){
-        if(!dungeon.addRoom(createRand(0,dungeon.getNumRows() - 1),createRand(0,dungeon.getNumCols() - 1))){
+        int rand1 = Functions().createRand(0,dungeon.getNumRows() - 1);
+        int rand2 = Functions().createRand(0,dungeon.getNumCols() - 1);
+        if(!dungeon.addRoom(rand1, rand2)){
             i--;
         }
     }
@@ -225,8 +222,8 @@ int main(int argc, char *argv[]){
 
     //NPC Generation
     for (int i = 0; i < dungeon.getMaxNPC(); i++){
-        int row = createRand(0,dungeon.getNumRows() - 1);
-        int col = createRand(0,dungeon.getNumCols() - 1);
+        int row = Functions().createRand(0,dungeon.getNumRows() - 1);
+        int col = Functions().createRand(0,dungeon.getNumCols() - 1);
         if(!dungeon.addNPC(row,col)){
             i--;
         } else {
@@ -311,7 +308,7 @@ int main(int argc, char *argv[]){
 
             //20% for each member to lose 1 health
             for (int i = 0; i < party.getPlayerSize(); i++){
-                if (createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
+                if (Functions().createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
                     game = party.changePlayerHealth(i,-1); //i is index of player
                 }
             }
@@ -328,7 +325,7 @@ int main(int argc, char *argv[]){
             dungeon.exploreSpace(dungeon.getPlayerRow(),dungeon.getPlayerCol());
 
             //Talk with NPC
-            if (party.npcPuzzle(createRand(1,20))){ //Correct answer
+            if (party.npcPuzzle(Functions().createRand(1,20))){ //Correct answer
                 cout << "Well, my God of Money! You answered well! Bravo." << endl;
                 cout << "Care to barter? (y/n)" << endl;
                 string confirm = "";
@@ -357,8 +354,11 @@ int main(int argc, char *argv[]){
 
                 int win = fight.monsterEncounter(party);
                 //game = monsters.monsterEncounter(party);
+                int rand1 = Functions().createRand(1,10);
+                int rand2 = Functions().createRand(2,party.getPlayerCount());
+                int rand3 = Functions().createRand(1,100);
 
-                party.monsterOutcome(win,createRand(1,10),createRand(2,party.getPlayerCount()),createRand(1,100));
+                party.monsterOutcome(win, rand1, rand2, rand3);
             }
 
             dungeon.removeNPC(dungeon.getPlayerRow(),dungeon.getPlayerCol());
@@ -381,8 +381,11 @@ int main(int argc, char *argv[]){
             
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
+            int rand1 = Functions().createRand(1,10);
+            int rand2 = Functions().createRand(2,party.getPlayerCount());
+            int rand3 = Functions().createRand(1,100);
 
-            game = party.monsterOutcome(win,createRand(1,10),createRand(2,party.getPlayerCount()),createRand(1,100));
+            game = party.monsterOutcome(win,rand1,rand2,rand3);
             //Removes room
             dungeon.removeRoom(dungeon.getPlayerRow(),dungeon.getPlayerCol());
         } else if (action == "2"){ //Investigating Space
@@ -393,7 +396,7 @@ int main(int argc, char *argv[]){
                 dungeon.exploreSpace(dungeon.getPlayerRow(),dungeon.getPlayerCol());
 
                 //Possibile outcomes
-                int chance = createRand(1,100);
+                int chance = Functions().createRand(1,100);
                 if (chance <= 10){ //Party finds key (10%)
                     cout << "Impressive! You found a key!" << endl;
                     party.setKeys(party.getKeys() + 1);
@@ -424,7 +427,10 @@ int main(int argc, char *argv[]){
 
                     int win = fight.monsterEncounter(party);
 
-                    party.monsterOutcome(win,createRand(1,10),createRand(2,party.getPlayerCount()),createRand(1,100));
+                    int rand1 = Functions().createRand(1,10);
+                    int rand2 = Functions().createRand(2,party.getPlayerCount());
+                    int rand3 = Functions().createRand(1,100);
+                    party.monsterOutcome(win, rand1, rand2, rand3);
 
                 } else {
                     cout << "Nothing found here." << endl;
@@ -433,7 +439,7 @@ int main(int argc, char *argv[]){
                 //50% of losing health
                 if (chance <= 30 || chance > 50){ //All outcomes except fighting a monster
                     for (int i = 0; i < party.getPlayerSize(); i++){
-                        if (createRand(1,100) <= 50){ //Percentage form
+                        if (Functions().createRand(1,100) <= 50){ //Percentage form
                             party.changePlayerHealth(i,-1); //i is index of player
                         }
                     }
@@ -459,7 +465,10 @@ int main(int argc, char *argv[]){
 
             int win = fight.monsterEncounter(party);
 
-            party.monsterOutcome(win,createRand(1,10),createRand(2,party.getPlayerCount()),createRand(1,100));
+            int rand1 = Functions().createRand(1,10);
+            int rand2 = Functions().createRand(2,party.getPlayerCount());
+            int rand3 = Functions().createRand(1,100);
+            party.monsterOutcome(win, rand1, rand2, rand3);
 
             cout << endl;
             convenientStop();

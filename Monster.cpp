@@ -10,9 +10,6 @@
 
 using namespace std;
 
-//Custom namespace
-using namespace functions;
-
 
 Monster::Monster(){
     monster_name = "NaM";
@@ -104,26 +101,12 @@ void Combat::setRaiseRating(int new_raise){
 }
 
 
-/*Algorithm: Dictate monster fights
-    1) By default, room will be -1 so that in accidental encounters, rating of monster would be 1
-    2) Creates random values for later
-    3) Chosen rating is initialized by room
-    4) Chooses random monster index
-    5) Initializes minimum bound and maximum bound so that
-    monsters found in member arrays have same rating as chosen rating
-    6) Through loop, a random monster with specific rating is chosen
-    9) Announces monster and gives player chance to fight or surrender
-        Note: For cases where no weapons, this would occur outside function
-    10) Exits if player surrenders
-    11) Calculates battle outcome based on first three parameters and random values from Step 2
-    12) If player wins (>0), returns rating of monster AND removes monster
-    13) If player loses, returns -2
-    Parameters: int weapon_stats, int armor, int variety, int room = ""
-    Returns:
+/*Returns:
     -1 if player surrounders
     -2 if player loses
     Monster's rating if player wins*/
-int Combat::monsterEncounter(Party& party, bool room){
+
+/*int Combat::monsterEncounter(Party& party, bool room){
     if (party.getCurrentWeaponCapacity() == 0){ //Party doesn't have any weapons
         return -1;
     }
@@ -164,15 +147,15 @@ int Combat::monsterEncounter(Party& party, bool room){
         //Picks random monster with chosen rating
         random_monster = createRand(1,countMonsterRating(rating));
     } else { //Creates a monster if all monsters with rating are dead
-        /*monst_name = "Wrathful Spectre";
-        monst_rating = rating;
-        remove_index = -1;*/
+        //monst_name = "Wrathful Spectre";
+        //monst_rating = rating;
+        //remove_index = -1;
     }
 
     //Picks monster that hasn't been removed, and has chosen rating
-    /*for (int i = temp.getMinRating(); i <= temp.getMaxRating(); i++){
-        cout << "Check monster count rating of " << i << ": " << countMonsterRating(i) << endl;
-    }*/
+    //for (int i = temp.getMinRating(); i <= temp.getMaxRating(); i++){
+    //    cout << "Check monster count rating of " << i << ": " << countMonsterRating(i) << endl;
+    //}
     for (int i = 0; i < monsterList.size(); i++){
         if(monsterList[i].difficultyRating == rating){
             search_index++;
@@ -229,7 +212,7 @@ int Combat::monsterEncounter(Party& party, bool room){
     } else { //Defeat
         return battleDefeat(party, createRand(0,party.getPlayerSize()), createRand(0,100));
     }
-}
+}*/
 
 void Combat::displayMonsterEffect(Effect monsterEffect){
     cout << "    " << monsterEffect.getEffectName() << ": ";
@@ -349,7 +332,7 @@ int Combat::encounter(Party& party, bool room){
     int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
 
     //Random variables for battle outcome
-    int rand_rating = createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
+    int rand_rating = Functions().createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
 
     //Determines monster rating
     if (room){ //Currently at room location
@@ -416,9 +399,11 @@ int Combat::encounter(Party& party, bool room){
     if (battle > 0){ //Victory
         removeMonster(remove_index);
         
-        return battleVictory(party,temp.monster_name,temp.difficultyRating,createRand(1,100));
+        return battleVictory(party,temp.monster_name,temp.difficultyRating,Functions().createRand(1,100));
     } else { //Defeat
-        return battleDefeat(party, createRand(0,party.getPlayerSize()), createRand(0,100));
+        int rand1 = Functions().createRand(0,party.getPlayerSize());
+        int rand2 = Functions().createRand(0,100);
+        return battleDefeat(party, rand1, rand2);
     }
 }
 
@@ -438,7 +423,7 @@ Monster Combat::returnMonster(int rating, int &monster_index){
         //Recurs function until there is monster that is alive
         return returnMonster(ratingReconfiguration(rating), monster_index);
     } else {
-        random_monster = createRand(1,countMonsterRating(rating));
+        random_monster = Functions().createRand(1,countMonsterRating(rating));
     }
 
     //Picks monster that hasn't been removed, and has chosen rating
@@ -484,22 +469,22 @@ int Combat::ratingReconfiguration(int &og_rating){
 
 int Battle::test(){
     //Test
-    for (int i = 0; i < createRand(1,3); i++){
+    for (int i = 0; i < Functions().createRand(1,3); i++){
         addStatus(curMonster->power,-1);
     }
-    for (int i = 0; i < createRand(2,3); i++){
+    for (int i = 0; i < Functions().createRand(2,3); i++){
         addStatus(curMonster->power, 0);
     }
-    for (int i = 0; i < createRand(1,3); i++){
+    for (int i = 0; i < Functions().createRand(1,3); i++){
         addStatus(curMonster->power, 1);
     }
-    for (int i = 0; i < createRand(2,3); i++){
+    for (int i = 0; i < Functions().createRand(2,3); i++){
         addStatus(curMonster->power, 2);
     }
-    for (int i = 0; i < createRand(1,3); i++){
+    for (int i = 0; i < Functions().createRand(1,3); i++){
         addStatus(curMonster->power, 3);
     }
-    for (int i = 0; i < createRand(1,3); i++){
+    for (int i = 0; i < Functions().createRand(1,3); i++){
         addStatus(curMonster->power, 4);
     }
     //End of testing
@@ -547,7 +532,7 @@ int Battle::test(){
 bool Battle::willActivate(int effect_chance){
     if (effect_chance == 100){ //Bypasses pseudo-random input
         return true;
-    } else if (effect_chance >= createRand(1,100)){
+    } else if (effect_chance >= Functions().createRand(1,100)){
         return true;
     }
     return false;
