@@ -40,18 +40,17 @@
 #define effect_Savage_Wrath "Savage Wrath"
 #define effect_Wicked___ "Test Wicked Effect" //Finish this effect on monsters.txt
 #define effect_Unholy_Judgement "Unholy Judgement"
-#define effect_Final_Requiem "Final Requiem"
+#define effect_Final_Requiem "Final Requiem" //Finish this on monsters.txt
 
 using namespace std;
 
 //General Functions to use
-struct Functions{
-    //Outputs a random value in a range
+namespace functions{
     int createRand(int min, int max){
         srand(time(0));
         return (rand() % (max - min + 1)) + min;
     }
-};
+}
 
 //Used by both items and monsters
 class Effect{
@@ -75,39 +74,35 @@ class Effect{
             duration = effectDuration;
         };
 
-        string getEffectName(){
-            return name;
-        }
+        string getEffectName(){ return name;}
 
-        int getEffectValue(){
-            return value;
-        }
+        int getEffectValue(){ return value;}
 
-        int getEffectChance(){
-            return chance;
-        }
+        int getEffectChance(){ return chance;}
 
-        int getEffectDuration(){
-            return duration;
-        }
+        int getEffectDuration(){ return duration;}
 
         void setEffectName(string new_name){
             name = new_name;
+
             return;
         }
 
         void setEffectValue(int new_value){
             value = new_value;
+
             return;
         }
 
         void setEffectChance(int new_chance){
             chance = new_chance;
+
             return;
         }
 
         void setEffectDuration(int new_duration){
             duration = new_duration;
+
             return;
         }
 };
