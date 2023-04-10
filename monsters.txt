@@ -1,0 +1,64 @@
+Update all monsters
+
+Monster Information
+<Name> => <Rating> => <Attack> => <Health> => <Ability> => <Ability Strength/Value> => <Chance> => <Duration>
+ - Name: Self-explanatory
+ - Rating: The difficulty of the monster (higher rating means harder to deal with)
+ - Attack: How much damage monster deals per hit
+ - Health: Monster's hitpoints
+ - Ability: All abilities are listed below
+ - Ability Strength/Value: Hopefully self-explanatory
+ - Chance: Likelihood of ability activating (some abilities will be guaranteed to activate)
+ - Duration: How long the ability lasts
+
+Key:
+ - Ability Value: x
+ - Ability Chance: y
+ - Ability Duration: z
+Monster Abilities:
+    - Wrath: Has y chance to temporary boost attack by x. Occurs every turn.
+    - Bleed: Inflicts x damage onto target target per turn. Lasts z turns.
+    - Rampage: Has y chance to attack x times per turn (Note: Can hit same player more than once)
+    - Condemnation: Has y chance to confuse target into attacking teammates. Lasts z turns.
+    - Savage Wrath: Every turn, permanently boosts attack by x; has y chance to lose x health
+    (Note: For duration, z = -1 so that it never hits conditional of z == 0)
+    - Wicked: //
+    - Unholy Judgement: after attacking, the targeted party member will be instantly killed after z turns
+    - Final Requiem: Exclusive to Boss Monster; stuns ALL party members, then kills them
+
+
+Rating: 1 (Easy)
+Animated Armor,1,5,10,Wrath,2,20,1
+Blighted Peasant,1,5,10,Bleed,1,100,10
+Bribed Guards,1,5,5,Rampage,3,10,1
+Sinful Clergy,1,5,15,Condemnation,0,20,1
+
+Rating: 2
+False Prophet,2,10,20,Condemnation,0,30,2
+Traitorous Priest,2,0,80,Savage Wrath,10,40,-1
+Blighted Clergy,2,10,20,Bleed,5,100,4
+Undead Soldier,2,10,20,Rampage,2,40,1
+
+Rating: 3
+Warped Human,3,10,30,Wrath,10,50,1
+Undead Soldier,3,Rampage,3,80,1
+Greedy Lord,3,1,100,Condemnation,0,50,2
+Hellhound,3,0,300,Savage Wrath,30,100,-1
+
+Rating: 4
+Assassin,4,10,200,Bleed,5,100,10
+Summoned Demon,4,15,350,Unholy Judgement,0,100,15
+Heathenous Bishop,4,20,360,Savage Wrath,10,50,-1
+Tainted Maiden,4,10,400,Unholy Judgement,0,100,10
+
+Rating: 5
+Ravenous Shadow,5,1,150,Bleed,10,100,100
+Skeleton Dragon,5,20,250,Rampage,3,100,1
+Corrupted Knight,5,20,300,Unholy Judgement,0,100,7
+
+Rating: 6 (Hardest non-Boss)
+Archbishop of Sin,6,10,700,Condemnation,0,100,3
+Nightmare Saintess,6,40,500,Unholy Judgement,1,100,5
+
+Rating: 7 (Boss)
+Wicked God,7,50,1000,Final Requiem,1,100,1

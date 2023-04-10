@@ -1,0 +1,89 @@
+Do not leave spaces in between separators or, in this case commas
+Make sure that for any lines that are NOT items, keep comma count to LESS than 3
+
+Item format:
+Name => Type => Cost => Special Stats* => Crit Chance => Crit Boost*
+=> Effect (if any) => Effect Value => Effect Chance => Effect Duration
+
+Special Stats*: Attack (weapon), DMG Reduction (armor), 0 for everything else
+Crit Boost*: 1 + (Value)/100
+
+
+Weapons:
+
+Weapon Effects (effect value is x, effect duration or chance is y)
+Key:
+Effect Value: x
+Effect Chance: y
+Effect Duration: z
+Weapon Effects
+ - None: Literally does nothing (Default Constructor)
+ - Burn: Inflicts x DMG every of z turns
+ - Freeze: Stops enemy from attacking over z turns
+ - Pierce: Weapon DMG ignores enemy armor (0 for effect value and 100% for chance)
+ - Crit Multiplier: Has y chance to multiply weapon's damage by x in battle calculation
+ - Enemy Current HP DMG: Inflicts DMG based on x% of enemy's current health
+
+For weapons: Prototype Anti-Fiend Rifle and _, consider if adding lore would be interesting
+
+Iron Sword,weapon,2,5,20,50,Pierce,0,100,0
+Longsword of Inferno,weapon,20,10,20,120,Burn,2,100,2
+Staff of Harsh Winters,weapon,30,15,10,80,Freeze,0,100,1
+Warlord's Battle-axe,weapon,50,20,40,150,Enemy Current HP DMG,10,100,0
+Prototype Anti-Fiend Rifle,weapon,60,25,20,500,Pierce,0,100,0
+Artemis' Fabled Bow,weapon,80,30,100,200,Freeze,0,100,2
+Twin Blades of Destiny,weapon,100,40,90,100,Burn,10,100,3
+Blighted Dagger,weapon,120,50,100,300,Enemy Current HP DMG,30,100,0
+
+
+Test:
+Sword of the End,weapon,99,11,Crit Multiplier
+,3,1
+Null Weapon,weapon,1,1,Crit Multiplier
+,2,1
+
+
+
+Delete this later
+Breakage value for cookware is in percentage form
+Ceramic Pot,cookware,5,25,None,0,0,0
+Frying Pan,cookware,10,10,None,0,0,0
+Cauldron,cookware,20,2,None,0,0,0
+
+
+
+
+
+Potions: (replaces food and cookware cuz fuck eating)
+
+Mini Health Potion,potion,5,0,0,0,Heal,5,100,0
+Large Health Potion,potion,20,0,0,0,Heal,25,100,0
+Unholy Health Potion,potion,40,0,0,0,Heal,50,100,0
+
+Rage: Chosen player gets to attack same target x times. Lasts z turns.
+Mini Rage Potion,potion,20,0,0,0,Rage,2,100,2
+Large Rage Potion,potion,40,0,0,0,Rage,3,100,4
+Unholy Rage Potion,potion,80,0,0,0,Rage,4,100,4
+
+Special Potions:
+    - Undying: Takes no damage for y turns
+    - Resurrection: Revives selected player to default health
+Potion of Deathless Requiem,potion,50,0,0,0,Undying,0,100,4
+Potion of Returning Requiem,potion,80,0,0,0,Resurrection,0,100,1
+Potion of Scorching Requiem,potion,60,0
+Potion of Righteous Requiem,potion,70,0
+Potion of Ungodly Requiem,potion,100,0,0,0,Godslayer,0,100,0
+
+
+Silver ring,treasure,10,0,0,0,Null,0,0,0
+Ruby necklace,treasure,20,0,0,0,Null,0,0,0
+Emerald bracelet,treasure,30,0,0,0,Null,0,0,0
+Diamond circlet,treasure,40,0,0,0,Null,0,0,0
+Gem-encrusted goblet,treasure,50,0,0,0,Null,0,0,0
+
+
+
+Armor: Special Stats is Damage Reduction Percentage (add effects later)
+Tattered Armor,armor,5,10,0,0,Null,0,0,0
+Steel Armor,armor,15,25,0,0,Null,0,0,0
+King's Armor,armor,40,50,0,0,Null,0,0,0
