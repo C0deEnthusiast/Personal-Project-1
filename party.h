@@ -2,14 +2,21 @@
 // Personal Project 1 - Party Class
 
 #include <iostream>
-#include <cstdlib>
-#include <fstream>
 #include <vector>
-#include "item.h"
 #include "player.h"
+#include "item.h"
 
 #ifndef PARTY_H
 #define PARTY_H
+
+//Defines how many players are in game
+#define playerCount 5
+
+//Item Type Constants
+#define isWeapon "weapon"
+#define isTreasure "treasure"
+#define isPotion "potion"
+#define isArmor "armor"
 
 using namespace std;
 
@@ -18,12 +25,6 @@ class Party{
         /*Relates to how data sections per line in item text file
         are needed for a complete item*/
         static const int data_count = 10;
-        //These string are for sustainable maintanence of item type
-        string is_weapon = "weapon"; //Item Type Constant
-        string is_cookware = "cookware"; //Item Type Constant
-        string is_treasure = "treasure"; //Item Type Constant
-        string is_potion = "potion"; //Item Type Constant
-        string is_armor = "armor"; //Item Type Constant
 
         //Maximums and constants
         static const int player_size = playerCount; //Count for players[]
@@ -48,6 +49,40 @@ class Party{
         vector<Item> merchantList; //Used to allow players to access and add items through merchant
         Item weapon_barracks[max_weapon]; //Quick access to weapons
         Item armorSets[max_armor];
+
+        bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
+            if (list_current_capacity >= max_capacity){
+                return false;
+            }
+
+            for (int i = 0; i < list_max_capacity; i++){
+                if (itemList[i].getItemName() == default_item_name){
+                    //Creates new item in inventory
+                    itemList[i] = item;
+                    list_current_capacity++;//Adds to capacity
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
+            if (list_current_capacity == 0){
+                return false; //Quickly returns false to give efficient output rather than wait for loop
+            }
+
+            for (int i = 0; i < list_max_capacity; i++){
+                if (itemList[i].getItemName() == item.getItemName()){
+                    //Default constructor is used to override current item; effectively removing it
+                    itemList[i] = Item();
+                    list_current_capacity--;//Reduces capacity
+                    return true;
+                }
+            }
+
+            return false; //This occurs only if item is not found for deletion
+        }
     public:
         Party(); //Default constructor
         Party(string filename); //Parameterized Constructor
@@ -72,6 +107,13 @@ class Party{
                 return Item();
             } else {
                 return weapon_barracks[index];
+            }
+        }
+        Item getArmor(int index){
+            if (index < 0 || index > max_armor){
+                return Item();
+            } else {
+                return armorSets[index];
             }
         }
         int getMoney();
@@ -108,18 +150,15 @@ class Party{
 
         void addPlayer(string player_name);
 
-        bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item);
         bool addItem(Item item);
 
         //Similar to addItem() above, replace string-based removeItem() with commented Item-based removeItem()
         bool removeItemOld(string item_name);
 
         //Keep this
-        bool removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item);
         bool removeItem(Item item);
         void showInventory();
         int countItem(string item_name);
-        bool isNumber(string line); //Checks for digits
 
         void purchaseProcess(int amount, int total_cost, Item purchasedItem);
 
@@ -136,8 +175,6 @@ class Party{
         //Monster functions
         //Modify this to account for Monster class change
         bool monsterOutcome(int outcome, int key_chance, int kill_index, int health_chance);
-        //Resurrects player if requirements are met
-        //void resurrect(Player dead_player, int count_skulls);
 };
 
 #endif

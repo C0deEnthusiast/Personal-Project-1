@@ -6,12 +6,13 @@
 #include <fstream>
 #include <vector>
 #include "party.h"
+#include "player.h"
+#include "item.h"
 
 #ifndef MONSTER_H
 #define MONSTER_H
 
 using namespace std;
-
 
 //Defines boss rating
 #define bossRating 7

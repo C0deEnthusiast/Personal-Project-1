@@ -7,6 +7,9 @@
 #include <vector>
 #include <sstream>
 #include "monster.h"
+#include "party.h"
+#include "player.h"
+#include "item.h"
 
 using namespace std;
 

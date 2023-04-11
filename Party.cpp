@@ -5,11 +5,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cstdlib>
-#include <cmath>
 #include <vector>
 #include <ctype.h>
 #include "party.h"
+#include "player.h"
+#include "item.h"
 
 //Overhaul everything in this cpp file AND main driver
 
@@ -42,64 +42,39 @@ Party::Party(string filename){ //Parameterized Constructor
 
 //Getters (Maximums and Constants)
 
-int Party::getPlayerSize(){
-    return player_size;
-}
+int Party::getPlayerSize(){ return player_size;}
 
-int Party::getHealthRecover(){
-    return food_recover;
-}
+int Party::getHealthRecover(){ return food_recover;}
 
-int Party::getMaxCapacity(){
-    return max_capacity;
-}
+int Party::getMaxCapacity(){ return max_capacity;}
 
-int Party::getMaxWeaponCapacity(){
-    return max_weapon;
-}
+int Party::getMaxWeaponCapacity(){ return max_weapon;}
 
-int Party::getMaxArmorCapacity(){
-    return max_armor;
-}
+int Party::getMaxArmorCapacity(){ return max_armor;}
 
 
 //Normal Getters
-int Party::getMoney(){
-    return money;
-}
+int Party::getMoney(){ return money;}
 
-int Party::getDangerLevel(){
-    return danger_level;
-}
+int Party::getDangerLevel(){ return danger_level;}
 
-int Party::getExploredRooms(){
-    return explored_rooms;
-}
+int Party::getExploredRooms(){ return explored_rooms;}
 
-int Party::getKeys(){
-    return keys;
-}
+int Party::getKeys(){ return keys;}
 
-int Party::getCurrentCapacity(){
-    return current_capacity;
-}
+int Party::getCurrentCapacity(){ return current_capacity;}
 
-int Party::getCurrentWeaponCapacity(){
-    return current_weapon;
-}
+int Party::getCurrentWeaponCapacity(){ return current_weapon;}
 
-int Party::getCurrentArmorCapacity(){
-    return current_armor;
-}
-
+int Party::getCurrentArmorCapacity(){ return current_armor;}
 
 
 //Counts how many players are alive
 int Party::getPlayerCount(){
     int player_count = 0;
 
-    for (int i = 0; i < player_size; i++){
-        if (players[i].getPlayerHealth() > 0){ //Player has health(alive)
+    for (auto& x: players){
+        if (x.getPlayerHealth() > 0){ //Player is alive
             player_count++;
         }
     }
@@ -107,9 +82,7 @@ int Party::getPlayerCount(){
     return player_count;
 }
 
-int Party::getMerchantCapacity(){
-    return merchantList.size();
-}
+int Party::getMerchantCapacity(){ return merchantList.size();}
 
 
 //Setters
@@ -299,63 +272,26 @@ void Party::addPlayer(string player_name){
     return;
 }
 
-bool Party::addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-    if (list_current_capacity >= max_capacity){
-        return false;
-    }
-
-    for (int i = 0; i < list_max_capacity; i++){
-        if (itemList[i].getItemName() == default_item_name){
-            //Creates new item in inventory
-            itemList[i] = item;
-            list_current_capacity++;//Adds to capacity
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /*Adds item to inventory[] array or other relevant Item arrays
 
 Returns: True if Item is added successfully; false otherwise*/
 bool Party::addItem(Item item){
-    if (item.getItemType() == is_weapon){
+    if (item.getItemType() == isWeapon){
         return addItemHelper(weapon_barracks,max_weapon,current_weapon,item);
-    } else if (item.getItemType() == is_armor){
+    } else if (item.getItemType() == isArmor){
         return addItemHelper(armorSets,max_armor,current_armor,item);
     } else {
         return addItemHelper(inventory,max_capacity,current_capacity,item);
     }
 }
 
-bool Party::removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-    if (list_current_capacity == 0){
-        return false; //Quickly returns false to give efficient output rather than wait for loop
-    }
-
-    for (int i = 0; i < list_max_capacity; i++){
-        if (itemList[i].getItemName() == item.getItemName()){
-            //Default constructor is used to override current item; effectively removing it
-            itemList[i] = Item();
-            list_current_capacity--;//Reduces capacity
-            return true;
-        }
-    }
-
-    return false; //This occurs only if item is not found for deletion
-}
-
 /*Removes Item from inventory[] array and other relevant Item arrays
 
 Returns: False if current capacity is 0 or item is not found; true if item is removed successfully*/
 bool Party::removeItem(Item item){
-    bool remove_weapon = false; //This is if the item to be removed would also be in weapon_barracks[]
-    bool remove_armor = false; //This is if the item to be removed would also be in armorSets[]
-
-    if (item.getItemType() == is_weapon){
+    if (item.getItemType() == isWeapon){
         return removeItemHelper(weapon_barracks,max_weapon,current_weapon,item);
-    } else if (item.getItemType() == is_armor){
+    } else if (item.getItemType() == isArmor){
         return removeItemHelper(armorSets,max_armor,current_armor,item);
     } else {
         return removeItemHelper(inventory,max_capacity,current_capacity,item);
@@ -394,20 +330,6 @@ int Party::countItem(string item_name){
     return count;
 }
 
-//Checks for numeric input by checking if each character is a digit
-bool Party::isNumber(string line){ //Checks for digits
-    if (line.length() == 0){
-        return false;
-    }
-    for (int i = 0; i < line.length(); i++){ //Checks if amount is a number
-        if (!isdigit(line[i])){
-            return false;
-        }
-    }
-
-    return true;
-}
-
 /*Algorithm: General-purpose purchasing process for all items
 This would allow for efficient maintenance
     1) Starts prompt and asks string input for confirmation of purchase; repeats process if incorrect input
@@ -420,14 +342,12 @@ void Party::purchaseProcess(int amount,int total_cost, Item purchasedItem){
     string confirm = ""; //Confirms or rejects purchase
 
     cout << "You want to buy " << amount << " ";
-    if (purchasedItem.getItemType() == "weapon"){
+    if (purchasedItem.getItemType() == isWeapon){
         cout << "(+" << purchasedItem.getStat() << ") ";
     }
-
-    cout << purchasedItem.getItemName() << "(s)";
-
-    cout << " for " << total_cost << " Gold? (y/n)" << endl;
+    cout << purchasedItem.getItemName() << "(s) for " << total_cost << " Gold? (y/n)" << endl;
     getline(cin,confirm);
+
     cout << endl;
 
     //Checks confirmation and if party has enough money
@@ -508,25 +428,25 @@ void Party::createMerchantList(string filename){
 }
 
 void Party::presentMerchantItem(Item item, string target, double tax){
-    if (target == is_weapon){
+    if (target == isWeapon){
         cout << "(+";
-    } else if (target == is_armor){
+    } else if (target == isArmor){
         cout << "(DMG Reduction: ";
     }
 
-    if (target != is_treasure && target != is_potion){
+    if (target != isTreasure && target != isPotion){
         cout << item.getStat();
     }
 
-    if (target == is_armor){
+    if (target == isArmor){
         cout << "%) ";
-    } else if (target == is_weapon){
+    } else if (target == isWeapon){
         cout << ") ";
     }
 
     cout << item.getItemName() << " [";
 
-    if (target != is_treasure){
+    if (target != isTreasure){
         cout << item.getCost() * tax;
     } else {
         cout << item.getCost();
@@ -534,12 +454,12 @@ void Party::presentMerchantItem(Item item, string target, double tax){
 
     cout << " Gold]\n";
 
-    if (target == is_weapon){
+    if (target == isWeapon){
         cout << " - Crit Chance: " << item.getCritChance();
         cout << "%; Crit Boost: " << item.getCritBoost() << "%\n";
     }
 
-    if (target == is_weapon || target == is_potion){
+    if (target == isWeapon || target == isPotion){
         displayEffect(item.weapon_effect);
     }
 }
@@ -586,7 +506,7 @@ void Party::merchant(){
 
         getline(cin,choice);
 
-        while (!isNumber(choice)){
+        while (!Functions().isNumber(choice)){
             cout << "I need a valid choice!" << endl;
             getline(cin,choice);
         }
@@ -604,7 +524,7 @@ void Party::merchant(){
                 cout << endl;
                 cout << "Choose one of the following:" << endl;
 
-                target = is_weapon;
+                target = isWeapon;
             } else if (stoi(choice) == 2){ //Armor
                 cout << "Looking for suits of armor, I see." << endl;
                 cout << "None of these will make you look like a dashing knight in shining armor";
@@ -613,20 +533,21 @@ void Party::merchant(){
                 cout << max_armor << " sets of armor." << endl;
                 cout << endl;
                 cout << "Have a look:" << endl;
-                target = is_armor;
+
+                target = isArmor;
             } else if (stoi(choice) == 3){ //Potions
                 cout << "I have many potions to choose from, what would you like?" << endl;
                 cout << "Each have their own ... special quirks." << endl;
                 cout << endl;
                 cout << "Pick and choose:" << endl;
-                target = is_potion;
+                target = isPotion;
             } else { //Treasures
                 cout << "Oooh! You got treasures? Brilliant!" << endl;
                 cout << "Let's see, here are the treasures I'm looking for:" << endl;
                 cout << endl;
                 cout << "Which ones do you have?" << endl;
 
-                target = is_treasure;
+                target = isTreasure;
             }
 
             //Prints all items in merchant array with target item type
@@ -645,7 +566,7 @@ void Party::merchant(){
             while (true){
                 getline(cin,choice);
 
-                if (isNumber(choice)){
+                if (Functions().isNumber(choice)){
                     if (stoi(choice) > 0 && stoi(choice) <= (displayed_items.size() + 1)){
                         break;
                     }
@@ -659,13 +580,13 @@ void Party::merchant(){
                 continue;
             }
 
-            if (target != is_treasure){ //Purchasing
+            if (target != isTreasure){ //Purchasing
                 //Complete this crap
                 while (true){
                     cout << "(Enter how many items you wish to purchase, or 0 to cancel)" << endl;
                     getline(cin,amount);
 
-                    if (isNumber(amount)){ //Valid Number
+                    if (Functions().isNumber(amount)){ //Valid Number
                         if (stoi(amount) >= 0){ //Non-negative
                             break;
                         }

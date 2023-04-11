@@ -2,11 +2,13 @@
 // Personal Project 1 - Player Class
 
 #include <iostream>
-#include <vector>
 #include "item.h"
 
 #ifndef PLAYER_H
 #define PLAYER_H
+
+//Defines default health of players
+#define defaultPlayerHealth 100
 
 using namespace std;
 

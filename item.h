@@ -2,17 +2,10 @@
 // Personal Project 1 - Item Class
 
 #include <iostream>
-#include <cstdlib>
-#include <fstream>
+#include <ctype.h>
 
 #ifndef ITEM_H
 #define ITEM_H
-
-//Defines how many players are in game
-#define playerCount 5
-
-//Defines default health of players
-#define defaultPlayerHealth 100
 
 //Default item name
 #define default_item_name "Not an Item"
@@ -46,9 +39,24 @@ using namespace std;
 
 //General Functions to use
 struct Functions{
+    //Outputs pseudo-random value within a specified interval
     int createRand(int min, int max){
         srand(time(0));
         return (rand() % (max - min + 1)) + min;
+    }
+    
+    //Checks if input is a number
+    bool isNumber(string line){ //Checks for digits
+        if (line.length() == 0){
+            return false;
+        }
+        for (int i = 0; i < line.length(); i++){ //Checks if amount is a number
+            if (!isdigit(line[i])){
+                return false;
+            }
+        }
+
+        return true;
     }
 };
 

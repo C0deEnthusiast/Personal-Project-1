@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "player.h"
+#include "item.h"
 
 using namespace std;
 
