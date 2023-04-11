@@ -338,7 +338,7 @@ This would allow for efficient maintenance
     'item' as the first parameter and 'amount' as the second for "weapon" and "treasure"
     Parameters: int amount,int total_cost,string exchange_type,string item
     Note: string item has default argument of ""*/
-void Party::purchaseProcess(int amount,int total_cost, Item purchasedItem){
+void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
     string confirm = ""; //Confirms or rejects purchase
 
     cout << "You want to buy " << amount << " ";
@@ -352,7 +352,7 @@ void Party::purchaseProcess(int amount,int total_cost, Item purchasedItem){
 
     //Checks confirmation and if party has enough money
     if ((confirm == "Y" || confirm == "y") && total_cost <= getMoney()){ //Purchase is successful
-        //Adds weapon to party's inventory list using weapon name
+        //Adds weapon to party's inventory list until all are added or inventory is full
         for (int i = 0; i < amount; i++){
             if (!addItem(purchasedItem)){
                 //This occurs if desired count of items can NOT entirely be added
@@ -361,11 +361,9 @@ void Party::purchaseProcess(int amount,int total_cost, Item purchasedItem){
                 total_cost /= amount;
 
                 //Informs player of adjusted price and item count
-                cout << "It appears you don't have enough inventory space." << endl;
-                cout << "As such, I added " << i << " out of the " << amount;
-                cout << " items that you requested." << endl;
-                cout << "I also adjusted the cost to reflect this!" << endl;
-                cout << "No need to thank me!" << endl;
+                cout << "It appears you don't have enough inventory space.\nAs such, I added ";
+                cout << i << " out of the " << amount << " items that you requested.\n";
+                cout << "I also adjusted the cost to reflect this!\nNo need to thank me!\n";
                 break;
             }
         }
@@ -520,8 +518,7 @@ void Party::merchant(){
                 cout << " what would you like?" << endl;
                 cout << "Note that each weapon have base attack power,";
                 cout << " marked by a (+X)." << endl;
-                cout << "Plus, each got a little ... bonus." << endl;
-                cout << endl;
+                cout << "Plus, each got a little ... bonus.\n\n";
                 cout << "Choose one of the following:" << endl;
 
                 target = isWeapon;
@@ -530,33 +527,29 @@ void Party::merchant(){
                 cout << "None of these will make you look like a dashing knight in shining armor";
                 cout << " (except one), but they do well in keeping you alive." << endl;
                 cout << "Keep in mind that you can only carry a maximum of ";
-                cout << max_armor << " sets of armor." << endl;
-                cout << endl;
+                cout << max_armor << " sets of armor.\n\n";
                 cout << "Have a look:" << endl;
 
                 target = isArmor;
             } else if (stoi(choice) == 3){ //Potions
                 cout << "I have many potions to choose from, what would you like?" << endl;
-                cout << "Each have their own ... special quirks." << endl;
-                cout << endl;
+                cout << "Each have their own ... special quirks.\n\n";
                 cout << "Pick and choose:" << endl;
                 target = isPotion;
             } else { //Treasures
                 cout << "Oooh! You got treasures? Brilliant!" << endl;
-                cout << "Let's see, here are the treasures I'm looking for:" << endl;
-                cout << endl;
+                cout << "Let's see, here are the treasures I'm looking for:\n\n";
                 cout << "Which ones do you have?" << endl;
 
                 target = isTreasure;
             }
 
             //Prints all items in merchant array with target item type
-            for (int i = 0; i < merchantList.size(); i++){
-                if (merchantList[i].getItemType() == target){
-                    displayed_items.push_back(merchantList[i]);
+            for (auto& x: merchantList){
+                if (x.getItemType() == target){
+                    displayed_items.push_back(x);
 
                     cout << displayed_items.size() << ". ";
-
                     presentMerchantItem(displayed_items.at(displayed_items.size() - 1),target,tax);
                     cout << endl;
                 }
@@ -607,8 +600,7 @@ void Party::merchant(){
                     string confirm = "";
                     //Checks for confirmation of selling treasures
                     do{
-                        cout << endl;
-                        cout << "You want to sell " << displayed_items.at(stoi(choice) - 1).getItemName();
+                        cout << "\nYou want to sell " << displayed_items.at(stoi(choice) - 1).getItemName();
                         cout << " for " << displayed_items.at(stoi(choice) - 1).getCost() << " Gold? (y/n)\n";
 
                         getline(cin,confirm);
