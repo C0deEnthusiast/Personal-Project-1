@@ -458,7 +458,7 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 
     if (target == isWeapon || target == isPotion){
-        displayEffect(item.weapon_effect);
+        Functions().displayEffect(item.weapon_effect);
     }
 }
 
@@ -634,40 +634,6 @@ void Party::merchant(){
             cout << "(Enter a character to display merchant's menu)" << endl;
             getline(cin,choice);
         }
-    }
-    cout << endl;
-
-    return;
-}
-
-void Party::displayEffect(Effect effect){
-    cout << "     Ability: " << effect.getEffectName() << " - ";
-
-    //Weapon
-    if (effect.getEffectName() == effect_Burn){
-        cout << "Inflicts " << effect.getEffectValue() << " damage onto enemy every turn. ";
-        cout << "Lasts for " << effect.getEffectDuration() << " turn(s).";
-    } else if (effect.getEffectName() == effect_EnemyHP){
-        cout << "Inclicts damage equal to " << effect.getEffectValue() << "% of the enemy's ";
-        cout << "current health (before base attack calculation).";
-    } else if (effect.getEffectName() == effect_Freeze){
-        cout << "Immobilize enemy for " << effect.getEffectDuration() << " turns.";
-    } else if (effect.getEffectName() == effect_Pierce){
-        cout << "Weapon Damage ignores enemy defenses, including armor.";
-    }
-
-    //Potion
-    if (effect.getEffectName() == effect_Heal){
-        cout << "Heals chosen player by " << effect.getEffectValue() << ".";
-    } else if (effect.getEffectName() == effect_Rage){
-        cout << "Chosen player gets to attack " << effect.getEffectValue();
-        cout << " times. Lasts " << effect.getEffectDuration() <<" turns.";
-    } else if (effect.getEffectName() == effect_Undying){
-        cout << "Chosen player takes no damage for " << effect.getEffectDuration() << " turns.";
-    } else if (effect.getEffectName() == effect_Resurrection){
-        cout << "Revives chosen dead player.";
-    } else if (effect.getEffectName() == effect_Godslayer){
-        cout << "No god will stand against you. Not anymore.";
     }
     cout << endl;
 

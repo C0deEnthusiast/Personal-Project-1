@@ -23,8 +23,12 @@ Monster Abilities:
     - Savage Wrath: Every turn, permanently boosts attack by x; has y chance to lose x health
     (Note: For duration, z = -1 so that it never hits conditional of z == 0)
     - Wicked: //
-    - Unholy Judgement: after attacking, the targeted party member will be instantly killed after z turns
-    - Final Requiem: Exclusive to Boss Monster; stuns ALL party members, then kills them
+    - Unholy Judgement: After attacking, the target will be killed instantly after z turns
+    - Final Requiem: Exclusive to Boss monster
+        Idea 1:
+            - First Phase: Gains fairly 'strong' Savage Wrath and Rampage
+            - Second Phase: After dying, it is resurrected (i.e. Resurrection) and inflicts
+            a Map-wide Unholy Judgement and some more
 
 
 Rating: 1 (Easy)
@@ -61,4 +65,7 @@ Archbishop of Sin,6,10,700,Condemnation,0,100,3
 Nightmare Saintess,6,40,500,Unholy Judgement,1,100,5
 
 Rating: 7 (Boss)
-Wicked God,7,50,1000,Final Requiem,1,100,1
+Wicked God,7,20,1000,Final Requiem,1,100,1
+
+Boss' Transformation (2nd phase)
+The Condemned One,0,0,0,Final Requiem,1,0,1

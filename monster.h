@@ -16,9 +16,12 @@ using namespace std;
 
 //Defines boss rating
 #define bossRating 7
+#define bossFinalRating 8
 
 //Defines boss' health after Resurrection (2nd phase)
 #define bossFinalHealth 1500
+//Defines boss' attack after Resurrection (2nd phase)
+#define bossFinalAttack 30
 
 class Monster{
     private:
@@ -43,7 +46,7 @@ class Monster{
         int getMaxRating();
 };
 
-//All-encompassing; manages monster fights (move fight-related functions from Monster class to here)
+//Manages construction and set up of monster fights through Battle() class
 class Combat{
     private:
         const char separator = ','; //Standard delimiter for monster text files
@@ -63,23 +66,13 @@ class Combat{
         void setRaiseRating(int new_raise);
 
         void monsterRush(string filename, bool new_rush = true);
-        int monsterEncounter(Party& party, bool room = false); //Maybe remove this
         void removeMonster(int index);
         int countMonsterRating(int rating);
-
-
-        void displayMonsterEffect(Effect monsterEffect);
-
-
-        //bool battle(Party &party, Monster &monster, bool romm = false);
 
         bool battleVictory(Party& party, string monster_name, int monster_rating, int key_chance);
         bool battleDefeat(Party& party, int kill_index, int health_loss_chance, bool surrender = false);
         
-        
-        //Functions that WILL be added
-        //int combat() //Basically what every RPG battle is like; will replace most functions
-        //bool monsterAmbush() //Will randomly trigger monsterEncounters
+        //bool monsterAmbush() //Will randomly trigger encounters
 
         //Sets up combat()
         int encounter(Party& party, bool room = false);
@@ -142,6 +135,9 @@ class Battle{
         //Array; determines whether damage taken accounts for defenses like armor
         bool player_defensesUp[playerCount];
 
+        //Determines whether player is blocking
+        bool player_blocking[playerCount];
+
         //Array; determines how many times a given player can attack per turn
         int player_attack_max[playerCount];
 
@@ -149,6 +145,7 @@ class Battle{
         
         bool monster_active = true; //Determines whether monster can take action or not
         bool monster_defensesUp = true; //Determines whether damage taken accounts for defenses
+        int monster_innate_armor;
         int monster_attack_max = 1; //Determines how many times monster can attack per turn
         //If possible, make another bool for if two monster combat can be implemented
 
@@ -159,39 +156,21 @@ class Battle{
         bool player_turn = true;
         bool monster_turn = false;
         
-        bool* returnboolArray(int size, bool constVal){
-            if (size <= 0){
-                return nullptr;
-            }
-            bool* temp = new bool[size];
-
-            for (int i = 0; i < size; i++){
-                temp[i] = constVal;
-            }
-
-            return temp;
-        }
     public:
         Battle(Party *party, Monster *monster){ //Pass memory addresses
             curParty = party;
             curMonster = monster;
 
-            //player_active = new bool[5];
-            for (int i = 0; i < 5; i++){
+            for (int i = 0; i < playerCount; i++){
                 player_active[i] = true;
-            }
-            //player_charmed = new bool[5];
-            for (int i = 0; i < 5; i++){
                 player_charmed[i] = false;
-            }
-            //player_immuneToDMG = new bool[5];
-            for (int i = 0; i < 5; i++){
                 player_immuneToDMG[i] = false;
-            }
-            //player_defensesUp = new bool[5];
-            for (int i = 0; i < 5; i++){
                 player_defensesUp[i] = true;
+                player_blocking[i] = false;
+                player_attack_max[i] = 1;
             }
+
+            monster_innate_armor = curMonster->difficultyRating * 10;
         }
 
         ~Battle(){
@@ -261,9 +240,6 @@ class Battle{
 
         int adjustAttack(int base_attack, int target); //Manually change defensesUp boolean to true here
 
-        //Set up functions
-        string displayCurrentEffects(string target_name, int target_health);
-
 
         //void activateEffect(Party &party, Monster &monster, Effect effect, int target, bool in_effect);
         void battleActivate(Party &party, Monster &monster, Effect effect, int target);
@@ -280,7 +256,8 @@ class Battle{
 
 //Outline on Effect Implementation
 /*
-    - At beginning of given turn, remove all effects with 0 duration
+    - At beginning of given turn:
+        - Activate all effects of respective turn, then remove all effects with 0 duration
     - For player's turn:
         * Set up integer counter; increment if player took action (i.e. party member attacked)
             **Set up a condition such that if counter reaches max;
@@ -290,7 +267,7 @@ class Battle{
         * /
     - For monster's turn:
         * /
-    - At end of given turn, 'activate' effects for all players/monsters, then reduce duration
+    - At end of given turn, reduce duration of all effects
         * Caveat: Certain effects from weapons and effects from potions will activate DURING turn
         * For 0 duration effects (i.e. Heal), negate duration reduction (ensures effect removal by next turn)
     -

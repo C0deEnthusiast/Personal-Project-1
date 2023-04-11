@@ -352,7 +352,7 @@ int main(int argc, char *argv[]){
                 cout << "Oh dear. . . We've got company!" << endl;
                 cout << "Wish you good luck!" << endl;
 
-                int win = fight.monsterEncounter(party);
+                int win = fight.encounter(party);
                 //game = monsters.monsterEncounter(party);
                 int rand1 = Functions().createRand(1,10);
                 int rand2 = Functions().createRand(2,party.getPlayerCount());
@@ -377,7 +377,7 @@ int main(int argc, char *argv[]){
                 continue;
             }
 
-            int win = fight.monsterEncounter(party,true);
+            int win = fight.encounter(party,true);
             
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
@@ -425,7 +425,7 @@ int main(int argc, char *argv[]){
                 } else if (chance > 30 && chance <= 50){ //Party fights random monster
                     cout << "There's a monster!" << endl;
 
-                    int win = fight.monsterEncounter(party);
+                    int win = fight.encounter(party);
 
                     int rand1 = Functions().createRand(1,10);
                     int rand2 = Functions().createRand(2,party.getPlayerCount());
@@ -463,7 +463,7 @@ int main(int argc, char *argv[]){
             //Fight a Monster
             cout << "There's a monster!" << endl;
 
-            int win = fight.monsterEncounter(party);
+            int win = fight.encounter(party);
 
             int rand1 = Functions().createRand(1,10);
             int rand2 = Functions().createRand(2,party.getPlayerCount());

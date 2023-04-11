@@ -109,149 +109,6 @@ void Combat::setRaiseRating(int new_raise){
     -2 if player loses
     Monster's rating if player wins*/
 
-/*int Combat::monsterEncounter(Party& party, bool room){
-    if (party.getCurrentWeaponCapacity() == 0){ //Party doesn't have any weapons
-        return -1;
-    }
-
-    Monster temp;
-
-    //Battle calculation Values
-    int rating, vulnerability = 1, armor = party.getCurrentArmorCapacity(), variety = 4, battle = 0;
-
-    //Monster name and rating
-    //string chosen_monster = "", chosen_;
-    int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
-    //Jesus,6,10,1000,Wrath,5,3
-    string monst_name = "";
-    int monst_rating;
-
-    //Random variables for battle outcome
-    int num1 = createRand(1,2); //1-2
-    int num2 = createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
-
-    //Determines monster rating
-    if (room){ //Currently at room location
-        rating = party.getExploredRooms() + 2;
-        party.setExploredRooms(party.getExploredRooms() + 1); //Increments Party Value
-    } else { //Random Encounter from either Investigate or Pick a Fight
-        rating = num2;
-    }
-
-    //Vulnerability increases the less armor party has
-    //This equation is meant to punish players for going without armor
-    vulnerability = temp.getMaxRating() - armor;
-
-    if (armor <= 0){ //This is to minimize exceptions which terminate the program
-        armor = 1;
-    }
-
-    if (countMonsterRating(rating) > 0){ //There is at least one monster with chosen rating
-        //Picks random monster with chosen rating
-        random_monster = createRand(1,countMonsterRating(rating));
-    } else { //Creates a monster if all monsters with rating are dead
-        //monst_name = "Wrathful Spectre";
-        //monst_rating = rating;
-        //remove_index = -1;
-    }
-
-    //Picks monster that hasn't been removed, and has chosen rating
-    //for (int i = temp.getMinRating(); i <= temp.getMaxRating(); i++){
-    //    cout << "Check monster count rating of " << i << ": " << countMonsterRating(i) << endl;
-    //}
-    for (int i = 0; i < monsterList.size(); i++){
-        if(monsterList[i].difficultyRating == rating){
-            search_index++;
-            
-            if(search_index == random_monster){
-                //Monster is alive and is randomly chosen
-                temp = monsterList[i];
-                remove_index = i;
-                break;
-            }
-        }
-    }
-
-    //Announces monster
-    cout << temp.monster_name << " (Health: " << temp.monster_health;
-    cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
-
-    //Allows player to fight or surrender
-    cout << endl;
-    cout << "Fight(1) or surrender(2)? Your call." << endl;
-    string choose = "";
-    do {
-        getline(cin,choose);
-        if (choose != "1" && choose != "2"){
-            cout << "Make a bloody choice!" << endl;
-        }
-    } while (choose != "1" && choose != "2");
-
-    if (choose == "2"){
-        return -1;
-    }
-
-    //Calculates battle outcome
-    battle = num1 + variety - (vulnerability * num2 * monst_rating)/armor;
-    battle+=1000000;
-    cout << "Printed Battle Calculation (So as to see how to make game harder)" << endl;
-    cout << num1 << " + " << variety << " - ";
-    cout << vulnerability << " X " << num2 << " X " << monst_rating << " / " << armor;
-    cout << " + 1000000";
-    cout << " = " << battle << endl;
-
-    cout << "(Rand_1 * Combined Weapon Stats) + Variety";
-    cout << "- (Vulnerability * Rand_2 * Monster Rating)/Armor" << endl;
-
-    if (battle > 0){ //Victory
-        removeMonster(remove_index);
-        cout << "Test removeMonster" << endl;
-        if (monsterList.size() == 1 && countMonsterRating(temp.getMaxRating()) == 1){
-            removeMonster(0); //Removes 
-            cout << "monsterRush should happen by now" << endl;
-            return -10;
-        }
-        return battleVictory(party,monst_name,monst_rating, createRand(1,100));
-    } else { //Defeat
-        return battleDefeat(party, createRand(0,party.getPlayerSize()), createRand(0,100));
-    }
-}*/
-
-void Combat::displayMonsterEffect(Effect monsterEffect){
-    cout << "    " << monsterEffect.getEffectName() << ": ";
-
-    if (monsterEffect.getEffectName() == effect_Wrath){
-        cout << "Has " << monsterEffect.getEffectChance();
-        cout << "% chance to temporary boost its own attack by " << monsterEffect.getEffectValue() << ".";
-    } else if (monsterEffect.getEffectName() == effect_Bleed){
-        cout << "Inflicts " << monsterEffect.getEffectValue();
-        cout << " damage onto target player every turn. Lasts " << monsterEffect.getEffectDuration();
-        cout << " turns.";
-    } else if (monsterEffect.getEffectName() == effect_Rampage){
-        cout << "Has " << monsterEffect.getEffectChance();
-        cout << "% chance to strike " << monsterEffect.getEffectValue();
-        cout << " times per turn.";
-    } else if (monsterEffect.getEffectName() == effect_Condemnation){
-        cout << "Has " << monsterEffect.getEffectChance();
-        cout << "% chance to confuse target into attacking teammates. Lasts ";
-        cout << monsterEffect.getEffectDuration() << " turns.";
-    } else if (monsterEffect.getEffectName() == effect_Savage_Wrath){
-        cout << "Permanently boosts attack by " << monsterEffect.getEffectValue();
-        cout << " every turn; has " << monsterEffect.getEffectChance();
-        cout << "% chance to lose " << monsterEffect.getEffectValue() << " health.";
-    } else if (monsterEffect.getEffectName() == effect_Wicked___){
-        cout << "Complete effect";
-    } else if (monsterEffect.getEffectName() == effect_Unholy_Judgement){
-        cout << "Targeted player of attack will be instantly killed after "; 
-        cout << monsterEffect.getEffectDuration() << " turns.";
-    } else if (monsterEffect.getEffectName() == effect_Final_Requiem){ //Revise effect
-        cout << "Exclusive to Boss Monster; stuns ALL party members, then kills them";
-    }
-    cout << endl;
-
-    return;
-}
-
 //Removes monster from data member vectors IF there are monsters remaining
 void Combat::removeMonster(int index){
     if (index == -1){
@@ -366,7 +223,7 @@ int Combat::encounter(Party& party, bool room){
     //Announces monster
     cout << temp.monster_name << " (Health: " << temp.monster_health;
     cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
-    displayMonsterEffect(temp.power);
+    Functions().displayEffect(temp.power);
 
     //Allows player to fight or surrender
     cout << endl;
@@ -720,5 +577,15 @@ int Battle::playerCombat(){
 
 //Calculates how monster attacks
 int Battle::monsterCombat(){
+    return 0;
+}
+
+int Battle::adjustAttack(int base_attack, int target){
+    if (target == -1){
+        //
+    }
+    double baseAtk = base_attack;
+
+    //Deducts based on target's armor
     return 0;
 }

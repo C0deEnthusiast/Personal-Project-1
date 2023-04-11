@@ -166,8 +166,6 @@ class Party{
         void presentMerchantItem(Item item, string target, double tax);
         void merchant();
 
-        void displayEffect(Effect show);
-
         void showPartyStatus();
 
         bool npcPuzzle(int riddle);
