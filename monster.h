@@ -30,7 +30,8 @@ class Monster{
     public:
         //Basic Monster Data
         string monster_name; //Monster Name
-        int difficultyRating; //Used for calculating rewards and battle frequency
+        //Used for calculating rewards as well as the monster's armor percentage (with a limit)
+        int difficultyRating;
         int attack_power; //Monster's attack value
         int monster_health;
         int crit_chance; //Likelihood to land a critical hit
@@ -48,6 +49,15 @@ class Monster{
         //Getters
         int getMinRating();
         int getMaxRating();
+        void setRating(int new_rating){
+            difficultyRating = new_rating;
+
+            if (difficultyRating < min_rating){
+                difficultyRating = min_rating;
+            } else if (difficultyRating > bossRating){
+                difficultyRating = bossRating;
+            }
+        }
 };
 
 //Manages construction and set up of monster fights through Battle() class
@@ -88,18 +98,6 @@ class Combat{
 
 struct Status{
     int effect_target; //-1 is monster; non-negative values for player index
-    /*Used to track whether certain effect should activate again
-    Example:
-    Bleed if false = Activates and false->true
-    Bleed if true = Activates again
-
-    Savage Wrath if false = Activates and false->true
-    Savage Wrath if true = Activates?
-
-    Wrath if false = Activates and false->true
-    Wrath if true (if duration != 0) = Does not activate again
-    Wrath if true (if duration == 0) = Activates (removes boost)
-    */
     Effect power;
     int max_duration;
     Status(){
@@ -127,6 +125,8 @@ class Battle{
         int player_actions_counter = 0;
         static const int player_actions_max = 7; //Includes taking potions, attacking, and blocking
 
+        //Player Modifiers
+
         //Array; Determines whether a given player can attack/take action
         bool player_active[playerCount];
 
@@ -145,11 +145,11 @@ class Battle{
         //Array; determines how many times a given player can attack per turn
         int player_attack_max[playerCount];
 
-        //Monster modifiers
+        //Monster Modifiers
         
         bool monster_active = true; //Determines whether monster can take action or not
         bool monster_defensesUp = true; //Determines whether damage taken accounts for defenses
-        int monster_innate_armor;
+        int monster_innate_armor = 0;
         int monster_attack_max = 1; //Determines how many times monster can attack per turn
         //If possible, make another bool for if two monster combat can be implemented
 
@@ -231,7 +231,7 @@ class Battle{
 
         //void activateZeroDurationEffect(Effect effect, int target_index);
 
-        bool willActivate(int effect_chance);
+        bool willActivate(int chance);
 
         void activateEffect(Status effectData);
         //Fix node configuration
@@ -242,7 +242,7 @@ class Battle{
         //Calculates how monster attacks
         int monsterCombat();
 
-        int adjustAttack(int base_attack, int target); //Manually change defensesUp boolean to true here
+        int adjustAttack(int base_attack, int target_index, int attacker_index);
 
 
         //void activateEffect(Party &party, Monster &monster, Effect effect, int target, bool in_effect);
@@ -268,7 +268,7 @@ class Battle{
             ends player turn and moves to monster turn
         * With a while loop, player can choose between taking eligible potions, attacking, or blocking
         * Block has innate 25% damage reduction (compounded by armor)
-        * /
+        * IMPORTANT: Set up cases when effects activate DURING TURN (i.e. Enemy's HP effect)
     - For monster's turn:
         * /
     - At end of given turn, reduce duration of all effects

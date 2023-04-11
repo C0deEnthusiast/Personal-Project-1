@@ -20,6 +20,8 @@ Monster::Monster(){
     difficultyRating = 0;
     attack_power = 0;
     monster_health = 0;
+    crit_chance = 0;
+    crit_boost = 0;
     power = Effect();
 }
 
@@ -103,10 +105,7 @@ void Combat::monsterRush(string filename, bool new_rush){
             monsterList.push_back(create);
             refillList.push_back(create);
         }
-
-        
     }
-
     file.close(); //Closes file
 
     return;
@@ -207,7 +206,7 @@ int Combat::encounter(Party& party, bool room){
 
     Monster temp;
     //Battle calculation Values
-    int rating, vulnerability = 1, armor = party.getCurrentArmorCapacity(), battle = 0;
+    int rating, armor = party.getCurrentArmorCapacity(), battle = 0;
     int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
 
     //Random variables for battle outcome
@@ -221,16 +220,14 @@ int Combat::encounter(Party& party, bool room){
         rating = rand_rating;
     }
 
-    //Vulnerability increases the less armor party has
-    //This equation is meant to punish players for going without armor
-    vulnerability = temp.getMaxRating() - armor;
-
     if (armor <= 0){ //This is to minimize exceptions which terminate the program
         armor = 1;
     }
 
     //Monster is chosen
     temp = returnMonster(rating, remove_index);
+    //Raises rating based on raise_rating
+    temp.setRating(temp.difficultyRating + raise_rating);
 
     //For testing
     /*cout << "Check monster count ratings: ";
@@ -261,8 +258,7 @@ int Combat::encounter(Party& party, bool room){
     }
 
     //Calculates battle outcome
-    battle = (vulnerability * temp.difficultyRating)/armor;
-    battle+=1000000;
+    battle = 1000000;
 
     //EffectList *system = new EffectList();
     Battle *system = new Battle(&party, &temp);
@@ -408,10 +404,10 @@ int Battle::test(){
     return 0;
 }
 
-bool Battle::willActivate(int effect_chance){
-    if (effect_chance == 100){ //Bypasses pseudo-random input
+bool Battle::willActivate(int chance){
+    if (chance == 100){ //Bypasses pseudo-random input
         return true;
-    } else if (effect_chance >= Functions().createRand(1,100)){
+    } else if (chance >= Functions().createRand(1,100)){
         return true;
     }
     return false;
@@ -599,34 +595,43 @@ int Battle::monsterCombat(){
     return 0;
 }
 
-int Battle::adjustAttack(int base_attack, int target){
-    if (target >= 0 && target < playerCount){ //Targets player
-        if (player_immuneToDMG[target]){
-            return 0;
-        }
-    }
+//Note: Monster will not attack itself
+int Battle::adjustAttack(int base_attack, int target_index, int attacker_index){
     double curAttack = base_attack;
 
-    //Accounts for armor IF defensesUp is true
-    if (target == -1){
-        if (monster_defensesUp){
+    if (target_index == -1){
+        //Damage Reduction
+        if (monster_defensesUp){ //Accounts for armor IF defensesUp is true
             curAttack *= (1 - (static_cast<double> (monster_innate_armor) / 100));
-        } else {
+        } else { //Bypasses armor
             monster_defensesUp = false;
         }
+
+        //Damage Boost
+        if (willActivate(curParty->getWeapon(attacker_index).getCritChance())){
+            curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
+        }
     } else {
-        if (player_immuneToDMG[target]){ //Can't take damage
+        //Damage Reduction
+        if (player_immuneToDMG[target_index]){ //Doesn't take damage
             return 0;
         }
-        if (player_defensesUp[target]){
-            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target).getItemStat()) / 100));
-        } else {
-            player_defensesUp[target] = false;
+        if (player_defensesUp[target_index]){ //Accounts for armor IF defensesUp is true
+            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target_index).getItemStat()) / 100));
+        } else { //Bypasses armor
+            player_defensesUp[target_index] = false;
+        }
+        if (player_blocking[target_index]){ //Player is blocking
+            curAttack *= (1 - (static_cast<double> (block_reduction) / 100));
+        }
+
+        //Damage Boost
+        if (attacker_index == -1 && willActivate(curMonster->crit_chance)){
+            curAttack *= (1.0 + curMonster->crit_boost);
+        } else if (willActivate(curParty->getWeapon(attacker_index).getCritChance())){
+            curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
         }
     }
-
-    //Accounts for block
-
     //Deducts based on target's armor
     return (int)round(curAttack);
 }

@@ -96,21 +96,21 @@ class Party{
 
         //Normal Getters
         Player getPlayer(int index){
-            if (index < 0 || index > player_size){
+            if (index < 0 || index >= player_size){
                 return Player();
             } else {
                 return players[index];
             }
         }
         Item getWeapon(int index){
-            if (index < 0 || index > max_weapon){
+            if (index < 0 || index >= max_weapon){
                 return Item();
             } else {
                 return weapon_barracks[index];
             }
         }
         Item getArmor(int index){
-            if (index < 0 || index > max_armor){
+            if (index < 0 || index >= max_armor){
                 return Item();
             } else {
                 return armorSets[index];
