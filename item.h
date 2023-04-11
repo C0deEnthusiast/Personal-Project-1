@@ -199,7 +199,7 @@ class Item{
         string getItemName();
         string getItemType();
         int getCost();
-        int getStat();
+        int getItemStat();
         int getCritChance();
         int getCritBoost();
 

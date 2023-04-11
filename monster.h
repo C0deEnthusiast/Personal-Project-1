@@ -33,13 +33,17 @@ class Monster{
         int difficultyRating; //Used for calculating rewards and battle frequency
         int attack_power; //Monster's attack value
         int monster_health;
+        int crit_chance; //Likelihood to land a critical hit
+        int crit_boost; //Boost of critical hit
         
         //Advanced Monster Data
         Effect power;
     
         Monster(); //Default Constructor
-        Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
-        int effectChance, int effectDuration); //Parameterized Constructor
+        /*Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
+        int effectChance, int effectDuration); //Parameterized Constructor*/
+        Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
+        string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
 
         //Getters
         int getMinRating();
@@ -50,7 +54,7 @@ class Monster{
 class Combat{
     private:
         const char separator = ','; //Standard delimiter for monster text files
-        static const int monster_info_count = 8; //Accounts all data sections per monster
+        static const int monster_info_count = 10; //Accounts all data sections per monster
         /*After first monsterRush(), every consecutive use of fxn would increase rating of all monsters,
         thereby raising difficulty*/
         int raise_rating;

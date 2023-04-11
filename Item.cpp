@@ -36,7 +36,7 @@ string Item::getItemType(){ return item_type;}
 int Item::getCost(){ return item_cost;}
 
 //See items.txt file
-int Item::getStat(){ return item_stats;}
+int Item::getItemStat(){ return item_stats;}
 
 int Item::getCritChance(){ return crit_chance;}
 

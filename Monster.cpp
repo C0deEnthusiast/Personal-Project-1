@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include "monster.h"
 #include "party.h"
 #include "player.h"
@@ -22,12 +23,26 @@ Monster::Monster(){
     power = Effect();
 }
 
-Monster::Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
+/*Monster::Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
 int effectChance, int effectDuration){
     monster_name = name;
     difficultyRating = rating;
     attack_power = attkPwr;
     monster_health = health;
+    power.setEffectName(effect);
+    power.setEffectValue(effectValue);
+    power.setEffectChance(effectChance);
+    power.setEffectDuration(effectDuration);
+}*/
+
+Monster::Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
+string effect, int effectValue, int effectChance, int effectDuration){
+    monster_name = name;
+    difficultyRating = rating;
+    attack_power = attkPwr;
+    monster_health = health;
+    crit_chance = critChance;
+    crit_boost = critBoost;
     power.setEffectName(effect);
     power.setEffectValue(effectValue);
     power.setEffectChance(effectChance);
@@ -71,16 +86,20 @@ void Combat::monsterRush(string filename, bool new_rush){
 
     while(getline(file,line)){
         
-        vector<string> monster; //Temporary vector
+        vector<string> temp; //Temporary vector
         istringstream splice(line);
 
         while(getline(splice,line,separator)){
-            monster.push_back(line);
+            temp.push_back(line);
         }
 
-        if (monster.size() == monster_info_count){
-            Monster create(monster.at(0),stoi(monster.at(1)),stoi(monster.at(2)),
-            stoi(monster.at(3)),monster.at(4),stoi(monster.at(5)),stoi(monster.at(6)),stoi(monster.at(7)));
+        if (temp.size() == monster_info_count){
+            /*Monster create(monster.at(0),stoi(monster.at(1)),stoi(monster.at(2)),
+            stoi(monster.at(3)),monster.at(4),stoi(monster.at(5)),stoi(monster.at(6)),stoi(monster.at(7)));*/
+            Monster create(temp.at(0),stoi(temp.at(1)),stoi(temp.at(2)),stoi(temp.at(3)),
+            stoi(temp.at(4)),stoi(temp.at(5)),
+            temp.at(6),stoi(temp.at(7)),stoi(temp.at(8)), stoi(temp.at(9)));
+
             monsterList.push_back(create);
             refillList.push_back(create);
         }
@@ -380,7 +399,7 @@ int Battle::test(){
 
     for (int i = 0; i < 5; i++){
         displayEffects(arr[i].getPlayerName(), arr[i].getPlayerHealth(), playerStatuses[i]);
-        cout << "Attack: " << curParty->getWeapon(i).getStat() << endl;
+        cout << "Attack: " << curParty->getWeapon(i).getItemStat() << endl;
     }
 
     displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
@@ -581,11 +600,33 @@ int Battle::monsterCombat(){
 }
 
 int Battle::adjustAttack(int base_attack, int target){
-    if (target == -1){
-        //
+    if (target >= 0 && target < playerCount){ //Targets player
+        if (player_immuneToDMG[target]){
+            return 0;
+        }
     }
-    double baseAtk = base_attack;
+    double curAttack = base_attack;
+
+    //Accounts for armor IF defensesUp is true
+    if (target == -1){
+        if (monster_defensesUp){
+            curAttack *= (1 - (static_cast<double> (monster_innate_armor) / 100));
+        } else {
+            monster_defensesUp = false;
+        }
+    } else {
+        if (player_immuneToDMG[target]){ //Can't take damage
+            return 0;
+        }
+        if (player_defensesUp[target]){
+            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target).getItemStat()) / 100));
+        } else {
+            player_defensesUp[target] = false;
+        }
+    }
+
+    //Accounts for block
 
     //Deducts based on target's armor
-    return 0;
+    return (int)round(curAttack);
 }

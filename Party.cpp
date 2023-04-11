@@ -252,7 +252,7 @@ void Party::modifyWeaponAttack(int index, int attack_change){
     }
 
     //Changes specified weapon's attack value
-    weapon_barracks[index].setStat(weapon_barracks[index].getStat() + attack_change);
+    weapon_barracks[index].setStat(weapon_barracks[index].getItemStat() + attack_change);
 
     return;
 }
@@ -343,7 +343,7 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
 
     cout << "You want to buy " << amount << " ";
     if (purchasedItem.getItemType() == isWeapon){
-        cout << "(+" << purchasedItem.getStat() << ") ";
+        cout << "(+" << purchasedItem.getItemStat() << ") ";
     }
     cout << purchasedItem.getItemName() << "(s) for " << total_cost << " Gold? (y/n)" << endl;
     getline(cin,confirm);
@@ -433,7 +433,7 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 
     if (target != isTreasure && target != isPotion){
-        cout << item.getStat();
+        cout << item.getItemStat();
     }
 
     if (target == isArmor){
@@ -661,7 +661,7 @@ void Party::showPartyStatus(){
         //Displays weapons
         if (weapon_barracks[i].getItemName() != default_item_name){
             cout << "Equipped: " << weapon_barracks[i].getItemName();
-            cout << "(Atk: " << weapon_barracks[i].getStat() << ")";
+            cout << "(Atk: " << weapon_barracks[i].getItemStat() << ")";
         }
     }
     cout << "\n+-------------+\n\n";
