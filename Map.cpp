@@ -11,52 +11,35 @@ Map::Map(){
     resetMap();
 }
 
-/*
- * Algorithm: Resets positions of player, NPCs, and rooms and clears map_data_
- * Set Player position coordinates to 0
- * Set npc_count_ to false
- * Set room_count_ to 0
- * loop i from 0 to max_npcs_
- *      Set row and col of location to -1
- * loop i from 0 to max_rooms
- *      Set row and col of room location to -1
- * loop i from 0 to num_rows_
- *      loop j from 0 to num_cols_
- *          Set (i,j) location on map_data_ to '-'
- * Parameters: none
- * Return: nothing (void)
- */
+//Resets positions of player, NPCs, and rooms and clears map_data_
 void Map::resetMap(){
-    // resets player position, count values, and initializes values in position arrays to -1
+    //Resets player position, count values, and initializes values in position arrays to -1
     player_position_[0] = 0;
     player_position_[1] = 0;
 
-    // set dungeon exit
-    dungeon_exit_[0] = num_rows_ - 1;
-    dungeon_exit_[1] = num_cols_ / 2;
+    //Set dungeon gate at fixed point
+    dungeon_gate_[0] = num_rows_ - 1;
+    dungeon_gate_[1] = num_cols_ / 2;
 
-    for (int i = 0; i < max_npcs_; i++)
-    {
+    for (int i = 0; i < max_npcs_; i++){
         npc_positions_[i][0] = -1;
         npc_positions_[i][1] = -1;
     }
     npc_count_ = 0;
 
-    for (int i = 0; i < max_rooms_; i++)
-    {
+    for (int i = 0; i < max_rooms_; i++){
         room_positions_[i][0] = -1;
         room_positions_[i][1] = -1;
     }
     room_count_ = 0;
 
-    for (int i = 0; i < num_rows_; i++)
-    {
+    for (int i = 0; i < num_rows_; i++){
         for (int j = 0; j < num_cols_; j++)
         {
             map_data_[i][j] = UNEXPLORED;
         }
     }
-    map_data_[dungeon_exit_[0]][dungeon_exit_[1]] = EXIT;
+    map_data_[dungeon_gate_[0]][dungeon_gate_[1]] = GATE;
 }
 
 // return max count of room
@@ -91,12 +74,12 @@ int Map::getNPCCount(){
 
 // return dungeon exit row
 int Map::getDungeonExitRow(){
-    return dungeon_exit_[0];
+    return dungeon_gate_[0];
 }
 
 // return dungeon exit col
 int Map::getDungeonExitCol(){
-    return dungeon_exit_[1];
+    return dungeon_gate_[1];
 }
 
 // set player position, if in range
@@ -110,8 +93,8 @@ void Map::setPlayerPosition(int row, int col){
 // set dungeon exit position, if in range
 void Map::setDungeonExit(int row, int col){
     if (isOnMap(row, col)){
-        dungeon_exit_[0] = row;
-        dungeon_exit_[1] = col;
+        dungeon_gate_[0] = row;
+        dungeon_gate_[1] = col;
     }
 }
 
@@ -232,7 +215,7 @@ bool Map::isExplored(int row, int col){
  *
  */
 bool Map::isDungeonExit(int row, int col){
-    if (row == dungeon_exit_[0] && col == dungeon_exit_[1]){
+    if (row == dungeon_gate_[0] && col == dungeon_gate_[1]){
         return true;
     }
     return false;

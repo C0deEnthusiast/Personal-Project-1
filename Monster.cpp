@@ -206,7 +206,7 @@ int Combat::encounter(Party& party, bool room){
 
     Monster temp;
     //Battle calculation Values
-    int rating, armor = party.getCurrentArmorCapacity(), battle = 0;
+    int rating, battle = 0;
     int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
 
     //Random variables for battle outcome
@@ -214,14 +214,11 @@ int Combat::encounter(Party& party, bool room){
 
     //Determines monster rating
     if (room){ //Currently at room location
+        //Boss is encountered only at 5th room, with final form (Rating of 8) at final phase
         rating = party.getExploredRooms() + 2;
         party.setExploredRooms(party.getExploredRooms() + 1); //Increments Party Value
     } else { //Random Encounter from either Investigate or Pick a Fight
         rating = rand_rating;
-    }
-
-    if (armor <= 0){ //This is to minimize exceptions which terminate the program
-        armor = 1;
     }
 
     //Monster is chosen
@@ -230,11 +227,11 @@ int Combat::encounter(Party& party, bool room){
     temp.setRating(temp.difficultyRating + raise_rating);
 
     //For testing
-    /*cout << "Check monster count ratings: ";
+    cout << "Check monster count ratings: ";
     for (int i = temp.getMinRating(); i <= temp.getMaxRating(); i++){
         cout << i << "(" << countMonsterRating(i) << ") -- ";
     }
-    cout << endl;*/
+    cout << endl;
 
     //Announces monster
     cout << temp.monster_name << " (Health: " << temp.monster_health;
@@ -286,9 +283,10 @@ Monster Combat::returnMonster(int rating, int &monster_index){
     Monster pick;
 
     //If only the Boss is alive AND if player is not fighting the boss
-    if (bossIsOnlyOneAlive() && rating != pick.getMaxRating()){
+    if (bossIsOnlyOneAlive() && rating != bossRating){
         //cout << "Renews monster roster" << endl;
-        removeMonster(0); //Removes Boss
+        //removeMonster(0); //Removes Boss
+        monsterList.clear(); //Removes Boss
         monsterRush(monsterFilename); //Creates monster roster again
     }
 
@@ -404,7 +402,7 @@ int Battle::test(){
     return 0;
 }
 
-bool Battle::willActivate(int chance){
+bool Battle::willOccur(int chance){
     if (chance == 100){ //Bypasses pseudo-random input
         return true;
     } else if (chance >= Functions().createRand(1,100)){
@@ -441,11 +439,11 @@ void Battle::activateEffect(Status effectData){
 
     //Wrath and Savage Wrath
     if (effect.getEffectName() == effect_Wrath || effect.getEffectName() == effect_Savage_Wrath){
-        cout << "Activating Wrath" << endl;
+        //cout << "Activating Wrath" << endl;
         if (!(atMaxDuration || atEnd)){ //Neither activated or at end of duration
             return;
         }
-        cout << "Modifying Attack" << endl;
+        //cout << "Modifying Attack" << endl;
 
         int changeAtk = effect.getEffectValue();
 
@@ -457,7 +455,7 @@ void Battle::activateEffect(Status effectData){
         bool depleteHealth = false;
 
         //Savage Wrath's negative side effect
-        if (effect.getEffectName() == effect_Savage_Wrath == willActivate(effect.getEffectChance())){
+        if (effect.getEffectName() == effect_Savage_Wrath == willOccur(effect.getEffectChance())){
             depleteHealth = true;
         }
 
@@ -608,7 +606,7 @@ int Battle::adjustAttack(int base_attack, int target_index, int attacker_index){
         }
 
         //Damage Boost
-        if (willActivate(curParty->getWeapon(attacker_index).getCritChance())){
+        if (willOccur(curParty->getWeapon(attacker_index).getCritChance())){
             curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
         }
     } else {
@@ -626,9 +624,9 @@ int Battle::adjustAttack(int base_attack, int target_index, int attacker_index){
         }
 
         //Damage Boost
-        if (attacker_index == -1 && willActivate(curMonster->crit_chance)){
+        if (attacker_index == -1 && willOccur(curMonster->crit_chance)){
             curAttack *= (1.0 + curMonster->crit_boost);
-        } else if (willActivate(curParty->getWeapon(attacker_index).getCritChance())){
+        } else if (willOccur(curParty->getWeapon(attacker_index).getCritChance())){
             curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
         }
     }

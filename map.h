@@ -10,26 +10,31 @@ using namespace std;
 
 class Map{
     private:
-        const char UNEXPLORED = '-'; // marker for unexplored spaces
-        const char EXPLORED = ' ';   // marker for explored spaces
-        const char ROOM = 'R';       // marker for room locations
-        const char NPC = 'N';        // marker for NPC locations
-        const char PARTY = 'X';      // marker for party position
-        const char EXIT = 'E';       // marker for dungeon exit
+        const char UNEXPLORED = '-'; //Marker for unexplored spaces
+        const char EXPLORED = ' '; //Marker for explored spaces
+        const char ROOM = 'R'; //Marker for room locations
+        const char NPC = 'N'; //Marker for NPC locations
+        const char PARTY = 'X'; //Marker for party position
+        const char GATE = 'G'; //Marker for dungeon gate (boss encounter)
+        const char HUNT = 'H'; //Marker for monsters chasing the party
 
-        static const int num_rows_ = 6; // number of rows in map
-        static const int num_cols_ = 24; // number of columns in map
-        static const int max_npcs_ = 5;  // max non-player characters
-        static const int max_rooms_ = 5; // max number of rooms
+        static const int num_rows_ = 6; //Number of rows in map
+        static const int num_cols_ = 24; //Number of columns in map
+        static const int max_npcs_ = 5;  //Max NPC count
+        static const int max_rooms_ = 5; //Max number of rooms
+        static const int max_skulls = 5; //Count of skulls party needs to enter gate and fight the boss
 
-        int player_position_[2];              // player position (row,col)
-        int dungeon_exit_[2];                 // exit location of the dungeon
-        int npc_positions_[max_npcs_][3];     // stores the (row,col) positions of NPCs present on map and if they have been found
-        int room_positions_[max_rooms_][2];   // stores the (row,col) positions of rooms present on map
+        int player_position_[2]; //Player position (row,col)
+        int dungeon_gate_[2]; //Gate location of the dungeon
+        int npc_positions_[max_npcs_][3]; //Stores the (row,col) positions of NPCs present on map and if they have been found
+        int room_positions_[max_rooms_][2]; //Stores the (row,col) positions of rooms present on map
+        //
         char map_data_[num_rows_][num_cols_]; // stores the character that will be shown at a given (row,col)
 
-        int npc_count_;  // stores number of misfortunes currently on map
-        int room_count_; // stores number of sites currently on map
+        int npc_count_; //Stores number of misfortunes currently on map
+        int room_count_; //Stores number of sites currently on map
+        int skulls_count_; //Stores skulls party collected by beating rooms
+        int hunt_count_ = 5; //Stores how many monsters are chasing party
     public:
         Map();
 

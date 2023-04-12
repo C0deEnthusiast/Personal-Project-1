@@ -231,7 +231,8 @@ class Battle{
 
         //void activateZeroDurationEffect(Effect effect, int target_index);
 
-        bool willActivate(int chance);
+        //Used for effects and critical hits
+        bool willOccur(int chance);
 
         void activateEffect(Status effectData);
         //Fix node configuration
