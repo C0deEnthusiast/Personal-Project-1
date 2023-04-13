@@ -17,7 +17,7 @@ Not essential: split.h, battleStats.h
 SUBMISSION INFORMATION
 ------------------------
 // Author: Rodolfo Martinez-Maldonado
-// Personal Project 1 - Dungeon Escape Game
+// Personal Project 1 - Dungeon adventure Game
 ------------------------
 ABOUT THIS PROJECT
 ------------------------
