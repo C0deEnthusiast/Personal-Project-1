@@ -24,6 +24,7 @@ void Map::resetMap(){
     for (int i = 0; i < max_npcs; i++){
         npc_positions[i][0] = -1;
         npc_positions[i][1] = -1;
+        npc_found[i] = false;
     }
 
     for (int i = 0; i < max_rooms; i++){
@@ -38,6 +39,7 @@ void Map::resetMap(){
         }
     }
     map_data[dungeon_gate[0]][dungeon_gate[1]] = GATE;
+    return;
 }
 
 //Set player position, if in range
@@ -46,22 +48,25 @@ void Map::setPlayerPosition(int row, int col){
         player_position[0] = row;
         player_position[1] = col;
     }
+    return;
 }
 
 //Set dungeon exit position, if in range
 void Map::setDungeonGate(int row, int col){
     if (isOnMap(row, col)){
+        if (dungeon_gate[0] != -1 && dungeon_gate[1] != -1){ //Removes already present gate
+            map_data[dungeon_gate[0]][dungeon_gate[1]] = UNEXPLORED;
+        }
         dungeon_gate[0] = row;
         dungeon_gate[1] = col;
+
+        map_data[dungeon_gate[0]][dungeon_gate[1]] = GATE;
     }
+    return;
 }
 
 //Checks if (row,col) positions is on the map
 bool Map::isOnMap(int row, int col){
-    /*if (0 <= row && row < num_rows && 0 <= col && col < num_cols){
-        return true;
-    }
-    return false;*/
     return (row >= 0 && row < num_rows && col >= 0 && col < num_cols);
 }
 
@@ -117,10 +122,6 @@ bool Map::isExplored(int row, int col){
 
 //Checks if location is the dungeon gate
 bool Map::isDungeonGate(int row, int col){
-    /*if (row == dungeon_gate[0] && col == dungeon_gate[1]){
-        return true;
-    }
-    return false;*/
     return (row == dungeon_gate[0] && col == dungeon_gate[1]);
 }
 
@@ -166,33 +167,19 @@ bool Map::addNPC(int row, int col){
     return true;
 }
 
-/*
- * Algorithm: Create a room on the map
- * if room_count_ is more than or equal to number of rooms
- *      return false
- * if (row,col) is not a free space
- *      return false
- * if next row in room_positions_ matrix is -1 -1
- *      store row, col and type values in the current row of room_positions_ matrix
- *      increment room_count_
- *      Set (row,col) value in map_data_ to 'R'
- *      return true
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+//Create a room on the map
 bool Map::addRoom(int row, int col){
 
     if (room_count >= max_rooms){
         return false;
     }
 
-    // location must be blank to spawn
+    //Location must be blank to spawn
     if (!isFreeSpace(row, col)){
         return false;
     }
 
-    if (row == 0 && col == 0){ //Starting player location
+    if (row == player_position[0] && col == player_position[1]){ //Starting player location
         return false;
     }
 
@@ -203,28 +190,14 @@ bool Map::addRoom(int row, int col){
     return true;
 }
 
-/*
- * Algorithm: Removes the NPC at (row, col) from the map
- * loop i from 0 to npc_count_
- *      if npc_position[i] is (row, col)
- *          swap npc_position[npc_count_-1] with npc_position[i]
- *          reset npc_position[npc_count_-1][0] and npc_position[npc_count_-1][1] to -1
- *          reset npc_position[npc_count_-1][2] to 0
- *          decrement npc_count_
- *          set map data at (row, col) to explored
- *          return true
- * return false
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+//Removes the NPC at (row, col) from the map
 bool Map::removeNPC(int row, int col){
     for (int i = 0; i < npc_count; i++){
         if (npc_positions[i][0] == row && npc_positions[i][1] == col){
             // swap i'th npc with last npc
             npc_positions[i][0] = npc_positions[npc_count - 1][0];
             npc_positions[i][1] = npc_positions[npc_count - 1][1];
-            npc_positions[i][2] = npc_positions[npc_count - 1][2];
+            npc_found[i] = npc_found[npc_count - 1];
             // reset last npc
             npc_positions[npc_count - 1][0] = -1;
             npc_positions[npc_count - 1][1] = -1;
@@ -239,20 +212,7 @@ bool Map::removeNPC(int row, int col){
     return false;
 }
 
-/*
- * Algorithm: Removes the room at (row, col) from the map
- * loop i from 0 to room_count_
- *      if room_position[i] is (row, col)
- *          swap room_position[room_count_-1] with room_position[i]
- *          reset room_position[room_count_-1][0] and room_position[room_count_-1][1] to -1
- *          decrement room_count_
- *          set map data at (row, col) to explored
- *          return true
- * return false
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+//Removes the room at (row, col) from the map
 bool Map::removeRoom(int row, int col){
     for (int i = 0; i < room_count; i++){
         if (room_positions[i][0] == row && room_positions[i][1] == col){
@@ -272,16 +232,8 @@ bool Map::removeRoom(int row, int col){
     return false;
 }
 
-/*
- * Algorithm: Mark (row, col) as explored, either revealing NPC or empty space
- * if (row, col) is NPC location
- *      mark npc at player_position_ as found
- * else if (row, col) is a free space
- *      mark space as explored in map data
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+
+//Mark (row, col) as explored, either revealing NPC or empty space
 void Map::exploreSpace(int row, int col){
     for (int i = 0; i < npc_count; i++){
         if (row == npc_positions[i][0] && col == npc_positions[i][1]){
@@ -292,56 +244,36 @@ void Map::exploreSpace(int row, int col){
     }
 
     if (isFreeSpace(row, col)){
-        map_data[player_position[0]][player_position[1]] = EXPLORED;
+        map_data[row][col] = EXPLORED;
     }
 }
 
-/*
- * Algorithm: Make the player move based on the given command
- * if user inputs w and if its not the top row of the map
- *      Move the player up by one row
- * if user inputs s and if its not the bottom row of the map
- *      Move the player down by one row
- * if user inputs a and if its not the leftmost column
- *      Move the player left by one column
- * if user inputs d and if its not the rightmost column
- *      Move the player right by one column
- * if player moved
- *      if new location is an NPC location
- *          mark new location as explored
- *      return true
- * else
- *      return false
- *
- * Parameters: direction (char)
- * Return: boolean (bool)
- */
-bool Map::move(char direction)
-{
-    // check input char and move accordingly
+
+//Make the player move based on the given command
+bool Map::move(char direction){
     switch (tolower(direction)){
-    case 'w': // if user inputs w, move up if it is an allowed move
+    case 'w': //Move up if it is an allowed move
         if (player_position[0] > 0){
             player_position[0] -= 1;
         } else {
             return false;
         }
         break;
-    case 's': // if user inputs s, move down if it is an allowed move
+    case 's': //Move down if it is an allowed move
         if (player_position[0] < num_rows - 1){
             player_position[0] += 1;
         } else {
             return false;
         }
         break;
-    case 'a': // if user inputs a, move left if it is an allowed move
+    case 'a': //Move left if it is an allowed move
         if (player_position[1] > 0){
             player_position[1] -= 1;
         } else {
             return false;
         }
         break;
-    case 'd': // if user inputs d, move right if it is an allowed move
+    case 'd': //Move right if it is an allowed move
         if (player_position[1] < num_cols - 1){
             player_position[1] += 1;
         } else {
@@ -358,29 +290,13 @@ bool Map::move(char direction)
     return true;
 }
 
-/*
- * Algorithm: This function prints a 2D map in the terminal.
- * Loop i from 0 to number of rows
- *      Loop j from 0 to number of columns
- *          if player position is at (i,j)
- *              print 'X'
- *          else if npc is at (i,j)
- *              if npc has been found:
- *                  print 'N'
- *              else
- *                  print '-'
- *          else
- *              print the value of (i,j) in map_data_
- *
- * Parameters: none
- * Return: nothing (void)
- */
+//Prints the map_data[] grid
 void Map::displayMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++){
             if (player_position[0] == i && player_position[1] == j){
                 cout << PARTY;
-            } else if (map_data[i][j] == 'N') { // NPC location, have to check if they were found yet
+            } else if (map_data[i][j] == 'N') { //NPC location, have to check if they were found yet
                 for (int k = 0; k < npc_count; k++){
                     if (npc_positions[k][0] == i && npc_positions[k][1] == j){
                         if (npc_found[k]){

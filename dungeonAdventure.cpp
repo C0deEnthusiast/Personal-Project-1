@@ -183,14 +183,14 @@ int main(int argc, char *argv[]){
     party.addItem(party.returnItem("Diamond circlet"));
     party.addItem(party.returnItem("Diamond circlet"));
     //party.addItem(party.returnItem("Blighted Dagger")); //Debugging only
-    party.merchant(); //Testing
+    /*party.merchant(); //Testing
     for (int i = 0; i < 23; i++){ //22
         if (fight.encounter(party) == -1){
             party.showPartyStatus();
             return 0;
         }
     }
-    return 0;
+    return 0;*/
     //End of removal
 
 
