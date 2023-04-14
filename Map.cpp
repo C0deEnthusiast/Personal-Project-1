@@ -49,7 +49,7 @@ void Map::setPlayerPosition(int row, int col){
 }
 
 //Set dungeon exit position, if in range
-void Map::setDungeonExit(int row, int col){
+void Map::setDungeonGate(int row, int col){
     if (isOnMap(row, col)){
         dungeon_gate[0] = row;
         dungeon_gate[1] = col;
@@ -65,19 +65,7 @@ bool Map::isOnMap(int row, int col){
     return (row >= 0 && row < num_rows && col >= 0 && col < num_cols);
 }
 
-/*
- * Algorithm: Checks if the location is an NPC location
- * if (row, col) is not within the map boundaries
- *      return false
- * loop i from 0 to npc_count_
- *      if (row,col) is a npc location
- *          return true
- * return true
- * Parameters: row (int), col (int)
- * return false
- * Parameters: none
- * Return: boolean (bool)
- */
+//Checks if the location is an NPC location
 bool Map::isNPCLocation(int row, int col){
     if (!isOnMap(row, col)){
         return false;
@@ -91,19 +79,7 @@ bool Map::isNPCLocation(int row, int col){
     return false;
 }
 
-/*
- * Algorithm: Checks if the location is an room location
- * if (row, col) is not within the map boundaries
- *      return false
- * loop i from 0 to room_count_
- *      if (row,col) is a room location
- *          return true
- * return true
- * Parameters: row (int), col (int)
- * return false
- * Parameters: none
- * Return: boolean (bool)
- */
+//Checks if the location is an room location
 bool Map::isRoomLocation(int row, int col){
     if (!isOnMap(row, col)){
         return false;
@@ -117,17 +93,7 @@ bool Map::isRoomLocation(int row, int col){
     return false;
 }
 
-/*
- * Algorithm: Checks if the given row and column is an explored space
- * if (row, col) is not on the map:
- *     return false
- * if map_data_[row][col] is ' ':
- *     return true
- * if (row, col) is npc location and has been found:
- *     return true
- * else:
- *     return false
- */
+//Checks if the given row and column is an explored space
 bool Map::isExplored(int row, int col){
     if (!isOnMap(row, col)){
         return false;
@@ -148,11 +114,9 @@ bool Map::isExplored(int row, int col){
     return false;
 }
 
-/*
- * Algorithm: checks if (row, col) is dungeon_exit_
- *
- */
-bool Map::isDungeonExit(int row, int col){
+
+//Checks if location is the dungeon gate
+bool Map::isDungeonGate(int row, int col){
     /*if (row == dungeon_gate[0] && col == dungeon_gate[1]){
         return true;
     }
@@ -160,21 +124,7 @@ bool Map::isDungeonExit(int row, int col){
     return (row == dungeon_gate[0] && col == dungeon_gate[1]);
 }
 
-/*
- * Algorithm: Checks if the given row and column on map is a free space
- * if row and column is not within the map boundaries
- *      return false
- * if row and column is a npc location
- *      return false
- * if row and column is a room location
- *      return false
- * if row and column is the dungeon exit
- *      return false
- * return true
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+//Checks if the given row and column on map is a free space
 bool Map::isFreeSpace(int row, int col){
     if (!isOnMap(row, col)){
         return false;
@@ -188,27 +138,13 @@ bool Map::isFreeSpace(int row, int col){
         return false;
     }
 
-    if (isDungeonExit(row, col)){
+    if (isDungeonGate(row, col)){
         return false;
     }
     return true;
 }
 
-/*
- * Algorithm: Create an NPC on the map
- * if npc is present on map
- *      return false
- * if (row,col) is not a free space
- *      return false
- * store row and col values in npcPosition array
- * mark NPC as hidden
- * set (row,col) value in map_data_ to 'N'
- * increment npc_count_
- * return true
- *
- * Parameters: row (int), col (int)
- * Return: boolean (bool)
- */
+//Add NPC on the map grid
 bool Map::addNPC(int row, int col){
     if (npc_count >= max_npcs){
         return false;

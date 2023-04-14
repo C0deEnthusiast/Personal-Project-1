@@ -34,6 +34,11 @@
 #define effect_Wicked___ "Test Wicked Effect" //Finish this effect on monsters.txt
 #define effect_Unholy_Judgement "Unholy Judgement"
 #define effect_Final_Requiem "Final Requiem" //Finish this on monsters.txt
+//Secret Enemy Effect
+#define effect_Eternal_Rest "Eternal Rest"
+//Special Enemy effect; for two monster combat: Enemy doesn't die before its ally does
+#define effect_My_Brothers_And_Sisters "My Brothers And Sisters"
+//#define effect_Eternal_Loyalty "Eternal Loyalty"
 
 using namespace std;
 

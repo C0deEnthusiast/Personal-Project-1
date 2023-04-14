@@ -31,11 +31,11 @@ class Map{
         bool npc_found[max_npcs]; //Checks if npc has been found/spotted
         int room_positions[max_rooms][2]; //Stores the (row,col) positions of rooms present on map
         int hunt_positions[max_hunt][2]; //Stores the (row,col) positions of monsters chasing party
-        char map_data[num_rows][num_cols]; // stores the character that will be shown at a given (row,col)
+        char map_data[num_rows][num_cols]; //Stores the character that will be shown at a given (row,col)
 
         int npc_count = 0; //Stores number of misfortunes currently on map
         int room_count = 0; //Stores number of sites currently on map
-        int skulls_count = 0; //Stores skulls party collected by beating rooms
+        int skull_count = 0; //Stores skulls party collected by beating rooms
         int hunt_count = 0; //Stores how many monsters are chasing party
     public:
         Map();
@@ -45,12 +45,16 @@ class Map{
         //Getters
         int getMaxRoom(){ return max_rooms;}
         int getMaxNPC(){ return max_npcs;}
+        int getMaxSkulls(){ return max_skulls;}
+        int getMaxHunt(){ return max_hunt;}
         int getPlayerRow(){ return player_position[0];}
         int getPlayerCol(){ return player_position[1];}
         int getDungeonGateRow(){ return dungeon_gate[0];}
         int getDungeonGateCol(){ return dungeon_gate[1];}
         int getRoomCount(){ return room_count;}
         int getNPCCount(){ return npc_count;}
+        int getSkullCount(){ return skull_count;}
+        int getHuntCount(){ return hunt_count;}
         int getNumRows(){ return num_rows;}
         int getNumCols(){ return num_cols;}
 
@@ -60,22 +64,23 @@ class Map{
         bool isRoomLocation(int row, int col);
         bool isExplored(int row, int col);
         bool isFreeSpace(int row, int col);
-        bool isDungeonExit(int row, int col);
+        bool isDungeonGate(int row, int col);
+        //bool isMonsterHunting(int row, int col);
 
         //Setters
         void setPlayerPosition(int row, int col);
-        void setDungeonExit(int row, int col);
+        void setDungeonGate(int row, int col);
+        //void setHuntLocation(int row, int col);
 
         //Other
         void displayMap();
         bool move(char);
         bool addNPC(int row, int col);
         bool addRoom(int row, int col);
+        //bool addHunt(int row, int col);
         bool removeNPC(int row, int col);
         bool removeRoom(int row, int col);
         void exploreSpace(int row, int col);
-
-        //bool addHunter(int row, int col);
 };
 
 #endif

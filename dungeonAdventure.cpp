@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
     while (game){
         string action = "";
 
-        bool exit = dungeon.isDungeonExit(dungeon.getPlayerRow(),dungeon.getPlayerCol());
+        bool exit = dungeon.isDungeonGate(dungeon.getPlayerRow(),dungeon.getPlayerCol());
         if (exit && party.getExploredRooms() == dungeon.getMaxRoom()){
             game = gameWin();
         }
