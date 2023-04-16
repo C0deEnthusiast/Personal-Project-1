@@ -65,11 +65,8 @@ class Effect{
         };
 
         string getEffectName(){ return name;}
-
         int getEffectValue(){ return value;}
-
         int getEffectChance(){ return chance;}
-
         int getEffectDuration(){ return duration;}
 
         void setEffectName(string new_name){
@@ -201,12 +198,12 @@ class Item{
         string effectName, int effectValue, int effectChance, int effectDuration);
 
         //Getters
-        string getItemName();
-        string getItemType();
-        int getCost();
-        int getItemStat();
-        int getCritChance();
-        int getCritBoost();
+        string getItemName(){ return item_name;}
+        string getItemType(){ return item_type;}
+        int getCost(){ return item_cost;}
+        int getItemStat(){ return item_stats;} //See details in items.txt file
+        int getCritChance(){ return crit_chance;}
+        int getCritBoost(){ return crit_boost;}
 
         //Setters
         void setItemName(string new_name);

@@ -177,14 +177,20 @@ bool Combat::battleDefeat(Party& party, int kill_index, int health_loss_chance, 
         cout << "Foolish mortals! With surrender, comes sacrifice!" << endl;
 
         //Kills random player
-        return party.changePlayerHealth(kill_index,-100);
+        party.modifyPlayerHealth(kill_index, -100);
+        if (party.getLivePlayerCount() == 0){
+            return false;
+        } else {
+            return true;
+        }
     } else { //Player loses against fighting monster
         party.setMoney(party.getMoney()/4);
         cout << "One for all, and all will fall." << endl;
         for (int i = 1; i < party.getPlayerSize(); i++){
             if (health_loss_chance <= 10){
                 //Kills player
-                if (!party.changePlayerHealth(i,-100)){
+                party.modifyPlayerHealth(i, -100);
+                if (party.getLivePlayerCount() == 0){
                     return false;
                 }
             }

@@ -65,7 +65,7 @@ class Map{
         bool isExplored(int row, int col);
         bool isDungeonGate(int row, int col);
         bool isFreeSpace(int row, int col);
-        //bool isAHunt(int row, int col);
+        //bool isHunt(int row, int col);
 
         //Setters
         void setPlayerPosition(int row, int col);

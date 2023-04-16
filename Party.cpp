@@ -40,37 +40,11 @@ Party::Party(string filename){ //Parameterized Constructor
 }
 
 
-//Getters (Maximums and Constants)
 
-int Party::getPlayerSize(){ return player_size;}
-
-int Party::getHealthRecover(){ return food_recover;}
-
-int Party::getMaxCapacity(){ return max_capacity;}
-
-int Party::getMaxWeaponCapacity(){ return max_weapon;}
-
-int Party::getMaxArmorCapacity(){ return max_armor;}
-
-
-//Normal Getters
-int Party::getMoney(){ return money;}
-
-int Party::getDangerLevel(){ return danger_level;}
-
-int Party::getExploredRooms(){ return explored_rooms;}
-
-int Party::getKeys(){ return keys;}
-
-int Party::getCurrentCapacity(){ return current_capacity;}
-
-int Party::getCurrentWeaponCapacity(){ return current_weapon;}
-
-int Party::getCurrentArmorCapacity(){ return current_armor;}
-
+//Special Getters
 
 //Counts how many players are alive
-int Party::getPlayerCount(){
+int Party::getLivePlayerCount(){
     int player_count = 0;
 
     for (auto& x: players){
@@ -82,8 +56,33 @@ int Party::getPlayerCount(){
     return player_count;
 }
 
-int Party::getMerchantCapacity(){ return merchantList.size();}
+vector<Item> Party::copyMerchantList(){
+    return merchantList;
+}
 
+Player Party::getPlayer(int index){
+    if (index >= 0 && index < player_size){
+        return players[index];
+    } else {
+        return Player();
+    }
+}
+
+Item Party::getWeapon(int index){
+    if (index >= 0 && index < max_weapon){
+        return weapon_barracks[index];
+    } else {
+        return Item();
+    }
+}
+
+Item Party::getArmor(int index){
+    if (index >= 0 && index < max_armor){
+        return armorSets[index];
+    } else {
+        return Item();
+    }
+}
 
 //Setters
 void Party::setMoney(int new_money){
@@ -142,13 +141,12 @@ void Party::setCurrentCapacity(int new_current_capacity){
 }
 
 void Party::setCurrentArmorCapacity(int new_armor){
-    if (new_armor >= 0){
-        current_armor = new_armor;
-    } else {
+    current_armor = new_armor;
+
+    //Readjusts armor count if necessary
+    if (current_armor < 0){
         current_armor = 0;
-    }
-    
-    if (current_armor > max_armor){ //Limits armor to maximum
+    } else if (current_armor > max_armor){
         current_armor = max_armor;
     }
 
@@ -168,9 +166,9 @@ bool Party::areAllPlayersDead(){
 }
 
 Item Party::returnItem(string item_name){
-    for (int i = 0; i < merchantList.size(); i++){
-        if (merchantList[i].getItemName() == item_name){
-            return merchantList[i];
+    for (auto& x: merchantList){
+        if (x.getItemName() == item_name){
+            return x;
         }
     }
 
@@ -182,36 +180,6 @@ void Party::cook(int probability){
     return;
 }
 
-
-/*Algorithm: Modifies player's health
-    1) Changes the health of player based on health_change
-    2) Aside from obvious purpose, it also checks whether the player's new health is 0
-    3) If the player's health is 0, the player is considered dead and so sends message of their death
-    4) However, checks if dead player is the main player, if so, returns false to initiate gameLose()
-    Parameters: index and health_change (int)
-    Returns: false if main player dies from 0 health; true otherwise*/
-bool Party::changePlayerHealth(int index, int health_change){
-    //This is if a dead player takes lethal health, thereby "dying again"
-    if (players[index].getPlayerHealth() == 0 && health_change < 0){
-        cout << "Goddamn! Not afraid to beat up dead meat, are we?" << endl;
-        return true;
-    }
-
-    //Changes specified player's health if the player is not dead
-    players[index].setPlayerHealth(players[index].getPlayerHealth() + health_change);
-    
-    //Checks if health = 0 (e.g. player is dead or alive)
-    if (players[index].getPlayerHealth() == 0){ //Player is dead
-        //Announces player is dead
-        cout << players[index].getPlayerName() << " is dead! Stay cautious!" << endl;
-
-        if (players[index].getLeaderStatus()){ //Checks if dead player is the main player (e.g. the user)
-            return false;
-        }
-    }
-
-    return true;
-}
 
 /*Algorithm: Modifies player's health
     1) Changes the health of player based on health_change
@@ -757,8 +725,9 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
         cout << "Foolish mortals! With surrender, comes sacrifice!" << endl;
         //Kills random player (that is alive, rather than beating a dead horse)
         if (players[kill_index].getPlayerHealth() > 0){
-            if (!changePlayerHealth(kill_index,-100)){ //Kills player
-                return false; //Main player is dead
+            modifyPlayerHealth(kill_index, -100); //Kills player
+            if (getLivePlayerCount() == 0){
+                return false;
             }
         }
     } else if (outcome == -2){ //Defeat
@@ -767,7 +736,9 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
         for (int i = 1; i < player_size; i++){
             if (health_chance <= 10){
                 //Kills player
-                if (!changePlayerHealth(i,-100)){
+                modifyPlayerHealth(i, -100);
+
+                if (getLivePlayerCount() == 0){
                     return false;
                 }
             }
@@ -776,8 +747,9 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
 
     for (int i = 0; i < getPlayerSize(); i++){
         if (health_chance <= 50){ //Percentage form; random chance for EACH member
-            if (!changePlayerHealth(i,-1)){ //i is index of player
-                return false; //Main player is dead
+            modifyPlayerHealth(i, -1);
+            if (getLivePlayerCount() == 0){
+                return false;
             }
         }
     }

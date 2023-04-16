@@ -88,46 +88,30 @@ class Party{
         Party(string filename); //Parameterized Constructor
 
         //Getters (Maximums and Constants)
-        int getPlayerSize();
-        int getHealthRecover();
-        int getMaxCapacity();
-        int getMaxWeaponCapacity();
-        int getMaxArmorCapacity();
+        int getPlayerSize(){ return player_size;}
+        int getHealthRecover(){ return food_recover;} //Remove this; Food is no longer in game
+        int getMaxCapacity(){ return max_capacity;}
+        int getMaxWeaponCapacity(){ return max_weapon;}
+        int getMaxArmorCapacity(){ return max_armor;}
 
         //Normal Getters
-        Player getPlayer(int index){
-            if (index < 0 || index >= player_size){
-                return Player();
-            } else {
-                return players[index];
-            }
-        }
-        Item getWeapon(int index){
-            if (index < 0 || index >= max_weapon){
-                return Item();
-            } else {
-                return weapon_barracks[index];
-            }
-        }
-        Item getArmor(int index){
-            if (index < 0 || index >= max_armor){
-                return Item();
-            } else {
-                return armorSets[index];
-            }
-        }
-        int getMoney();
-        int getDangerLevel();
-        int getExploredRooms();
-        int getKeys();
-        int getCurrentCapacity();
-        int getCurrentWeaponCapacity();
-        int getCurrentArmorCapacity();
-        int getPlayerCount();
-        int getMerchantCapacity();
+        int getMoney(){ return money;}
+        int getDangerLevel(){ return danger_level;}
+        int getExploredRooms(){ return explored_rooms;}
+        int getKeys(){ return keys;}
+        int getCurrentCapacity(){ return current_capacity;}
+        int getCurrentWeaponCapacity(){ return current_weapon;}
+        int getCurrentArmorCapacity(){ return current_armor;}
+        int getMerchantCapacity(){ return merchantList.size();}
+        int getLivePlayerCount();
+        vector<Item> copyMerchantList();
+        Player getPlayer(int index);
+        Item getWeapon(int index);
+        Item getArmor(int index);
 
         //Setters
         void setMoney(int new_money);
+        //Remove Danger Level Implementation after Map modifications
         bool setDangerLevel(int new_level);
         void setExploredRooms(int new_rooms);
         void setKeys(int new_keys);
@@ -136,15 +120,12 @@ class Party{
 
         //Other functions
 
-        bool areAllPlayersDead();
+        bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
         Item returnItem(string item_name);
         
         //Remove this; cookware and food will be replaced by potions
         void cook(int probability);
 
-        //Modify this so that it becomes a void function
-        //IMPORTANT: Remove the boolean status from PLAYER class
-        bool changePlayerHealth(int index, int health_change);
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
 

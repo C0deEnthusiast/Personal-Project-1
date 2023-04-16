@@ -12,6 +12,8 @@ Item::Item(){
     item_type = "";
     item_cost = 0;
     item_stats = 0;
+    crit_chance = 0;
+    crit_boost = 0;
     weapon_effect = Effect();
 }
 
@@ -22,25 +24,11 @@ string effectName, int effectValue, int effectChance, int effectDuration){
     item_cost = cost;
     item_stats = stat;
 
-    weapon_effect = Effect(effectName, effectValue, effectChance, effectDuration);
-
     crit_chance = critChance;
     crit_boost = critBoost;
+
+    weapon_effect = Effect(effectName, effectValue, effectChance, effectDuration);
 }
-
-//Getters
-string Item::getItemName(){ return item_name;}
-
-string Item::getItemType(){ return item_type;}
-
-int Item::getCost(){ return item_cost;}
-
-//See items.txt file
-int Item::getItemStat(){ return item_stats;}
-
-int Item::getCritChance(){ return crit_chance;}
-
-int Item::getCritBoost(){ return crit_boost;}
 
 //Setters
 void Item::setItemName(string new_name){

@@ -255,7 +255,7 @@ int main(int argc, char *argv[]){
             game = gameWin();
         }
 
-        if (party.getPlayerCount() == 0){ //All Players are dead
+        if (party.getLivePlayerCount() == 0){ //All Players are dead
             game = gameLose(-3);
         }
 
@@ -309,7 +309,13 @@ int main(int argc, char *argv[]){
             //20% for each member to lose 1 health
             for (int i = 0; i < party.getPlayerSize(); i++){
                 if (Functions().createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
-                    game = party.changePlayerHealth(i,-1); //i is index of player
+                    party.modifyPlayerHealth(i, -1);
+                    game = party.getLivePlayerCount();
+                    if (party.getLivePlayerCount() == 0){
+                        game = false;
+                    } else {
+                        game = true;
+                    }
                 }
             }
 
@@ -355,7 +361,7 @@ int main(int argc, char *argv[]){
                 int win = fight.encounter(party);
                 //game = monsters.monsterEncounter(party);
                 int rand1 = Functions().createRand(1,10);
-                int rand2 = Functions().createRand(2,party.getPlayerCount());
+                int rand2 = Functions().createRand(2,party.getLivePlayerCount());
                 int rand3 = Functions().createRand(1,100);
 
                 party.monsterOutcome(win, rand1, rand2, rand3);
@@ -382,7 +388,7 @@ int main(int argc, char *argv[]){
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
             int rand1 = Functions().createRand(1,10);
-            int rand2 = Functions().createRand(2,party.getPlayerCount());
+            int rand2 = Functions().createRand(2,party.getLivePlayerCount());
             int rand3 = Functions().createRand(1,100);
 
             game = party.monsterOutcome(win,rand1,rand2,rand3);
@@ -428,7 +434,7 @@ int main(int argc, char *argv[]){
                     int win = fight.encounter(party);
 
                     int rand1 = Functions().createRand(1,10);
-                    int rand2 = Functions().createRand(2,party.getPlayerCount());
+                    int rand2 = Functions().createRand(2,party.getLivePlayerCount());
                     int rand3 = Functions().createRand(1,100);
                     party.monsterOutcome(win, rand1, rand2, rand3);
 
@@ -440,7 +446,12 @@ int main(int argc, char *argv[]){
                 if (chance <= 30 || chance > 50){ //All outcomes except fighting a monster
                     for (int i = 0; i < party.getPlayerSize(); i++){
                         if (Functions().createRand(1,100) <= 50){ //Percentage form
-                            party.changePlayerHealth(i,-1); //i is index of player
+                            party.modifyPlayerHealth(i, -1);
+                            if (party.getLivePlayerCount() == 0){
+                                game = false;
+                            } else {
+                                game = true;
+                            }
                         }
                     }
                 }
@@ -466,7 +477,7 @@ int main(int argc, char *argv[]){
             int win = fight.encounter(party);
 
             int rand1 = Functions().createRand(1,10);
-            int rand2 = Functions().createRand(2,party.getPlayerCount());
+            int rand2 = Functions().createRand(2,party.getLivePlayerCount());
             int rand3 = Functions().createRand(1,100);
             party.monsterOutcome(win, rand1, rand2, rand3);
 

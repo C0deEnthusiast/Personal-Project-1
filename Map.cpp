@@ -42,8 +42,6 @@ void Map::resetMap(){
     return;
 }
 
-
-
 //Checks Map Locations
 
 //Checks if (row,col) positions is on the map
@@ -152,7 +150,7 @@ void Map::setDungeonGate(int row, int col){
 
 //Others
 
-//Prints the map_data[] grid
+//Prints the map_data grid
 void Map::displayMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++){
