@@ -63,24 +63,27 @@ class Map{
         bool isNPCLocation(int row, int col);
         bool isRoomLocation(int row, int col);
         bool isExplored(int row, int col);
-        bool isFreeSpace(int row, int col);
         bool isDungeonGate(int row, int col);
-        //bool isMonsterHunting(int row, int col);
+        bool isFreeSpace(int row, int col);
+        //bool isAHunt(int row, int col);
 
         //Setters
         void setPlayerPosition(int row, int col);
         void setDungeonGate(int row, int col);
         //void setHuntLocation(int row, int col);
+        //void setSkullCount(int new_count);
 
         //Other
         void displayMap();
-        bool move(char);
+        bool move(char direction);
         bool addNPC(int row, int col);
         bool addRoom(int row, int col);
         //bool addHunt(int row, int col);
         bool removeNPC(int row, int col);
         bool removeRoom(int row, int col);
+        //bool removeHunt(int row, int col);
         void exploreSpace(int row, int col);
+        //void moveHunt(int row, int col, int hunt_index); //Idea: Maybe a DFS traversal
 };
 
 #endif
