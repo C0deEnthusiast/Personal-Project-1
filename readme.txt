@@ -3,8 +3,8 @@ HOW TO COMPILE AND RUN
 ------------------------
 Compile:
 g++ -std=c++17 dungeonAdventure.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
-Run:
-./game items.txt monsters.txt
+Run: (Accepts four arguments)
+./game items.txt monsters.txt story.txt
 ------------------------
 DEPENDENCIES
 ------------------------

@@ -7,73 +7,12 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <vector>
 #include "party.h"
 #include "monster.h"
 #include "map.h"
 
 using namespace std;
-
-
-/*
- * This is to let player read exposition; also stops stream from entering 'player' input
- * Intended to let player read what everything goddamn says*/
-void convenientStop(string stop = ""){
-    cout << "(Enter a character to continue)" << endl;
-    getline(cin, stop);
-
-    return;
-}
-
-/*Algorithm: Prints a desired count of lines from the story text file, starting from first_line (INCLUSIVE)
-Range of function: Line 1 to end of text file*/
-void read(int first_line, int last_line, string speaker = ""){
-    //First line of text file is treated as 1, not 0
-
-    ifstream file("story.txt"); //Opens story text file
-
-    bool target = false; //Determines if first target line, first_line, is found
-    int current_line = 1;
-
-    if (!file.is_open()){ //Failed to open file
-        cout << "File not open" << endl;
-        return;
-    }
-
-    if (first_line < 1 || last_line < 1 || first_line > last_line){
-        cout << "Range out of bounds" << endl;
-        return;
-    }
-
-    while (!file.eof() && current_line <= last_line){
-        string line;
-        getline(file,line);
-
-        if (line.length() == 0){ //Empty lines are ignored
-            continue;
-        }
-
-        if (current_line == first_line){ //Prints a desired count of lines when first_line is found
-            target = true;
-        }
-        
-        if (target){ //Prints desired count of lines after first_line (Inclusive of first_line)
-            if (speaker.length() != 0){ //Excludes default
-                cout << speaker << ": ";
-            }
-            cout << line << endl;
-        }
-
-        current_line++;
-    }
-
-    file.close(); //Closes file
-
-    if (!target){ //First line is above range (outside of text file)
-        cout << "Target lines outside of text file" << endl;
-    }
-
-    return;
-}
 
 //Announces user's defeat; ends game
 bool gameLose(int scenario = 0){ //0 is when player gives up
@@ -118,8 +57,9 @@ char cardinalMove(){
 }
 
 int main(int argc, char *argv[]){
-    if (argc != 3){
-        cout << "Need in order: {Program} {Text file of Items} {Text file of Monsters}" << endl;
+    if (argc != 4){
+        cout << "Need in order:\n";
+        cout << "{Program} {Item Text File} {Monster Text File} {Story Text File}" << endl;
         return 0;
     }
 
@@ -133,15 +73,19 @@ int main(int argc, char *argv[]){
     string skip; //For exposition
 
     //These arrays are to make it easier to maintain displaying text
-    int firstLineList[] = {1,4,8,14,16};
-    int lastLineList[] = {3,7,13,15,18};
+    int firstLineList[] = {0,3,7,13,15,18};
+    int lastLineList[] = {2,6,12,14,17,30};
+
+    vector<string> read = Functions::copyFile(argv[3]);
 
     cout << "???:" << endl;
     //Introduction exposition; creates 3 rooms
     for (int i = 0; i < 3; i++){
-        read(firstLineList[i],lastLineList[i]);
-        cout << "(Enter a character to continue)" << endl;
-        getline(cin,skip); //Allows player to read exposition; also stops stream from entering 'player' input
+        for (int line = firstLineList[i]; line <= lastLineList[i]; line++){
+            cout << read.at(line) << endl;
+        }
+        //read(firstLineList[i],lastLineList[i]);
+        Functions::convenientStop();
         cout << endl;
     }
 
@@ -200,8 +144,8 @@ int main(int argc, char *argv[]){
 
     //Room Generation
     for (int i = 0; i < dungeon.getMaxRoom(); i++){
-        int rand1 = Functions().createRand(0,dungeon.getNumRows() - 1);
-        int rand2 = Functions().createRand(0,dungeon.getNumCols() - 1);
+        int rand1 = Functions::createRand(0,dungeon.getNumRows() - 1);
+        int rand2 = Functions::createRand(0,dungeon.getNumCols() - 1);
         if(!dungeon.addRoom(rand1, rand2)){
             i--;
         }
@@ -210,11 +154,10 @@ int main(int argc, char *argv[]){
     cout << endl;
 
     for (int i = 3; i < 5; i++){
-        read(firstLineList[i],lastLineList[i]);
-        //cout << "(Enter a character to continue)" << endl;
-        //Allows player to read exposition; also stops stream from entering 'player' input
-        //getline(cin,skip);
-        convenientStop();
+        for (int line = firstLineList[i]; line <= lastLineList[i]; line++){
+            cout << read.at(line) << endl;
+        }
+        Functions::convenientStop();
         cout << endl;
     }
 
@@ -222,8 +165,8 @@ int main(int argc, char *argv[]){
 
     //NPC Generation
     for (int i = 0; i < dungeon.getMaxNPC(); i++){
-        int row = Functions().createRand(0,dungeon.getNumRows() - 1);
-        int col = Functions().createRand(0,dungeon.getNumCols() - 1);
+        int row = Functions::createRand(0,dungeon.getNumRows() - 1);
+        int col = Functions::createRand(0,dungeon.getNumCols() - 1);
         if(!dungeon.addNPC(row,col)){
             i--;
         } else {
@@ -232,11 +175,10 @@ int main(int argc, char *argv[]){
     }
 
     cout << "Merchant:" << endl;
-    read(19,31);
-    //cout << "(Enter any character to continue)" << endl;
-    //This is to let player read exposition; also stops stream from entering 'player' input
-    //getline(cin,skip);
-    convenientStop();
+    for (int line = firstLineList[5]; line <= lastLineList[5]; line++){
+        cout << read.at(line) << endl;
+    }
+    Functions::convenientStop();
     cout << endl;
     cout << "Now, time for my salesman's speech!" << endl;
 
@@ -301,14 +243,14 @@ int main(int argc, char *argv[]){
             cout << "+-------------+" << endl;
 
             cout << endl;
-            convenientStop();
+            Functions::convenientStop();
         } else if (action == "1"){ //Universal Move Option
             //Starts prompt for player to move
             dungeon.move(cardinalMove());
 
             //20% for each member to lose 1 health
             for (int i = 0; i < party.getPlayerSize(); i++){
-                if (Functions().createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
+                if (Functions::createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
                     party.modifyPlayerHealth(i, -1);
                     game = party.getLivePlayerCount();
                     if (party.getLivePlayerCount() == 0){
@@ -331,7 +273,7 @@ int main(int argc, char *argv[]){
             dungeon.exploreSpace(dungeon.getPlayerRow(),dungeon.getPlayerCol());
 
             //Talk with NPC
-            if (party.npcPuzzle(Functions().createRand(1,20))){ //Correct answer
+            if (party.npcPuzzle(Functions::createRand(1,20))){ //Correct answer
                 cout << "Well, my God of Money! You answered well! Bravo." << endl;
                 cout << "Care to barter? (y/n)" << endl;
                 string confirm = "";
@@ -360,9 +302,9 @@ int main(int argc, char *argv[]){
 
                 int win = fight.encounter(party);
                 //game = monsters.monsterEncounter(party);
-                int rand1 = Functions().createRand(1,10);
-                int rand2 = Functions().createRand(2,party.getLivePlayerCount());
-                int rand3 = Functions().createRand(1,100);
+                int rand1 = Functions::createRand(1,10);
+                int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+                int rand3 = Functions::createRand(1,100);
 
                 party.monsterOutcome(win, rand1, rand2, rand3);
             }
@@ -370,7 +312,7 @@ int main(int argc, char *argv[]){
             dungeon.removeNPC(dungeon.getPlayerRow(),dungeon.getPlayerCol());
 
             cout << endl;
-            convenientStop();
+            Functions::convenientStop();
         } else if (action == "2" && room){ //Entering Room
 
             //Space is now explored
@@ -387,9 +329,9 @@ int main(int argc, char *argv[]){
             
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
-            int rand1 = Functions().createRand(1,10);
-            int rand2 = Functions().createRand(2,party.getLivePlayerCount());
-            int rand3 = Functions().createRand(1,100);
+            int rand1 = Functions::createRand(1,10);
+            int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+            int rand3 = Functions::createRand(1,100);
 
             game = party.monsterOutcome(win,rand1,rand2,rand3);
             //Removes room
@@ -402,7 +344,7 @@ int main(int argc, char *argv[]){
                 dungeon.exploreSpace(dungeon.getPlayerRow(),dungeon.getPlayerCol());
 
                 //Possibile outcomes
-                int chance = Functions().createRand(1,100);
+                int chance = Functions::createRand(1,100);
                 if (chance <= 10){ //Party finds key (10%)
                     cout << "Impressive! You found a key!" << endl;
                     party.setKeys(party.getKeys() + 1);
@@ -433,9 +375,9 @@ int main(int argc, char *argv[]){
 
                     int win = fight.encounter(party);
 
-                    int rand1 = Functions().createRand(1,10);
-                    int rand2 = Functions().createRand(2,party.getLivePlayerCount());
-                    int rand3 = Functions().createRand(1,100);
+                    int rand1 = Functions::createRand(1,10);
+                    int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+                    int rand3 = Functions::createRand(1,100);
                     party.monsterOutcome(win, rand1, rand2, rand3);
 
                 } else {
@@ -445,7 +387,7 @@ int main(int argc, char *argv[]){
                 //50% of losing health
                 if (chance <= 30 || chance > 50){ //All outcomes except fighting a monster
                     for (int i = 0; i < party.getPlayerSize(); i++){
-                        if (Functions().createRand(1,100) <= 50){ //Percentage form
+                        if (Functions::createRand(1,100) <= 50){ //Percentage form
                             party.modifyPlayerHealth(i, -1);
                             if (party.getLivePlayerCount() == 0){
                                 game = false;
@@ -462,7 +404,7 @@ int main(int argc, char *argv[]){
             }
 
             cout << endl;
-            convenientStop();
+            Functions::convenientStop();
         } else if (action == "3"){ //Fight monster or Give Up Option
             if (npc || room){ //Give Up Option for NPC and Room actions
                 game = gameLose();
@@ -476,16 +418,16 @@ int main(int argc, char *argv[]){
 
             int win = fight.encounter(party);
 
-            int rand1 = Functions().createRand(1,10);
-            int rand2 = Functions().createRand(2,party.getLivePlayerCount());
-            int rand3 = Functions().createRand(1,100);
+            int rand1 = Functions::createRand(1,10);
+            int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+            int rand3 = Functions::createRand(1,100);
             party.monsterOutcome(win, rand1, rand2, rand3);
 
             cout << endl;
-            convenientStop();
+            Functions::convenientStop();
         } else if (action == "4" && !npc && !room){ //Eat Food
             cout << "Food, cookware, and all cooking related stuff will be replaced by potions" << endl;
-            convenientStop();
+            Functions::convenientStop();
         } else if (action == "5" && !npc && !room){ //Give Up Option for Normal Space
             game = gameLose();
         } else { //Incorrect Input

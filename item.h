@@ -2,7 +2,9 @@
 // Personal Project 1 - Item Class
 
 #include <iostream>
-#include <ctype.h>
+//#include <ctype.h>
+#include <vector>
+#include <fstream>
 
 #ifndef ITEM_H
 #define ITEM_H
@@ -41,6 +43,12 @@
 //#define effect_Eternal_Loyalty "Eternal Loyalty"
 
 using namespace std;
+/*using std::cout;
+using std::cin;
+using std::getline;
+using std::string;
+using std::endl;
+using std::vector;*/
 
 //Used by both items and monsters
 class Effect{
@@ -94,16 +102,17 @@ class Effect{
         }
 };
 
+
 //General Functions to use
-struct Functions{
+namespace Functions{
     //Outputs pseudo-random value within a specified interval
-    int createRand(int min, int max){
+    inline int createRand(int min, int max){
         srand(time(0));
         return (rand() % (max - min + 1)) + min;
     }
     
     //Checks if input is a number
-    bool isNumber(string line){ //Checks for digits
+    inline bool isNumber(string line){ //Checks for digits
         if (line.length() == 0){
             return false;
         }
@@ -116,7 +125,7 @@ struct Functions{
         return true;
     }
 
-    void displayEffect(Effect effect){
+    inline void displayEffect(Effect effect){
         cout << "     Ability: " << effect.getEffectName() << " - ";
 
         //Weapon
@@ -178,7 +187,37 @@ struct Functions{
 
         return;
     }
+
+    inline vector<string> copyFile(string fileName){ //Does not close file
+        ifstream file_(fileName);
+        vector<string> v;
+        string line;
+        if (!file_.is_open()){
+            cout << "File is not open\n";
+            return v;
+        }
+
+        while (getline(file_,line)){
+            if (line.length() == 0){
+                continue;
+            }
+
+            v.push_back(line);
+        }
+        file_.close();
+
+        return v;
+    }
+
+    inline void convenientStop(string stop = ""){ //Intended to let user read what exposition goddamn says
+        cout << "(Enter a character to continue)" << endl;
+        getline(cin, stop);
+
+        return;
+    }
 };
+
+
 class Item{
     private:
         string item_name; //Universal attributes

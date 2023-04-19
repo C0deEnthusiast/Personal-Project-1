@@ -216,7 +216,7 @@ int Combat::encounter(Party& party, bool room){
     int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
 
     //Random variables for battle outcome
-    int rand_rating = Functions().createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
+    int rand_rating = Functions::createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
 
     //Determines monster rating
     if (room){ //Currently at room location
@@ -242,7 +242,7 @@ int Combat::encounter(Party& party, bool room){
     //Announces monster
     cout << temp.monster_name << " (Health: " << temp.monster_health;
     cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
-    Functions().displayEffect(temp.power);
+    Functions::displayEffect(temp.power);
 
     //Allows player to fight or surrender
     cout << endl;
@@ -277,10 +277,10 @@ int Combat::encounter(Party& party, bool room){
     if (battle > 0){ //Victory
         removeMonster(remove_index);
         
-        return battleVictory(party,temp.monster_name,temp.difficultyRating,Functions().createRand(1,100));
+        return battleVictory(party,temp.monster_name,temp.difficultyRating,Functions::createRand(1,100));
     } else { //Defeat
-        int rand1 = Functions().createRand(0,party.getPlayerSize());
-        int rand2 = Functions().createRand(0,100);
+        int rand1 = Functions::createRand(0,party.getPlayerSize());
+        int rand2 = Functions::createRand(0,100);
         return battleDefeat(party, rand1, rand2);
     }
 }
@@ -302,7 +302,7 @@ Monster Combat::returnMonster(int rating, int &monster_index){
         //Recurs function until there is monster that is alive
         return returnMonster(ratingReconfiguration(rating), monster_index);
     } else {
-        random_monster = Functions().createRand(1,countMonsterRating(rating));
+        random_monster = Functions::createRand(1,countMonsterRating(rating));
     }
 
     //Picks monster that hasn't been removed, and has chosen rating
@@ -348,22 +348,22 @@ int Combat::ratingReconfiguration(int &og_rating){
 
 int Battle::test(){
     //Test
-    for (int i = 0; i < Functions().createRand(1,3); i++){
+    for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power,-1);
     }
-    for (int i = 0; i < Functions().createRand(2,3); i++){
+    for (int i = 0; i < Functions::createRand(2,3); i++){
         addStatus(curMonster->power, 0);
     }
-    for (int i = 0; i < Functions().createRand(1,3); i++){
+    for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power, 1);
     }
-    for (int i = 0; i < Functions().createRand(2,3); i++){
+    for (int i = 0; i < Functions::createRand(2,3); i++){
         addStatus(curMonster->power, 2);
     }
-    for (int i = 0; i < Functions().createRand(1,3); i++){
+    for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power, 3);
     }
-    for (int i = 0; i < Functions().createRand(1,3); i++){
+    for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power, 4);
     }
     //End of testing
@@ -411,7 +411,7 @@ int Battle::test(){
 bool Battle::willOccur(int chance){
     if (chance == 100){ //Bypasses pseudo-random input
         return true;
-    } else if (chance >= Functions().createRand(1,100)){
+    } else if (chance >= Functions::createRand(1,100)){
         return true;
     }
     return false;

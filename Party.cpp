@@ -426,7 +426,7 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 
     if (target == isWeapon || target == isPotion){
-        Functions().displayEffect(item.weapon_effect);
+        Functions::displayEffect(item.weapon_effect);
     }
 }
 
@@ -472,7 +472,7 @@ void Party::merchant(){
 
         getline(cin,choice);
 
-        while (!Functions().isNumber(choice)){
+        while (!Functions::isNumber(choice)){
             cout << "I need a valid choice!" << endl;
             getline(cin,choice);
         }
@@ -527,7 +527,7 @@ void Party::merchant(){
             while (true){
                 getline(cin,choice);
 
-                if (Functions().isNumber(choice)){
+                if (Functions::isNumber(choice)){
                     if (stoi(choice) > 0 && stoi(choice) <= (displayed_items.size() + 1)){
                         break;
                     }
@@ -547,7 +547,7 @@ void Party::merchant(){
                     cout << "(Enter how many items you wish to purchase, or 0 to cancel)" << endl;
                     getline(cin,amount);
 
-                    if (Functions().isNumber(amount)){ //Valid Number
+                    if (Functions::isNumber(amount)){ //Valid Number
                         if (stoi(amount) >= 0){ //Non-negative
                             break;
                         }
