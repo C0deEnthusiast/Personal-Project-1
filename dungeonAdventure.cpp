@@ -426,7 +426,7 @@ int main(int argc, char *argv[]){
             cout << endl;
             Functions::convenientStop();
         } else if (action == "4" && !npc && !room){ //Eat Food
-            cout << "Food, cookware, and all cooking related stuff will be replaced by potions" << endl;
+            cout << "Food, cookware, and everything related will be replaced by potions" << endl;
             Functions::convenientStop();
         } else if (action == "5" && !npc && !room){ //Give Up Option for Normal Space
             game = gameLose();
