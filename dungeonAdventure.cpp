@@ -1,8 +1,8 @@
 // Author: Rodolfo Martinez-Maldonado
-// Personal Project 1 - Dungeon Escape Game
+// Personal Project 1 - Dungeon Adventure Game
 
-//Shortcut: g++ -std=c++17 dungeonEscape.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
-//Compile with with this: ./game items.txt monsters.txt
+//Shortcut: g++ -std=c++17 dungeonAdventure.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
+//Compile with with this: ./game items.txt monsters.txt story.txt
 
 #include <iostream>
 #include <cstdlib>

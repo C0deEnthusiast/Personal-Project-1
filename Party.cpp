@@ -241,7 +241,6 @@ void Party::addPlayer(string player_name){
 }
 
 /*Adds item to inventory[] array or other relevant Item arrays
-
 Returns: True if Item is added successfully; false otherwise*/
 bool Party::addItem(Item item){
     if (item.getItemType() == isWeapon){
@@ -254,7 +253,6 @@ bool Party::addItem(Item item){
 }
 
 /*Removes Item from inventory[] array and other relevant Item arrays
-
 Returns: False if current capacity is 0 or item is not found; true if item is removed successfully*/
 bool Party::removeItem(Item item){
     if (item.getItemType() == isWeapon){
@@ -268,15 +266,14 @@ bool Party::removeItem(Item item){
 
 //Shows status information of party inventory
 void Party::showInventory(){
-    cout << "+-------------+" << endl;
-    cout << "| INVENTORY   | " << current_capacity << "/" << max_capacity << endl;
-    cout << "+-------------+" << endl;
-    cout << "| Gold        | " << money << endl;
-    cout << "| Weapons     | " << current_weapon << "/" << max_weapon << endl;
-    cout << "| Armor       | " << current_armor << "/" << max_armor << endl;
+    cout << "+-------------+\n";
+    cout << "| INVENTORY   | " << current_capacity << "/" << max_capacity;
+    cout << "\n+-------------+";
+    cout << "\n| Gold        | " << money;
+    cout << "\n| Weapons     | " << current_weapon << "/" << max_weapon;
+    cout << "\n| Armor       | " << current_armor << "/" << max_armor;
     //cout << "| Potions     | " << endl;
-
-    cout << "| Treasures   | R: " << countItem("Silver ring");
+    cout << "\n| Treasures   | R: " << countItem("Silver ring");
     cout << " | N: " << countItem("Ruby necklace");
     cout << " | B: " << countItem("Emerald bracelet");
     cout << " | C: " << countItem("Diamond circlet");
@@ -298,14 +295,9 @@ int Party::countItem(string item_name){
     return count;
 }
 
-/*Algorithm: General-purpose purchasing process for all items
-This would allow for efficient maintenance
-    1) Starts prompt and asks string input for confirmation of purchase; repeats process if incorrect input
-    2) Based on exchange_type ("food","armor","weapon", and "cookware"), setters ("food" and "armor")
-    would be called to change data members while addItem() would be used to create item with
-    'item' as the first parameter and 'amount' as the second for "weapon" and "treasure"
-    Parameters: int amount,int total_cost,string exchange_type,string item
-    Note: string item has default argument of ""*/
+/*General-purpose purchasing process for all items
+    1) At confirmation of purchase, adds item(s); repeats process if invalid confirmation
+    2) If successful, deducts party's money based on count of items added to inventory*/
 void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
     string confirm = ""; //Confirms or rejects purchase
 
@@ -338,16 +330,16 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
         
         setMoney(getMoney() - total_cost); //Deducts money from party
         //Show inventory capacity
-        cout << "Thank you for your patronage! What else can I get for you?" << endl;
+        cout << "Thank you for your patronage! What else can I get for you?\n";
     } else if (confirm == "n" || confirm == "N"){ //Denies purchase
-        cout << "Oh well. I won't judge you, for now." << endl;
+        cout << "Oh well. I won't judge you, for now.\n";
     } else if (total_cost > getMoney()){ //Low on money
-        cout << "Sorry, my friend, but you need more money for that." << endl;
-        cout << "I recommend purchasing less quantity." << endl;
-        cout << "Let's negotiate again." << endl;
+        cout << "Sorry, my friend, but you need more money for that.\n";
+        cout << "I recommend purchasing less quantity.\n";
+        cout << "Let's negotiate again.\n";
     } else {
-        cout << "Valid input please." << endl;
-        purchaseProcess(amount,total_cost,purchasedItem); //Recurs process if invalid input
+        cout << "Valid input please.\n";
+        purchaseProcess(amount,total_cost,purchasedItem);
     }
 
     return;
@@ -355,7 +347,6 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
 
 //Merchant-exclusive; creates ALL items for merchant's Item array
 void Party::createMerchantList(string filename){
-    //Opens file
     ifstream file(filename);
 
     if (!file.is_open()){
@@ -364,19 +355,11 @@ void Party::createMerchantList(string filename){
     }
 
     string line;
-    while (getline(file,line)){
+    while (getline(file, line)){
 
         vector<string> temp;
 
-        if (line.length() == 0){
-            continue;
-        }
-
-        istringstream splice(line);
-
-        while (getline(splice,line,separator)){
-            temp.push_back(line);
-        }
+        Functions::vectorSplit(line, separator, temp);
 
         if (temp.size() != data_count){
             continue;
@@ -421,8 +404,8 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     cout << " Gold]\n";
 
     if (target == isWeapon){
-        cout << " - Crit Chance: " << item.getCritChance();
-        cout << "%; Crit Boost: " << item.getCritBoost() << "%\n";
+        cout << " - Crit Information - Chance: " << item.getCritChance();
+        cout << "%; Boost: " << item.getCritBoost() << "%\n";
     }
 
     if (target == isWeapon || target == isPotion){
@@ -430,16 +413,9 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 }
 
-/*Algorithm: Opens merchant prompt and allow user to make purchases or sell treasures
-    1) Sets up costs for food and armor since neither are from Item class
-    2) Sets up wrong_input, a penalty that ensures that players would be careful
-    with 'wasting' the merchant's time
-    3) Sets up the 'tax' that increases prices based on explored rooms
-    4) Sets up 'purchase', which keeps the prompt active until user chooses to exit merchant prompt
-    5) Updates the inventory text file and initiates merchant prompt
-    6) In a while loop, the user would be able to make purchases or sell treasures based on input
-    7) Each input would repeat if input is invalid
-    No parameters or returns*/
+/*Opens merchant prompt and allow user to make purchases or sell treasures
+    1) Sets up a penalty in case user makes deliberate incorrect input for 'wasting' the merchant's time
+    2) Sets up the tax that increases prices based on explored rooms*/
 void Party::merchant(){
     //If players deliberately make wrong inputs (i.e. letters for number input) at certain points
     //They will be punished
@@ -447,8 +423,8 @@ void Party::merchant(){
 
     double tax = 1 + (0.25 * explored_rooms); //Modifies prices based on how many rooms were explored
 
-    cout << "If you're looking to get supplies, you've come to the right place." << endl;
-    cout << "I would be happy to part with some of my wares...for the proper price!" << endl;
+    cout << "If you're looking to get supplies, you've come to the right place.\n";
+    cout << "I would be happy to part with some of my wares...for the proper price!\n";
 
     while (true){
         //All are string to avoid players trying to "brick" the game
@@ -460,20 +436,19 @@ void Party::merchant(){
 
         cout << endl;
         showInventory();
-        cout << endl;
-        cout << "Choose one of the following:" << endl;
-        cout << "1. Weapons: It's dangerous to go alone, take this!" << endl;
-        cout << "2. Armor: If you want to survive monster attacks, you will need some armor." << endl;
-        cout << "3. Potions: Dangerous and potent, but unfair. To your enemies that is." << endl;
+        cout << "\nChoose one of the following:\n";
+        cout << "1. Weapons: It's dangerous to go alone, take this!\n";
+        cout << "2. Armor: If you want to survive monster attacks, you will need some armor.\n";
+        cout << "3. Potions: Dangerous and potent, but unfair. To your enemies that is.\n";
         cout << "4. Sell treasures: If you find anything shiny, ";
-        cout << "I would be happy to take it off your hands." << endl;
-        cout << "5. Leave: Make sure you get everything you need, I'm leaving after this sale!" << endl;
+        cout << "I would be happy to take it off your hands.\n";
+        cout << "5. Leave: Make sure you get everything you need, I'm leaving after this sale!\n";
         cout << endl;
 
         getline(cin,choice);
 
         while (!Functions::isNumber(choice)){
-            cout << "I need a valid choice!" << endl;
+            cout << "I need a valid choice!\n";
             getline(cin,choice);
         }
 
@@ -483,31 +458,30 @@ void Party::merchant(){
 
             if (stoi(choice) == 1){ //Weapons
                 cout << "I have a plentiful collection of weapons to choose from,";
-                cout << " what would you like?" << endl;
-                cout << "Note that each weapon have base attack power,";
-                cout << " marked by a (+X)." << endl;
+                cout << " what would you like?\n";
+                cout << "Note that each weapon have base attack power, marked by a (+X).\n";
                 cout << "Plus, each got a little ... bonus.\n\n";
-                cout << "Choose one of the following:" << endl;
+                cout << "Choose one of the following:\n";
 
                 target = isWeapon;
             } else if (stoi(choice) == 2){ //Armor
-                cout << "Looking for suits of armor, I see." << endl;
+                cout << "Looking for suits of armor, I see.\n";
                 cout << "None of these will make you look like a dashing knight in shining armor";
-                cout << " (except one), but they do well in keeping you alive." << endl;
+                cout << " (except a few), but they do well in keeping you alive.\n";
                 cout << "Keep in mind that you can only carry a maximum of ";
                 cout << max_armor << " sets of armor.\n\n";
-                cout << "Have a look:" << endl;
+                cout << "Have a look:\n";
 
                 target = isArmor;
             } else if (stoi(choice) == 3){ //Potions
-                cout << "I have many potions to choose from, what would you like?" << endl;
+                cout << "I have many potions to choose from, what would you like?\n";
                 cout << "Each have their own ... special quirks.\n\n";
-                cout << "Pick and choose:" << endl;
+                cout << "Pick and choose:\n";
                 target = isPotion;
             } else { //Treasures
-                cout << "Oooh! You got treasures? Brilliant!" << endl;
+                cout << "Oooh! You got treasures? Brilliant!\n";
                 cout << "Let's see, here are the treasures I'm looking for:\n\n";
-                cout << "Which ones do you have?" << endl;
+                cout << "Which ones do you have?\n";
 
                 target = isTreasure;
             }
@@ -522,7 +496,7 @@ void Party::merchant(){
                     cout << endl;
                 }
             }
-            cout << (displayed_items.size() + 1) << ". Cancel" << endl;
+            cout << (displayed_items.size() + 1) << ". Cancel\n";
 
             while (true){
                 getline(cin,choice);
@@ -533,7 +507,7 @@ void Party::merchant(){
                     }
                 }
 
-                cout << "Valid Input Please" << endl;
+                cout << "Valid Input Please\n";
             }
 
             //Cancels weapon selection if choice is the Cancel option
@@ -541,10 +515,11 @@ void Party::merchant(){
                 continue;
             }
 
+            Item target_item = displayed_items.at(stoi(choice) - 1);
+
             if (target != isTreasure){ //Purchasing
-                //Complete this crap
                 while (true){
-                    cout << "(Enter how many items you wish to purchase, or 0 to cancel)" << endl;
+                    cout << "(Enter how many items you wish to purchase, or 0 to cancel)\n";
                     getline(cin,amount);
 
                     if (Functions::isNumber(amount)){ //Valid Number
@@ -553,53 +528,52 @@ void Party::merchant(){
                         }
                     }
 
-                    cout << "I need an appropriate amount." << endl;
-                    cout << endl;
+                    cout << "I need an appropriate amount.\n\n";
                 }
 
                 //Calculates price
-                confirm_total = displayed_items.at(stoi(choice) - 1).getCost() * tax * stoi(amount);
+                double adjustTax = tax * static_cast<double> (target_item.getCost());
+                confirm_total = adjustTax * stoi(amount);
 
                 if (stoi(amount) != 0){ //0 is Cancel
-                    purchaseProcess(stoi(amount),confirm_total,displayed_items.at(stoi(choice) - 1));
+                    purchaseProcess(stoi(amount),confirm_total,target_item);
                 }
             } else { //Treasure; selling
                 while (true){
                     string confirm = "";
                     //Checks for confirmation of selling treasures
                     do{
-                        cout << "\nYou want to sell " << displayed_items.at(stoi(choice) - 1).getItemName();
-                        cout << " for " << displayed_items.at(stoi(choice) - 1).getCost() << " Gold? (y/n)\n";
+                        cout << "\nYou want to sell " << target_item.getItemName();
+                        cout << " for " << target_item.getCost() << " Gold? (y/n)\n";
 
                         getline(cin,confirm);
 
                         if (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N"){
-                            cout << "Valid confirmation please." << endl;
+                            cout << "Valid confirmation please.\n";
                         }
                     } while (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N");
 
                     cout << endl;
                     
                     if (confirm == "y" || confirm == "Y"){ //Sells treasure
-                        if (removeItem(displayed_items.at(stoi(choice) - 1))){ //Sold treasure successfully
-                            //Gives party more gold
-                            setMoney(money + displayed_items.at(stoi(choice) - 1).getCost());
+                        if (removeItem(target_item)){ //Sold treasure successfully
+                            setMoney(money + target_item.getCost()); //Gives party more gold
                         } else {
-                            cout << "How unfortunate, it appears you don't have the treasure." << endl;
+                            cout << "How unfortunate, it appears you don't have the treasure.\n";
                         }
                     } else {
-                        cout << "Damn. Very well, keep your treasure then." << endl;
+                        cout << "Damn. Very well, keep your treasure then.\n";
                     }
 
                     break;
                 }
             }
         } else if (stoi(choice) == 5){ //Leave; Terminates merchant event
-            cout << "Farewell!" << endl;
+            cout << "Farewell!\n";
             break;
         } else {
-            cout << "Why are we beating around the bush?" << endl;
-            cout << "(Enter a character to display merchant's menu)" << endl;
+            cout << "Why are we beating around the bush?\n";
+            cout << "(Enter a character to display merchant's menu)\n";
             getline(cin,choice);
         }
     }
@@ -610,14 +584,14 @@ void Party::merchant(){
 
 //Displays Inventory status, party status, and other information
 void Party::showPartyStatus(){
-    cout << "+-------------+" << endl;
-    cout << "| STATUS      |" << endl;
-    cout << "+-------------+" << endl;
+    cout << "+-------------+\n";
+    cout << "| STATUS      |\n";
+    cout << "+-------------+\n";
     cout << "| Rooms Cleared: " << getExploredRooms();
-    cout << " | Keys: " << getKeys() << " | Patience Level: " << getDangerLevel() << endl;
-    cout << "+-------------+" << endl;
-    cout << "| PARTY       |" << endl;
-    cout << "+-------------+";
+    cout << " | Keys: " << getKeys() << " | Patience Level: " << getDangerLevel();
+    cout << "\n+-------------+";
+    cout << "\n| PARTY       |";
+    cout << "\n+-------------+";
     //Main player is first displayed
     for (int i = 0; i < player_size; i++){
         cout << "\n| " << players[i].getPlayerName();
@@ -697,7 +671,7 @@ bool Party::npcPuzzle(int riddle){
 
     //Prints riddle
     cout << riddleContent[0] << endl;
-    cout << "Answer carefully; one shot, mate." << endl;
+    cout << "Answer carefully; one shot, mate.\n";
     getline(cin,answer);
     cout << endl;
 

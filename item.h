@@ -5,6 +5,7 @@
 //#include <ctype.h>
 #include <vector>
 #include <fstream>
+#include <sstream>
 
 #ifndef ITEM_H
 #define ITEM_H
@@ -215,6 +216,39 @@ namespace Functions{
 
         return;
     }
+
+    //Returns splice count of input string
+    inline int arraySplit(string input_string, char separator, string arr[], int arr_size){
+        if (input_string.length() == 0){ //Makes sure input_string is proper length
+            return 0;
+        }
+
+        istringstream splice(input_string);
+        int split_count = 0;
+
+        while(getline(splice,arr[split_count],separator)){
+            split_count++;
+            
+            if (split_count == arr_size){
+                break;
+            }
+        }
+        return split_count;
+    }
+
+    inline void vectorSplit(string input_string, char separator, vector<string> &vect){
+        if (input_string.length() == 0){ //Makes sure input_string is proper length
+            return;
+        }
+
+        istringstream splice(input_string);
+
+        while (getline(splice,input_string,separator)){
+            vect.push_back(input_string);
+        }
+
+        return;
+    }
 };
 
 
@@ -223,7 +257,7 @@ class Item{
         string item_name; //Universal attributes
         string item_type; //Type of Item (weapon, cookware, treasure)
         int item_cost; //For merchants only; also works for treasures
-        int item_stats; //Attack (weapon), dmg reduction (armor), and potions got something else
+        int item_stats; //Attack (weapon), DMG Reduction (armor), and potions get other special stats
         int crit_chance;
         int crit_boost;
     public:
@@ -231,8 +265,6 @@ class Item{
 
         Item(); //Default constructor
         //Parameterized constructor
-        /*Item(string name, string type, int cost, int stat, string effectName, 
-        int effectValue, int effectChance, int effectDuration);*/
         Item(string name, string type, int cost, int stat, int critChance, int critBoost, 
         string effectName, int effectValue, int effectChance, int effectDuration);
 

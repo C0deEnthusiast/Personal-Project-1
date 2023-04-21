@@ -3,21 +3,21 @@ HOW TO COMPILE AND RUN
 ------------------------
 Compile:
 g++ -std=c++17 dungeonAdventure.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
-Run: (Accepts four arguments)
+Run: (Exactly four arguments)
 ./game items.txt monsters.txt story.txt
 ------------------------
 DEPENDENCIES
 ------------------------
-item.h, map.h, monster.h, party.h, player.h,
-inventoryDisplay.txt, items.txt, and monsters.txt
-must be in the same directory as the cpp files in order to compile.
+Header Files: item.h, map.h, monster.h, party.h, player.h
+Text Files: inventoryDisplay.txt, items.txt, monsters.txt, story.txt
+These files must be in the same directory as the cpp files in order to compile.
 
 Not essential: split.h, battleStats.h
 ------------------------
 SUBMISSION INFORMATION
 ------------------------
-// Author: Rodolfo Martinez-Maldonado
-// Personal Project 1 - Dungeon adventure Game
+Author: Rodolfo Martinez-Maldonado
+Personal Project 1 - Dungeon Adventure Game
 ------------------------
 ABOUT THIS PROJECT
 ------------------------
