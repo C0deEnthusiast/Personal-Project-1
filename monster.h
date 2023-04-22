@@ -14,8 +14,14 @@
 
 using namespace std;
 
+//Defines minimum monster difficulty rating
+#define minimumRating 1
+
+//Defines maximum damage reduction allowed for monster (in percentage form)
+#define maxArmorValue 90
+
 //Defines boss rating
-#define bossRating 7
+#define bossRating 7 //Note: This also behaves the maximum rating a monster can normally have
 #define bossFinalRating 8
 
 //Defines boss' health after Resurrection (2nd phase)
@@ -23,41 +29,21 @@ using namespace std;
 //Defines boss' attack after Resurrection (2nd phase)
 #define bossFinalAttack 30
 
-class Monster{
-    private:
-        static const int min_rating = 1; //Minimum Difficulty Rating of Monsters
-        static const int max_rating = bossRating; //Maximum Difficulty Rating of Monsters
-    public:
-        //Basic Monster Data
-        string monster_name; //Monster Name
-        //Used for calculating rewards as well as the monster's armor percentage (with a limit)
-        int difficultyRating;
-        int attack_power; //Monster's attack value
-        int monster_health;
-        int crit_chance; //Likelihood to land a critical hit
-        int crit_boost; //Boost of critical hit
-        
-        //Advanced Monster Data
-        Effect power;
-    
-        Monster(); //Default Constructor
-        /*Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
-        int effectChance, int effectDuration); //Parameterized Constructor*/
-        Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
-        string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
+struct Monster{
+    string monster_name; //Monster Name
+    int difficultyRating; //Determines likelihood of encounter, rewards, and monster's damage reduction
+    int attack_power; //Monster's attack value
+    int monster_health; //Monster's hitpoints before death
+    int crit_chance; //Probability to land a critical hit
+    int crit_boost; //Boost damage percentage on critical hit
+    Effect power; //Monster's skill/effect
 
-        //Getters
-        int getMinRating();
-        int getMaxRating();
-        void setRating(int new_rating){
-            difficultyRating = new_rating;
+    Monster(); //Default Constructor
+    Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
+    string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
 
-            if (difficultyRating < min_rating){
-                difficultyRating = min_rating;
-            } else if (difficultyRating > bossRating){
-                difficultyRating = bossRating;
-            }
-        }
+    //Setter
+    void setRating(int new_rating);
 };
 
 //Manages construction and set up of monster fights through Battle() class
@@ -65,17 +51,18 @@ class Combat{
     private:
         const char separator = ','; //Standard delimiter for monster text files
         static const int monster_info_count = 10; //Accounts all data sections per monster
-        /*After first monsterRush(), every consecutive use of fxn would increase rating of all monsters,
-        thereby raising difficulty*/
+        /*Increases after every consecutive use of monsterRush() after constructor call
+
+        During battle/encounters, it would increment the monster's rating, adjusting
+        rewards as well as monster's damage reduction*/
         int raise_rating;
-        vector<Monster> refillList; //This is to skip most of monsterRush() function
+        vector<Monster> refillList; //Designed to skip most of monsterRush() function
         vector<Monster> monsterList;
         string monsterFilename;
     public:
         Combat(string filename);
 
-        int getMonsterSize();
-
+        int getMonsterSize(){ return monsterList.size();}
 
         void setRaiseRating(int new_raise);
 
@@ -88,11 +75,10 @@ class Combat{
         
         //bool monsterAmbush() //Will randomly trigger encounters
 
-        //Sets up combat()
-        int encounter(Party& party, bool room = false);
+        int encounter(Party& party, bool room = false); //Sets up parameters for Battle Class
         Monster returnMonster(int rating, int &monster_index);
         bool bossIsOnlyOneAlive();
-        int ratingReconfiguration(int &og_rating);
+        int ratingReconfiguration(int &original_rating);
 
 };
 
@@ -110,7 +96,6 @@ struct Status{
         max_duration = new_power.getEffectDuration();
     }
 };
-
 
 class Battle{
     private:
@@ -255,7 +240,6 @@ class Battle{
 /*
  *Effect that any damage taken from player heals monster instead
  *Experiment: Replace "Crit Multiplier" effect with another; make crit innate to weapons and monsters
- *Implement <Stats> vector into Player Class Implementation; if so, modify any functions related if necessary
  *Implement <Item> weapon into Player Class Implementation (if possible)
 */
 

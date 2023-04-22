@@ -133,9 +133,6 @@ class Party{
 
         bool addItem(Item item);
 
-        //Similar to addItem() above, replace string-based removeItem() with commented Item-based removeItem()
-        bool removeItemOld(string item_name);
-
         //Keep this
         bool removeItem(Item item);
         void showInventory();
@@ -154,6 +151,9 @@ class Party{
         //Monster functions
         //Modify this to account for Monster class change
         bool monsterOutcome(int outcome, int key_chance, int kill_index, int health_chance);
+
+        //Ambitious functions
+        //void rerollWeaponEffect()
 };
 
 #endif

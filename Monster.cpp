@@ -25,18 +25,6 @@ Monster::Monster(){
     power = Effect();
 }
 
-/*Monster::Monster(string name, int rating, int attkPwr, int health, string effect, int effectValue,
-int effectChance, int effectDuration){
-    monster_name = name;
-    difficultyRating = rating;
-    attack_power = attkPwr;
-    monster_health = health;
-    power.setEffectName(effect);
-    power.setEffectValue(effectValue);
-    power.setEffectChance(effectChance);
-    power.setEffectDuration(effectDuration);
-}*/
-
 Monster::Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
 string effect, int effectValue, int effectChance, int effectDuration){
     monster_name = name;
@@ -51,12 +39,14 @@ string effect, int effectValue, int effectChance, int effectDuration){
     power.setEffectDuration(effectDuration);
 }
 
-int Monster::getMinRating(){
-    return min_rating;
-}
+void Monster::setRating(int new_rating){
+    difficultyRating = new_rating;
 
-int Monster::getMaxRating(){
-    return max_rating;
+    if (difficultyRating < minimumRating){
+        difficultyRating = minimumRating;
+    } else if (difficultyRating > bossRating){
+        difficultyRating = bossRating;
+    }
 }
 
 Combat::Combat(string filename){
@@ -111,10 +101,6 @@ void Combat::monsterRush(string filename, bool new_rush){
     return;
 }
 
-int Combat::getMonsterSize(){
-    return monsterList.size();
-}
-
 void Combat::setRaiseRating(int new_raise){
     raise_rating = new_raise;
 
@@ -122,14 +108,9 @@ void Combat::setRaiseRating(int new_raise){
 }
 
 
-/*Returns:
-    -1 if player surrounders
-    -2 if player loses
-    Monster's rating if player wins*/
-
-//Removes monster from data member vectors IF there are monsters remaining
+//Removes monster from roster
 void Combat::removeMonster(int index){
-    if (index == -1){
+    if (index == -1 || monsterList.size() == 0){
         return;
     }
     monsterList.erase(monsterList.begin() + index);
@@ -216,7 +197,7 @@ int Combat::encounter(Party& party, bool room){
     int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
 
     //Random variables for battle outcome
-    int rand_rating = Functions::createRand(temp.getMinRating(),temp.getMaxRating()-1); //1-6
+    int rand_rating = Functions::createRand(minimumRating, bossRating - 1); //1-6
 
     //Determines monster rating
     if (room){ //Currently at room location
@@ -234,7 +215,7 @@ int Combat::encounter(Party& party, bool room){
 
     //For testing
     cout << "Check monster count ratings: ";
-    for (int i = temp.getMinRating(); i <= temp.getMaxRating(); i++){
+    for (int i = minimumRating; i <= bossRating; i++){
         cout << i << "(" << countMonsterRating(i) << ") -- ";
     }
     cout << endl;
@@ -320,26 +301,26 @@ Monster Combat::returnMonster(int rating, int &monster_index){
 
 //Checks if boss has not yet to be defeated while others have
 bool Combat::bossIsOnlyOneAlive(){
-    return (countMonsterRating(Monster().getMaxRating()) == 1 && getMonsterSize() == 1);
+    return (countMonsterRating(bossRating) == 1 && getMonsterSize() == 1);
 }
 
 /*Reconfigures monster rating by first checking if there are monsters with a rating BELOW
 given rating; if so, then it returns the rating. If not, then it searches for monsters
 with rating ABOVE given rating; if so, returns the rating. Otherwise, returns original rating*/
-int Combat::ratingReconfiguration(int &og_rating){
-    int original_rating = og_rating;
+int Combat::ratingReconfiguration(int &original_rating){
+    int old_rating = original_rating;
     Monster temp;
-    while (og_rating >= temp.getMinRating()){
-        if (countMonsterRating(--og_rating) > 0){
-            return og_rating;
+    while (old_rating >= minimumRating){
+        if (countMonsterRating(--original_rating) > 0){
+            return original_rating;
         }
     }
 
-    og_rating = original_rating;
+    original_rating = old_rating;
 
-    while (og_rating < temp.getMaxRating()){
-        if (countMonsterRating(++og_rating) > 0){
-            return og_rating;
+    while (old_rating < bossRating){
+        if (countMonsterRating(++original_rating) > 0){
+            return original_rating;
         }
     }
 
