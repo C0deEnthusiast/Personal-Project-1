@@ -56,14 +56,20 @@ Cauldron,cookware,20,2,None,0,0,0
 
 Potions: (replaces food and cookware cuz fuck eating)
 
-Mini Health Potion,potion,5,0,0,0,Heal,5,100,0
-Large Health Potion,potion,20,0,0,0,Heal,25,100,0
-Unholy Health Potion,potion,40,0,0,0,Heal,50,100,0
+Tier I Health Potion,potion,5,0,0,0,Heal,5,100,0
+Tier II Health Potion,potion,20,0,0,0,Heal,25,100,0
+Tier III Health Potion,potion,40,0,0,0,Heal,50,100,0
+
+Make this unique in acquiring:
+Unholy Health Potion,potion,80,0,0,0,
 
 Rage: Chosen player gets to attack same target x times. Lasts z turns.
-Mini Rage Potion,potion,20,0,0,0,Rage,2,100,2
-Large Rage Potion,potion,40,0,0,0,Rage,3,100,4
-Unholy Rage Potion,potion,80,0,0,0,Rage,4,100,4
+Tier I Rage Potion,potion,20,0,0,0,Rage,2,100,2
+Tier II Rage Potion,potion,40,0,0,0,Rage,3,100,4
+Tier III Rage Potion,potion,60,0,0,0,Rage,3,100,5
+
+Make this unique in acquiring:
+Unholy Rage Potion,potion,80,0,0,0,
 
 Special Potions:
     - Undying: Takes no damage for y turns

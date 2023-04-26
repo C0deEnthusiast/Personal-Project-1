@@ -70,9 +70,6 @@ class Combat{
         void removeMonster(int index);
         int countMonsterRating(int rating);
 
-        bool battleVictory(Party& party, string monster_name, int monster_rating, int key_chance);
-        bool battleDefeat(Party& party, int kill_index, int health_loss_chance, bool surrender = false);
-        
         //bool monsterAmbush() //Will randomly trigger encounters
 
         int encounter(Party& party, bool room = false); //Sets up parameters for Battle Class
@@ -144,6 +141,28 @@ class Battle{
         //Determines who attacks in current turn; player always starts first
         bool player_turn = true;
         bool monster_turn = false;
+
+        void battleRewards(){ //Victory
+            /*
+             * Guaranteed Rewards:
+                * Money (10 * monster's rating)
+             * Common Rewards:
+                * 1 key (20%)
+                * A Heal or Rage potion (chances TBD)
+             * Rare Rewards:
+                * One of the special potions (chances TBD)
+                * Armor? (TBD)
+            */
+            return;
+        }
+
+        void battleRetreat(){ //Retreat
+            /*Party Losses:
+             * Lose 1/4 of money
+             * Random party member loses health
+            */
+            return;
+        }
         
     public:
         Battle(Party *party, Monster *monster){ //Pass memory addresses
@@ -160,6 +179,9 @@ class Battle{
             }
 
             monster_innate_armor = curMonster->difficultyRating * 10;
+            if (monster_innate_armor > 90){
+                monster_innate_armor = 90;
+            }
         }
 
         ~Battle(){

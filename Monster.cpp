@@ -130,57 +130,6 @@ int Combat::countMonsterRating(int rating){
     return count;
 }
 
-//Rewards player with gold (dependent on monster rating) and potentially a key; always returns true
-bool Combat::battleVictory(Party& party,string monster_name, int monster_rating, int key_chance){
-    party.setMoney(party.getMoney() + 10 * monster_rating);
-    //Make function that potentially gives player a random potion
-    //cout << endl;
-    cout << "Congrats! You've slain " << monster_name << "!";
-    cout << " You won " << 10 * monster_rating << " gold and " << 5 * monster_rating << " food!" << endl;
-    cout << endl;
-
-    if (key_chance <= 10){ //Chance for key
-        cout << "You got a key too!" << endl;
-        party.setKeys(party.getKeys() + 1);
-    }
-
-    return true;
-}
-
-/*Algorithm: Penalizes player based on either they surrendered or lost
-    1) If player surrendered, kills one player randomly
-    2) If player lost, kills one player if health_loss_chance is within 10% threshold;
-    player also loses some money and food
-    Returns: false if MAIN player/leader is dead; true otherwise
-*/
-bool Combat::battleDefeat(Party& party, int kill_index, int health_loss_chance, bool surrender){
-    if (surrender){ //Player surrendered
-        cout << "Foolish mortals! With surrender, comes sacrifice!" << endl;
-
-        //Kills random player
-        party.modifyPlayerHealth(kill_index, -100);
-        if (party.getLivePlayerCount() == 0){
-            return false;
-        } else {
-            return true;
-        }
-    } else { //Player loses against fighting monster
-        party.setMoney(party.getMoney()/4);
-        cout << "One for all, and all will fall." << endl;
-        for (int i = 1; i < party.getPlayerSize(); i++){
-            if (health_loss_chance <= 10){
-                //Kills player
-                party.modifyPlayerHealth(i, -100);
-                if (party.getLivePlayerCount() == 0){
-                    return false;
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
 /*
 -1 if surrender
 -2 if loss
@@ -226,8 +175,7 @@ int Combat::encounter(Party& party, bool room){
     Functions::displayEffect(temp.power);
 
     //Allows player to fight or surrender
-    cout << endl;
-    cout << "Fight(1) or surrender(2)? Your call." << endl;
+    cout << "\nFight(1) or surrender(2)? Your call.\n";
     string choose = "";
     //choose = "1"; //Debugging only
     do {
@@ -238,6 +186,17 @@ int Combat::encounter(Party& party, bool room){
     } while (choose != "1" && choose != "2");
 
     if (choose == "2"){
+        /*if (surrender){ //Player surrendered
+            cout << "Foolish mortals! With surrender, comes sacrifice!" << endl;
+
+            //Kills random player
+            party.modifyPlayerHealth(kill_index, -100);
+            if (party.getLivePlayerCount() == 0){
+                return false;
+            } else {
+                return true;
+            }
+        }*/
         return -1;
     }
 
@@ -257,12 +216,32 @@ int Combat::encounter(Party& party, bool room){
 
     if (battle > 0){ //Victory
         removeMonster(remove_index);
+
+        //Rewards (for now)
+        //Money
+        party.setMoney(party.getMoney() + 10 * temp.difficultyRating);
+        cout << "Congrats! You've slain " << temp.monster_name << "!";
+        cout << " You won " << 10 * temp.difficultyRating << " gold!\n\n";
         
-        return battleVictory(party,temp.monster_name,temp.difficultyRating,Functions::createRand(1,100));
+        if (Functions::createRand(1,100) <= 10){ //Chance for key
+            cout << "You got a key too!" << endl;
+            party.setKeys(party.getKeys() + 1);
+        }
+        
+        return true;
     } else { //Defeat
-        int rand1 = Functions::createRand(0,party.getPlayerSize());
-        int rand2 = Functions::createRand(0,100);
-        return battleDefeat(party, rand1, rand2);
+        party.setMoney(party.getMoney() * 3 / 4);
+        cout << "One for all, and all will fall." << endl;
+        for (int i = 1; i < party.getPlayerSize(); i++){
+            if (Functions::createRand(0,100) <= 10){
+                //Kills player
+                party.modifyPlayerHealth(i, -100);
+                if (party.getLivePlayerCount() == 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 

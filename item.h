@@ -126,63 +126,62 @@ namespace Functions{
         return true;
     }
 
-    inline void displayEffect(Effect effect){
-        cout << "     Ability: " << effect.getEffectName() << " - ";
+    inline void displayEffect(Effect T){
+        cout << "     Ability: " << T.getEffectName() << " - ";
 
         //Weapon
-        if (effect.getEffectName() == effect_Burn){
-            cout << "Inflicts " << effect.getEffectValue() << " damage onto enemy every turn. ";
-            cout << "Lasts for " << effect.getEffectDuration() << " turn(s).";
-        } else if (effect.getEffectName() == effect_EnemyHP){
-            cout << "Inclicts damage equal to " << effect.getEffectValue() << "% of the enemy's ";
+        if (T.getEffectName() == effect_Burn){
+            cout << "Inflicts " << T.getEffectValue() << " damage onto enemy every turn. ";
+            cout << "Lasts for " << T.getEffectDuration() << " turn(s).";
+        } else if (T.getEffectName() == effect_EnemyHP){
+            cout << "Inclicts damage equal to " << T.getEffectValue() << "% of the enemy's ";
             cout << "current health (before base attack calculation).";
-        } else if (effect.getEffectName() == effect_Freeze){
-            cout << "Immobilize enemy for " << effect.getEffectDuration() << " turns.";
-        } else if (effect.getEffectName() == effect_Pierce){
-            cout << "Weapon Damage ignores enemy defenses, including armor.";
+        } else if (T.getEffectName() == effect_Freeze){
+            cout << "Immobilize enemy for " << T.getEffectDuration() << " turns.";
+        } else if (T.getEffectName() == effect_Pierce){
+            cout << "Weapon damage ignores enemy defenses, including armor.";
         }
 
         //Potion
-        if (effect.getEffectName() == effect_Heal){
-            cout << "Heals chosen player by " << effect.getEffectValue() << ".";
-        } else if (effect.getEffectName() == effect_Rage){
-            cout << "Chosen player gets to attack " << effect.getEffectValue();
-            cout << " times. Lasts " << effect.getEffectDuration() <<" turns.";
-        } else if (effect.getEffectName() == effect_Undying){
-            cout << "Chosen player takes no damage for " << effect.getEffectDuration() << " turns.";
-        } else if (effect.getEffectName() == effect_Resurrection){
+        if (T.getEffectName() == effect_Heal){
+            cout << "Heals chosen player by " << T.getEffectValue() << ".";
+        } else if (T.getEffectName() == effect_Rage){
+            cout << "Chosen player gets to attack " << T.getEffectValue();
+            cout << " times. Lasts " << T.getEffectDuration() <<" turns.";
+        } else if (T.getEffectName() == effect_Undying){
+            cout << "Chosen player takes no damage for " << T.getEffectDuration() << " turns.";
+        } else if (T.getEffectName() == effect_Resurrection){
             cout << "Revives chosen dead player.";
-        } else if (effect.getEffectName() == effect_Godslayer){
+        } else if (T.getEffectName() == effect_Godslayer){
             cout << "No god will stand against you. Not anymore.";
         }
 
         //Monster
-        if (effect.getEffectName() == effect_Wrath){
-            cout << "Has " << effect.getEffectChance();
-            cout << "% chance to temporary boost its own attack by " << effect.getEffectValue() << ".";
-        } else if (effect.getEffectName() == effect_Bleed){
-            cout << "Inflicts " << effect.getEffectValue();
-            cout << " damage onto target player every turn. Lasts " << effect.getEffectDuration();
-            cout << " turns.";
-        } else if (effect.getEffectName() == effect_Rampage){
-            cout << "Has " << effect.getEffectChance();
-            cout << "% chance to strike " << effect.getEffectValue();
-            cout << " times per turn.";
-        } else if (effect.getEffectName() == effect_Condemnation){
-            cout << "Has " << effect.getEffectChance();
+        if (T.getEffectName() == effect_Wrath){
+            cout << "Has " << T.getEffectChance();
+            cout << "% chance to temporary boost its own attack by " << T.getEffectValue() << ".";
+        } else if (T.getEffectName() == effect_Bleed){
+            cout << "Inflicts " << T.getEffectValue();
+            cout << " damage onto target player every turn. Lasts ";
+            cout << T.getEffectDuration() << " turns.";
+        } else if (T.getEffectName() == effect_Rampage){
+            cout << "Has " << T.getEffectChance() << "% chance to strike ";
+            cout << T.getEffectValue() << " times per turn.";
+        } else if (T.getEffectName() == effect_Condemnation){
+            cout << "Has " << T.getEffectChance();
             cout << "% chance to confuse target into attacking teammates. Lasts ";
-            cout << effect.getEffectDuration() << " turns.";
-        } else if (effect.getEffectName() == effect_Savage_Wrath){
-            cout << "Permanently boosts attack by " << effect.getEffectValue();
-            cout << " every turn; has " << effect.getEffectChance();
-            cout << "% chance to lose " << effect.getEffectValue() << " health.";
-        } else if (effect.getEffectName() == effect_Wicked___){
+            cout << T.getEffectDuration() << " turns.";
+        } else if (T.getEffectName() == effect_Savage_Wrath){
+            cout << "Permanently boosts attack by " << T.getEffectValue();
+            cout << " every turn; has " << T.getEffectChance();
+            cout << "% chance to lose " << T.getEffectValue() << " health.";
+        } else if (T.getEffectName() == effect_Wicked___){
             cout << "Complete effect";
-        } else if (effect.getEffectName() == effect_Unholy_Judgement){
-            cout << "Targeted player of attack will be instantly killed after "; 
-            cout << effect.getEffectDuration() << " turns.";
-        } else if (effect.getEffectName() == effect_Final_Requiem){ //Revise effect
-            cout << "Exclusive to Boss Monster; stuns ALL party members, then kills them";
+        } else if (T.getEffectName() == effect_Unholy_Judgement){
+            cout << "Targeted player will be instantly killed after "; 
+            cout << T.getEffectDuration() << " turns.";
+        } else if (T.getEffectName() == effect_Final_Requiem){ //Revise effect
+            cout << "Revise effect from monster text file";
         }
         cout << endl;
 

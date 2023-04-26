@@ -12,7 +12,11 @@
 
 using namespace std;
 
-class Player{
+class pe{ //Potential base class for inheritance
+    //
+};
+
+class Player{ //Consider whether to have Monster class inherit this
     private:
         string name;
         int health;
