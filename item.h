@@ -26,6 +26,7 @@
 #define effect_Undying "Undying" //Target does not receive damage
 #define effect_Resurrection "Resurrection"
 //Add more potion effects here
+#define effect_Muspelheim "Muspelheim"
 #define effect_Godslayer "Godslayer"
 
 //Monster Effect Constants
