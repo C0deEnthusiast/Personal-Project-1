@@ -15,8 +15,8 @@ Weapon Effect Key:
     - Effect Duration: z
 Weapon Effect List:
     - None: Literally does nothing (Default Constructor)
-    - Burn: Inflicts x DMG every turn. Lasts z turns.
-    - Freeze: Immobilizes enemy from attacking, lasting z turns.
+    - Burn: Inflicts x DMG every turn for z turns
+    - Freeze: Immobilizes enemy from attacking for z turns
     - Pierce: Weapon DMG ignores enemy armor
         - Note: 0 for effect Value and 100% for effect chance
     - Enemy Current HP DMG: Inflicts DMG based on x percentage of enemy's current health
@@ -32,7 +32,7 @@ Warlord's Battle-axe,weapon,50,20,40,150,Enemy Current HP DMG,10,100,0
 Prototype Anti-Fiend Rifle,weapon,60,25,20,500,Pierce,0,100,0
 Artemis' Fabled Bow,weapon,80,30,100,200,Freeze,0,100,2
 Twin Blades of Destiny,weapon,100,40,90,100,Burn,10,100,3
-Blighted Dagger,weapon,120,50,100,300,Enemy Current HP DMG,30,100,0
+Crescent Edge,weapon,120,50,100,300,Enemy Current HP DMG,30,100,0
 
 
 Prototype Weapon List:
@@ -48,7 +48,7 @@ Potions: (replaces food and cookware cuz fuck eating)
 Potion effect List (same key as weapon list):
     - Heal: Target receives x amount of health
         - Note: Duration will be 0 (will not linger)
-    - Rage: Target will be able to attack x times. Lasts z turns.
+    - Rage: Target will be able to attack x times for z turns
     - Undying: Takes no damage for z turns
         - Exclusive to: Potion of Deathless Requiem
     - Resurrection: Revives target to default health
@@ -98,6 +98,10 @@ Diamond circlet,treasure,40,0,0,0,None,0,0,0
 Gem-encrusted goblet,treasure,50,0,0,0,None,0,0,0
 
 
+
+Armor Effects (same key as weapons list):
+    - Taunt: All attacks redirect to target for z turns
+    - Deflect: Deflects x% of damage
 
 Armor List:
 Tattered Armor,armor,5,10,0,0,None,0,0,0

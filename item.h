@@ -44,6 +44,11 @@
 #define effect_My_Brothers_And_Sisters "My Brothers And Sisters"
 //#define effect_Eternal_Loyalty "Eternal Loyalty"
 
+
+//Armor Effects
+#define effect_Taunt "Taunt"
+#define effect_Deflect "Deflect"
+
 using namespace std;
 /*using std::cout;
 using std::cin;

@@ -153,6 +153,7 @@ class Battle{
                 * One of the special potions (chances TBD)
                 * Armor? (TBD)
             */
+            curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficultyRating);
             return;
         }
 
@@ -161,6 +162,14 @@ class Battle{
              * Lose 1/4 of money
              * Random party member loses health
             */
+            double moneyLoss = 0.25 * static_cast<double> (curParty->getMoney());
+            curParty->setMoney(curParty->getMoney() - static_cast<int> (moneyLoss));
+
+            for (int i = 0; i < curParty->getPlayerSize(); i++){
+                if (Functions::createRand(0,100) <= 50){
+                    curParty->modifyPlayerHealth(i, -5);
+                }
+            }
             return;
         }
         
