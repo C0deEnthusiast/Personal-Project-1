@@ -28,7 +28,7 @@ class Party{
 
         //Maximums and constants
         static const int player_size = playerCount; //Count for players[]
-        static const int food_recover = 5; //Healing amount for when food is consumed
+        //static const int food_recover = 5; //Healing amount for when food is consumed
         static const int max_capacity = 30; //Max capacity of inventory[]
         static const int max_weapon = player_size; //Maximum Weapon Count (proportional to player_size)
         static const int max_armor = player_size; //Max armor count (proportional to player_size)
@@ -89,7 +89,7 @@ class Party{
 
         //Getters (Maximums and Constants)
         int getPlayerSize(){ return player_size;}
-        int getHealthRecover(){ return food_recover;} //Remove this; Food is no longer in game
+        //int getHealthRecover(){ return food_recover;} //Remove this; Food is no longer in game
         int getMaxCapacity(){ return max_capacity;}
         int getMaxWeaponCapacity(){ return max_weapon;}
         int getMaxArmorCapacity(){ return max_armor;}

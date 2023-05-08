@@ -40,7 +40,6 @@ Party::Party(string filename){ //Parameterized Constructor
 }
 
 
-
 //Special Getters
 
 //Counts how many players are alive

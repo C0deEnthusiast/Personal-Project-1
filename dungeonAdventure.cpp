@@ -134,7 +134,7 @@ int main(int argc, char *argv[]){
             return 0;
         }
     }*/
-    return 0;
+    //return 0;
     //End of removal
 
 
@@ -144,9 +144,9 @@ int main(int argc, char *argv[]){
 
     //Room Generation
     for (int i = 0; i < dungeon.getMaxRoom(); i++){
-        int rand1 = Functions::createRand(0,dungeon.getNumRows() - 1);
-        int rand2 = Functions::createRand(0,dungeon.getNumCols() - 1);
-        if(!dungeon.addRoom(rand1, rand2)){
+        int row = Functions::createRand(0,dungeon.getNumRows() - 1);
+        int col = Functions::createRand(0,dungeon.getNumCols() - 1);
+        if(!dungeon.addRoom(row, col)){
             i--;
         }
     }
@@ -247,6 +247,9 @@ int main(int argc, char *argv[]){
         } else if (action == "1"){ //Universal Move Option
             //Starts prompt for player to move
             dungeon.move(cardinalMove());
+            if (dungeon.move(cardinalMove())){
+                //
+            }
 
             //20% for each member to lose 1 health
             for (int i = 0; i < party.getPlayerSize(); i++){

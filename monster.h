@@ -63,9 +63,7 @@ class Combat{
         Combat(string filename);
 
         int getMonsterSize(){ return monsterList.size();}
-
         void setRaiseRating(int new_raise);
-
         void monsterRush(string filename, bool new_rush = true);
         void removeMonster(int index);
         int countMonsterRating(int rating);
@@ -76,7 +74,6 @@ class Combat{
         Monster returnMonster(int rating, int &monster_index);
         bool bossIsOnlyOneAlive();
         int ratingReconfiguration(int &original_rating);
-
 };
 
 struct Status{

@@ -35,10 +35,10 @@ void Map::resetMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++)
         {
-            map_data[i][j] = UNEXPLORED;
+            map_data[i][j] = unexplored;
         }
     }
-    map_data[dungeon_gate[0]][dungeon_gate[1]] = GATE;
+    map_data[dungeon_gate[0]][dungeon_gate[1]] = gate;
     return;
 }
 
@@ -83,7 +83,7 @@ bool Map::isExplored(int row, int col){
         return false;
     }
 
-    if (map_data[row][col] == EXPLORED){
+    if (map_data[row][col] == explored){
         return true;
     }
 
@@ -138,12 +138,12 @@ void Map::setPlayerPosition(int row, int col){
 void Map::setDungeonGate(int row, int col){
     if (isOnMap(row, col)){
         if (dungeon_gate[0] != -1 && dungeon_gate[1] != -1){ //Removes already present gate
-            map_data[dungeon_gate[0]][dungeon_gate[1]] = UNEXPLORED;
+            map_data[dungeon_gate[0]][dungeon_gate[1]] = unexplored;
         }
         dungeon_gate[0] = row;
         dungeon_gate[1] = col;
 
-        map_data[dungeon_gate[0]][dungeon_gate[1]] = GATE;
+        map_data[dungeon_gate[0]][dungeon_gate[1]] = gate;
     }
     return;
 }
@@ -155,26 +155,27 @@ void Map::displayMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++){
             if (player_position[0] == i && player_position[1] == j){
-                cout << PARTY;
-            } else if (map_data[i][j] == 'N') { //NPC location, have to check if they were found yet
+                cout << party;
+            } else if (map_data[i][j] == npc) { //NPC location, have to check if they were found yet
                 for (int k = 0; k < npc_count; k++){
                     if (npc_positions[k][0] == i && npc_positions[k][1] == j){
-                        if (npc_found[k]){
-                            cout << NPC;
+                        /*if (npc_found[k]){
+                            cout << npc;
                         } else {
-                            cout << UNEXPLORED;
-                        }
+                            cout << unexplored;
+                        }*/
+                        (npc_found[k] ? cout << npc : cout << unexplored);
                     }
                 }
             } else {
                 cout << map_data[i][j];
             }
         }
-        cout << endl;
+        cout << "\n";
     }
 }
 
-//Make the player move based on the given command
+//Make the player move (consider diagonal movement)
 bool Map::move(char direction){
     switch (tolower(direction)){
     case 'w': //Move up if it is an allowed move
@@ -225,14 +226,14 @@ bool Map::addNPC(int row, int col){
         return false;
     }
 
-    if (row == 0 && col == 0){ //Starting player location
+    if (row == player_position[0] && col == player_position[1]){ //Player location
         return false;
     }
 
     npc_positions[npc_count][0] = row;
     npc_positions[npc_count][1] = col;
     npc_found[npc_count] = false;
-    map_data[row][col] = NPC;
+    map_data[row][col] = npc;
     npc_count++;
     return true;
 }
@@ -255,7 +256,7 @@ bool Map::addRoom(int row, int col){
     room_positions[room_count][0] = row;
     room_positions[room_count][1] = col;
     room_count++;
-    map_data[row][col] = ROOM;
+    map_data[row][col] = room;
     return true;
 }
 
@@ -263,18 +264,17 @@ bool Map::addRoom(int row, int col){
 bool Map::removeNPC(int row, int col){
     for (int i = 0; i < npc_count; i++){
         if (npc_positions[i][0] == row && npc_positions[i][1] == col){
-            // swap i'th npc with last npc
+            //Swaps current position with position of last NPC
             npc_positions[i][0] = npc_positions[npc_count - 1][0];
             npc_positions[i][1] = npc_positions[npc_count - 1][1];
             npc_found[i] = npc_found[npc_count - 1];
-            // reset last npc
+            //Last NPC is removed
             npc_positions[npc_count - 1][0] = -1;
             npc_positions[npc_count - 1][1] = -1;
             npc_found[npc_count - 1] = false;
-            // decrement npc_count_
+
             npc_count--;
-            // set map data to explored
-            map_data[row][col] = EXPLORED;
+            map_data[row][col] = explored;
             return true;
         }
     }
@@ -285,16 +285,15 @@ bool Map::removeNPC(int row, int col){
 bool Map::removeRoom(int row, int col){
     for (int i = 0; i < room_count; i++){
         if (room_positions[i][0] == row && room_positions[i][1] == col){
-            // swap i'th room with last room
+            //Swaps current position with position of last room
             room_positions[i][0] = room_positions[room_count - 1][0];
             room_positions[i][1] = room_positions[room_count - 1][1];
-            // reset last room
+            //Last room is removed
             room_positions[room_count - 1][0] = -1;
             room_positions[room_count - 1][1] = -1;
-            // decrement room_count_
+
             room_count--;
-            // set map data to explored
-            map_data[row][col] = EXPLORED;
+            map_data[row][col] = explored;
             return true;
         }
     }
@@ -313,6 +312,8 @@ void Map::exploreSpace(int row, int col){
     }
 
     if (isFreeSpace(row, col)){
-        map_data[row][col] = EXPLORED;
+        map_data[row][col] = explored;
     }
+
+    return;
 }

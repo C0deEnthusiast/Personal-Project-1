@@ -8,20 +8,39 @@
 
 using namespace std;
 
+//Map Max Constants
+#define Max_NPC_Count 5
+#define Max_Room_Count 5 //Max number of rooms (at a time)
+#define Max_Skull_Count 5 //Count of skulls party needs to enter gate and fight the boss
+#define Max_Hunt_Count 3 //Max number of monsters chasing party at given moment
+
+//Movement
+#define dirNorth "w"
+#define dirSouth "s"
+#define dirWest "a"
+#define dirEast "d"
+
+//Diagonal Movement
+#define dirNorthWest "wa"
+#define dirNorthEast "wd"
+#define dirSouthWest "sa"
+#define dirSouthEast "sd"
+
+
 class Map{
     private:
-        const char UNEXPLORED = '-'; //Marker for unexplored spaces
-        const char EXPLORED = ' '; //Marker for explored spaces
-        const char ROOM = 'R'; //Marker for room locations
-        const char NPC = 'N'; //Marker for NPC locations
-        const char PARTY = 'X'; //Marker for party position
-        const char GATE = 'G'; //Marker for dungeon gate (boss encounter)
-        const char HUNT = 'H'; //Marker for monsters chasing the party
+        const char unexplored = '-'; //Marker for unexplored spaces
+        const char explored = ' '; //Marker for explored spaces
+        const char room = 'R'; //Marker for room locations
+        const char npc = 'N'; //Marker for NPC locations
+        const char party = 'X'; //Marker for party position
+        const char gate = 'G'; //Marker for dungeon gate (boss encounter)
+        const char hunt = 'H'; //Marker for monsters chasing the party
 
         static const int num_rows = 6; //Number of rows in map
         static const int num_cols = 24; //Number of columns in map
         static const int max_npcs = 5;  //Max NPC count
-        static const int max_rooms = 5; //Max number of rooms
+        static const int max_rooms = 5; //Max number of rooms (at a time)
         static const int max_skulls = 5; //Count of skulls party needs to enter gate and fight the boss
         static const int max_hunt = 3; //Max number of monsters chasing party at given moment
 
@@ -39,6 +58,8 @@ class Map{
         int hunt_count = 0; //Stores how many monsters are chasing party
     public:
         Map();
+        Map(int new_row, int new_cols, int set_max_npc, int set_max_rooms, int set_max_skulls,
+        int set_max_hunt);
 
         void resetMap();
 
