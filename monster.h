@@ -106,23 +106,20 @@ class Battle{
 
         //Player Modifiers
 
-        //Array; Determines whether a given player can attack/take action
-        bool player_active[playerCount];
-
-        //Array; Determines whether a given player is charmed into attacking allies
-        bool player_charmed[playerCount];
+        bool* player_active = nullptr; //Determines which player can attack/take action
+        bool* player_charmed = nullptr; //Determines which player is charmed into attacking allies
 
         //Array; determines whether a given player is immune to damage
-        bool player_immuneToDMG[playerCount];
+        bool* player_immuneToDMG = nullptr; //Determines which player is immune to damage
 
         //Array; determines whether damage taken accounts for defenses like armor
-        bool player_defensesUp[playerCount];
+        bool* player_defensesUp = nullptr;
 
         //Determines whether player is blocking
-        bool player_blocking[playerCount];
+        bool* player_blocking = nullptr;
 
         //Array; determines how many times a given player can attack per turn
-        int player_attack_max[playerCount];
+        int* player_attack_max = nullptr;
 
         //Monster Modifiers
         
@@ -174,6 +171,12 @@ class Battle{
         Battle(Party *party, Monster *monster){ //Pass memory addresses
             curParty = party;
             curMonster = monster;
+            player_active = new bool[playerCount];
+            player_charmed = new bool[playerCount];
+            player_immuneToDMG = new bool[playerCount];
+            player_defensesUp = new bool[playerCount];
+            player_blocking = new bool[playerCount];
+            player_attack_max = new int[playerCount];
 
             for (int i = 0; i < playerCount; i++){
                 player_active[i] = true;
@@ -193,6 +196,33 @@ class Battle{
         ~Battle(){
             curParty = nullptr;
             curMonster = nullptr;
+
+            if (player_active != nullptr){
+                delete[] player_active;
+                player_active = nullptr;
+            }
+            if (player_immuneToDMG != nullptr){
+                cout << "Deleting immune\n";
+                delete[] player_immuneToDMG;
+                player_immuneToDMG = nullptr;
+            }
+            if (player_charmed != nullptr){
+                cout << "Deleting charm\n";
+                delete[] player_charmed;
+                player_charmed = nullptr;
+            }
+            if (player_defensesUp != nullptr){
+                delete[] player_defensesUp;
+                player_defensesUp = nullptr;
+            }
+            if (player_blocking != nullptr){
+                delete[] player_blocking;
+                player_blocking = nullptr;
+            }
+            if (player_attack_max != nullptr){
+                delete[] player_attack_max;
+                player_attack_max = nullptr;
+            }
         }
 
         //target_index: -1 for monster, otherwise [0,5] for player

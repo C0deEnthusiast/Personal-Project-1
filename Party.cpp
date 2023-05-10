@@ -16,26 +16,10 @@
 using namespace std;
 
 Party::Party(){ //Default constructor
-    money = 100;
-    current_armor = 0;
-    danger_level = 100; //Game ends when reaches 0
-    explored_rooms = 0;
-    keys = 0;
-    current_capacity = 0;
-    current_weapon = 0;
-
     createMerchantList("items.txt"); //Default items text file
 }
 
 Party::Party(string filename){ //Parameterized Constructor
-    money = 100;
-    current_armor = 0;
-    danger_level = 100; //Game ends when reaches 0
-    explored_rooms = 0;
-    keys = 0;
-    current_capacity = 0;
-    current_weapon = 0;
-
     createMerchantList(filename); //Parameterized items text file
 }
 
@@ -68,7 +52,7 @@ Player Party::getPlayer(int index){
 }
 
 Item Party::getWeapon(int index){
-    if (index >= 0 && index < max_weapon){
+    if (index >= 0 && index < max_weapon_capacity){
         return weapon_barracks[index];
     } else {
         return Item();
@@ -76,7 +60,7 @@ Item Party::getWeapon(int index){
 }
 
 Item Party::getArmor(int index){
-    if (index >= 0 && index < max_armor){
+    if (index >= 0 && index < max_armor_capacity){
         return armorSets[index];
     } else {
         return Item();
@@ -131,22 +115,22 @@ void Party::setKeys(int new_keys){
 void Party::setCurrentCapacity(int new_current_capacity){
     //Current capacity can increase or decrease
     if (new_current_capacity >= 0){
-        current_capacity = new_current_capacity;
+        current_inventory_capacity = new_current_capacity;
     } else {
-        current_capacity = 0;
+        current_inventory_capacity = 0;
     }
 
     return;
 }
 
 void Party::setCurrentArmorCapacity(int new_armor){
-    current_armor = new_armor;
+    current_armor_capacity = new_armor;
 
     //Readjusts armor count if necessary
-    if (current_armor < 0){
-        current_armor = 0;
-    } else if (current_armor > max_armor){
-        current_armor = max_armor;
+    if (current_armor_capacity < 0){
+        current_armor_capacity = 0;
+    } else if (current_armor_capacity > max_armor_capacity){
+        current_armor_capacity = max_armor_capacity;
     }
 
     return;
@@ -214,7 +198,7 @@ void Party::modifyPlayerHealth(int index, int health_change){
 }
 
 void Party::modifyWeaponAttack(int index, int attack_change){
-    if (index < 0 || index >= max_weapon){
+    if (index < 0 || index >= max_weapon_capacity){
         return;
     }
 
@@ -243,11 +227,11 @@ void Party::addPlayer(string player_name){
 Returns: True if Item is added successfully; false otherwise*/
 bool Party::addItem(Item item){
     if (item.getItemType() == isWeapon){
-        return addItemHelper(weapon_barracks,max_weapon,current_weapon,item);
+        return addItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
     } else if (item.getItemType() == isArmor){
-        return addItemHelper(armorSets,max_armor,current_armor,item);
+        return addItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
     } else {
-        return addItemHelper(inventory,max_capacity,current_capacity,item);
+        return addItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
     }
 }
 
@@ -255,22 +239,22 @@ bool Party::addItem(Item item){
 Returns: False if current capacity is 0 or item is not found; true if item is removed successfully*/
 bool Party::removeItem(Item item){
     if (item.getItemType() == isWeapon){
-        return removeItemHelper(weapon_barracks,max_weapon,current_weapon,item);
+        return removeItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
     } else if (item.getItemType() == isArmor){
-        return removeItemHelper(armorSets,max_armor,current_armor,item);
+        return removeItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
     } else {
-        return removeItemHelper(inventory,max_capacity,current_capacity,item);
+        return removeItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
     }
 }
 
 //Shows status information of party inventory
 void Party::showInventory(){
     cout << "+-------------+\n";
-    cout << "| INVENTORY   | " << current_capacity << "/" << max_capacity;
+    cout << "| INVENTORY   | " << current_inventory_capacity << "/" << max_inventory_capacity;
     cout << "\n+-------------+";
     cout << "\n| Gold        | " << money;
-    cout << "\n| Weapons     | " << current_weapon << "/" << max_weapon;
-    cout << "\n| Armor       | " << current_armor << "/" << max_armor;
+    cout << "\n| Weapons     | " << current_weapon_capacity << "/" << max_weapon_capacity;
+    cout << "\n| Armor       | " << current_armor_capacity << "/" << max_armor_capacity;
     //cout << "| Potions     | " << endl;
     cout << "\n| Treasures   | R: " << countItem("Silver ring");
     cout << " | N: " << countItem("Ruby necklace");
@@ -285,7 +269,7 @@ void Party::showInventory(){
 int Party::countItem(string item_name){
     int count = 0;
 
-    for (int i = 0; i < max_capacity; i++){
+    for (int i = 0; i < max_inventory_capacity; i++){
         if(inventory[i].getItemName() == item_name){
             count++;
         }
@@ -426,7 +410,6 @@ void Party::merchant(){
     cout << "I would be happy to part with some of my wares...for the proper price!\n";
 
     while (true){
-        //All are string to avoid players trying to "brick" the game
         string choice = "", amount = ""; //These are strings in case of invalid input
         int confirm_total;
 
@@ -441,8 +424,7 @@ void Party::merchant(){
         cout << "3. Potions: Dangerous and potent, but unfair. To your enemies that is.\n";
         cout << "4. Sell treasures: If you find anything shiny, ";
         cout << "I would be happy to take it off your hands.\n";
-        cout << "5. Leave: Make sure you get everything you need, I'm leaving after this sale!\n";
-        cout << endl;
+        cout << "5. Leave: Make sure you get everything you need, I'm leaving after this sale!\n\n";
 
         getline(cin,choice);
 
@@ -468,7 +450,7 @@ void Party::merchant(){
                 cout << "None of these will make you look like a dashing knight in shining armor";
                 cout << " (except a few), but they do well in keeping you alive.\n";
                 cout << "Keep in mind that you can only carry a maximum of ";
-                cout << max_armor << " sets of armor.\n\n";
+                cout << max_armor_capacity << " sets of armor.\n\n";
                 cout << "Have a look:\n";
 
                 target = isArmor;
@@ -540,8 +522,7 @@ void Party::merchant(){
             } else { //Treasure; selling
                 while (true){
                     string confirm = "";
-                    //Checks for confirmation of selling treasures
-                    do{
+                    do { //Checks for confirmation of selling treasures
                         cout << "\nYou want to sell " << target_item.getItemName();
                         cout << " for " << target_item.getCost() << " Gold? (y/n)\n";
 

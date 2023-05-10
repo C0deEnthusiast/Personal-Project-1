@@ -28,30 +28,30 @@ class Party{
 
         //Maximums and constants
         static const int player_size = playerCount; //Count for players[]
-        //static const int food_recover = 5; //Healing amount for when food is consumed
-        static const int max_capacity = 30; //Max capacity of inventory[]
-        static const int max_weapon = player_size; //Maximum Weapon Count (proportional to player_size)
-        static const int max_armor = player_size; //Max armor count (proportional to player_size)
+        static const int max_inventory_capacity = 30; //Max capacity of inventory[]
+        static const int max_weapon_capacity = player_size;
+        static const int max_armor_capacity = player_size;
         char separator = ','; //Standard delimiter for splitting data in text files
 
         //Game stats
-        int money; //In gold
-        int danger_level; //0 - 100
-        int explored_rooms; //Count of how many rooms have been explored
-        int keys; //Room keys
-        int current_capacity; //Accounts for current count inventory[];
-        int current_weapon; //Accounts for current WEAPON capacity
-        int current_armor; //How much armor
+        int player_count = player_size; //Count of players that are ALIVE
+        int money = 100; //In gold
+        int danger_level = 100; //0 - 100
+        int explored_rooms = 0; //Count of how many rooms have been explored
+        int keys = 0; //Used to access keys
+        int current_inventory_capacity = 0;
+        int current_weapon_capacity = 0;
+        int current_armor_capacity = 0;
 
         //Arrays
         Player players[player_size]; //Player list
-        Item inventory[max_capacity]; //Contains ALL player-owned items
+        Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
         vector<Item> merchantList; //Used to allow players to access and add items through merchant
-        Item weapon_barracks[max_weapon]; //Quick access to weapons
-        Item armorSets[max_armor];
+        Item weapon_barracks[max_weapon_capacity]; //Quick access to weapons
+        Item armorSets[max_armor_capacity];
 
         bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-            if (list_current_capacity >= max_capacity){
+            if (list_current_capacity >= list_max_capacity){
                 return false;
             }
 
@@ -86,25 +86,26 @@ class Party{
     public:
         Party(); //Default constructor
         Party(string filename); //Parameterized Constructor
+        //Party(); //Dynamic Parameterized Constructor
 
         //Getters (Maximums and Constants)
         int getPlayerSize(){ return player_size;}
-        //int getHealthRecover(){ return food_recover;} //Remove this; Food is no longer in game
-        int getMaxCapacity(){ return max_capacity;}
-        int getMaxWeaponCapacity(){ return max_weapon;}
-        int getMaxArmorCapacity(){ return max_armor;}
+        int getMaxInventoryCapacity(){ return max_inventory_capacity;}
+        int getMaxWeaponCapacity(){ return max_weapon_capacity;}
+        int getMaxArmorCapacity(){ return max_armor_capacity;}
 
         //Normal Getters
         int getMoney(){ return money;}
         int getDangerLevel(){ return danger_level;}
         int getExploredRooms(){ return explored_rooms;}
         int getKeys(){ return keys;}
-        int getCurrentCapacity(){ return current_capacity;}
-        int getCurrentWeaponCapacity(){ return current_weapon;}
-        int getCurrentArmorCapacity(){ return current_armor;}
+        int getCurrentCapacity(){ return current_inventory_capacity;}
+        int getCurrentWeaponCapacity(){ return current_weapon_capacity;}
+        int getCurrentArmorCapacity(){ return current_armor_capacity;}
         int getMerchantCapacity(){ return merchantList.size();}
         int getLivePlayerCount();
-        vector<Item> copyMerchantList();
+        bool isPlayer(int index){ return (index >= 0 && index < player_size);}
+        vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
         Item getWeapon(int index);
         Item getArmor(int index);
@@ -132,8 +133,6 @@ class Party{
         void addPlayer(string player_name);
 
         bool addItem(Item item);
-
-        //Keep this
         bool removeItem(Item item);
         void showInventory();
         int countItem(string item_name);

@@ -398,8 +398,10 @@ void Battle::activateEffect(Status effectData){
         //Sets health to 0 when Unholy Judgement ends
         if (target == -1 && monster_turn){
             curMonster->monster_health = 0;
-        } else if (player_turn && !player_immuneToDMG[target]){
-            curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
+        } else if (player_turn && target >= 0 && target < curParty->getPlayerSize()){
+            if (!player_immuneToDMG[target]){
+                curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
+            }
         }
     }
 
@@ -439,7 +441,10 @@ void Battle::activateEffect(Status effectData){
     }
 
     //Condemnation
-    if (effect.getEffectName() == effect_Condemnation){ //Will not activate on monster
+    if (effect.getEffectName() == effect_Condemnation){
+        if (target == -1){ //Will NOT activate on monster (for now)
+            return;
+        }
         if (atMaxDuration && player_turn){
             player_charmed[target] = true;
         } else if (atEnd && player_turn){
