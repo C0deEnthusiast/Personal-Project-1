@@ -116,21 +116,19 @@ class Party{
         bool setDangerLevel(int new_level);
         void setExploredRooms(int new_rooms);
         void setKeys(int new_keys);
-        void setCurrentCapacity(int new_current_capacity);
-        void setCurrentArmorCapacity(int new_armor);
 
         //Other functions
 
         bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
         Item returnItem(string item_name);
         
-        //Remove this; cookware and food will be replaced by potions
-        void cook(int probability);
-
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
 
         void addPlayer(string player_name);
+
+        bool addItemProto(Item item);
+        bool removeItemProto(Item item);
 
         bool addItem(Item item);
         bool removeItem(Item item);

@@ -359,7 +359,7 @@ int Battle::test(){
 
     for (int i = 0; i < 5; i++){
         displayEffects(arr[i].getPlayerName(), arr[i].getPlayerHealth(), playerStatuses[i]);
-        cout << "Attack: " << curParty->getWeapon(i).getItemStat() << endl;
+        cout << "Attack: " << arr[i].getEquippedWeapon().getStat() << endl;
     }
 
     displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
@@ -586,7 +586,8 @@ int Battle::adjustAttack(int base_attack, int target_index, int attacker_index){
             return 0;
         }
         if (player_defensesUp[target_index]){ //Accounts for armor IF defensesUp is true
-            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target_index).getItemStat()) / 100));
+            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target_index).getStat()) / 100));
+            //curParty->getPlayer(target_index).getEquippedWeapon().getStat();
         } else { //Bypasses armor
             player_defensesUp[target_index] = false;
         }

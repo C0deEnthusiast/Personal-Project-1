@@ -50,12 +50,6 @@
 #define effect_Deflect "Deflect"
 
 using namespace std;
-/*using std::cout;
-using std::cin;
-using std::getline;
-using std::string;
-using std::endl;
-using std::vector;*/
 
 //Used by both items and monsters
 class Effect{
@@ -277,7 +271,7 @@ class Item{
         string getItemName(){ return item_name;}
         string getItemType(){ return item_type;}
         int getCost(){ return item_cost;}
-        int getItemStat(){ return item_stats;} //See details in items.txt file
+        int getStat(){ return item_stats;} //See details in items.txt file
         int getCritChance(){ return crit_chance;}
         int getCritBoost(){ return crit_boost;}
 

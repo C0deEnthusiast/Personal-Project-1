@@ -24,27 +24,6 @@ Player::Player(string new_name, int new_health, bool leader_status){
     leader = leader_status;
 }
 
-//Getters
-string Player::getPlayerName(){
-    return name;
-}
-
-int Player::getPlayerHealth(){
-    return health;
-}
-
-bool Player::getLeaderStatus(){
-    return leader;
-}
-
-/*Item Player::getEquippedWeapon(){
-    return equipped_weapon;
-}
-
-Item Player::getEquippedArmor(){
-    return equipped_armor;
-}*/
-
 //Setters
 void Player::setPlayerName(string new_name){
     name = new_name;
@@ -71,7 +50,7 @@ void Player::setLeaderStatus(bool new_status){
     return;
 }
 
-/*void Player::setEquippedWeapon(Item item){
+void Player::setEquippedWeapon(Item item){
     equipped_weapon = item;
 
     return;
@@ -81,4 +60,4 @@ void Player::setEquippedArmor(Item item){
     equipped_armor = item;
     
     return;
-}*/
+}

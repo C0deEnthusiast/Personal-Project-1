@@ -44,7 +44,7 @@ vector<Item> Party::copyMerchantList(){
 }
 
 Player Party::getPlayer(int index){
-    if (index >= 0 && index < player_size){
+    if (isPlayer(index)){
         return players[index];
     } else {
         return Player();
@@ -52,7 +52,7 @@ Player Party::getPlayer(int index){
 }
 
 Item Party::getWeapon(int index){
-    if (index >= 0 && index < max_weapon_capacity){
+    if (isPlayer(index)){ //Each player has individual weapon
         return weapon_barracks[index];
     } else {
         return Item();
@@ -60,7 +60,7 @@ Item Party::getWeapon(int index){
 }
 
 Item Party::getArmor(int index){
-    if (index >= 0 && index < max_armor_capacity){
+    if (isPlayer(index)){ //Each player has individual armor
         return armorSets[index];
     } else {
         return Item();
@@ -112,31 +112,6 @@ void Party::setKeys(int new_keys){
     return;
 }
 
-void Party::setCurrentCapacity(int new_current_capacity){
-    //Current capacity can increase or decrease
-    if (new_current_capacity >= 0){
-        current_inventory_capacity = new_current_capacity;
-    } else {
-        current_inventory_capacity = 0;
-    }
-
-    return;
-}
-
-void Party::setCurrentArmorCapacity(int new_armor){
-    current_armor_capacity = new_armor;
-
-    //Readjusts armor count if necessary
-    if (current_armor_capacity < 0){
-        current_armor_capacity = 0;
-    } else if (current_armor_capacity > max_armor_capacity){
-        current_armor_capacity = max_armor_capacity;
-    }
-
-    return;
-}
-
-
 //Returns false if at least one player is alive; true if all are literally dead
 bool Party::areAllPlayersDead(){
     for (int i = 0; i < player_size; i++){
@@ -158,11 +133,6 @@ Item Party::returnItem(string item_name){
     return Item();
 }
 
-void Party::cook(int probability){
-    cout << "Cook no longer in function." << endl;
-    return;
-}
-
 
 /*Algorithm: Modifies player's health
     1) Changes the health of player based on health_change
@@ -171,7 +141,7 @@ void Party::cook(int probability){
     4) If player is dead and is leader, activates a function regarding this
     Returns: void*/
 void Party::modifyPlayerHealth(int index, int health_change){
-    if (index < 0 || index >= player_size){
+    if (!isPlayer(index)){
         return;
     }
     //This is if a dead player takes lethal health, thereby "dying again"
@@ -187,6 +157,7 @@ void Party::modifyPlayerHealth(int index, int health_change){
     if (players[index].getPlayerHealth() == 0 && health_change < 0){ //Player is killed
         //Announces player is dead
         cout << players[index].getPlayerName() << " is dead! Stay cautious!" << endl;
+        player_count--;
 
         if (players[index].getLeaderStatus()){ //Checks if dead player is the 'leader'
             cout << "Leader is dead. (Execute function regarding this.)" << endl;
@@ -198,12 +169,14 @@ void Party::modifyPlayerHealth(int index, int health_change){
 }
 
 void Party::modifyWeaponAttack(int index, int attack_change){
-    if (index < 0 || index >= max_weapon_capacity){
+    if (!isPlayer(index)){
         return;
     }
 
     //Changes specified weapon's attack value
-    weapon_barracks[index].setStat(weapon_barracks[index].getItemStat() + attack_change);
+    //weapon_barracks[index].setStat(weapon_barracks[index].getStat() + attack_change);
+    int original_attack = players[index].getEquippedWeapon().getStat();
+    players[index].getEquippedWeapon().setStat(original_attack + attack_change);
 
     return;
 }
@@ -221,6 +194,73 @@ void Party::addPlayer(string player_name){
     }
 
     return;
+}
+
+bool Party::addItemProto(Item item){
+    //Checks if item should go into inventory
+    if (!(item.getItemType() == isWeapon || item.getItemType() == isArmor)){ //Adds to inventory
+        if (current_inventory_capacity >= max_inventory_capacity){ //Full inventory
+            return false;
+        }
+
+        for (auto& x: inventory){
+            if (x.getItemName() == default_item_name){
+                //Adds item to inventory
+                x = item;
+                current_inventory_capacity++;
+                return true;
+            }
+        }
+    }
+
+    //Adding weapon or armor
+    for (auto& x: players){
+        //Equips new armor
+        if (x.getEquippedArmor().getItemName() == default_item_name && item.getItemType() == isArmor){
+            x.setEquippedArmor(item);
+            current_armor_capacity++;
+            return true;
+        }
+        //Equips new weapon
+        if (x.getEquippedWeapon().getItemName() == default_item_name && item.getItemType() == isWeapon){
+            x.setEquippedWeapon(item);
+            current_weapon_capacity++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Party::removeItemProto(Item item){
+    //Removes from inventory
+    if (!(item.getItemType() == isWeapon || item.getItemType() == isArmor)){
+        for (auto& x: inventory){
+            if (x.getItemName() == item.getItemName()){
+                x = Item();
+                current_inventory_capacity--;
+                return true;
+            }
+        }
+    }
+
+    //Adding weapon or armor
+    for (auto& x: players){
+        //Removes armor
+        if (x.getEquippedArmor().getItemName() == item.getItemType()){
+            x.setEquippedArmor(Item());
+            current_armor_capacity--;
+            return true;
+        }
+        //Removes weapon
+        if (x.getEquippedWeapon().getItemName() == item.getItemType()){
+            x.setEquippedWeapon(Item());
+            current_weapon_capacity--;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /*Adds item to inventory[] array or other relevant Item arrays
@@ -286,7 +326,7 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
 
     cout << "You want to buy " << amount << " ";
     if (purchasedItem.getItemType() == isWeapon){
-        cout << "(+" << purchasedItem.getItemStat() << ") ";
+        cout << "(+" << purchasedItem.getStat() << ") ";
     }
     cout << purchasedItem.getItemName() << "(s) for " << total_cost << " Gold? (y/n)" << endl;
     getline(cin,confirm);
@@ -297,7 +337,7 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
     if ((confirm == "Y" || confirm == "y") && total_cost <= getMoney()){ //Purchase is successful
         //Adds weapon to party's inventory list until all are added or inventory is full
         for (int i = 0; i < amount; i++){
-            if (!addItem(purchasedItem)){
+            if (!addItemProto(purchasedItem)){ //!addItem(purchasedItem)
                 //This occurs if desired count of items can NOT entirely be added
                 //Adjusts total cost if necessary
                 total_cost *= i;
@@ -367,7 +407,7 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 
     if (target != isTreasure && target != isPotion){
-        cout << item.getItemStat();
+        cout << item.getStat();
     }
 
     if (target == isArmor){
@@ -573,17 +613,24 @@ void Party::showPartyStatus(){
     cout << "\n| PARTY       |";
     cout << "\n+-------------+";
     //Main player is first displayed
-    for (int i = 0; i < player_size; i++){
-        cout << "\n| " << players[i].getPlayerName();
-        if (armorSets[i].getItemName() != default_item_name){
+    for (auto x: players){
+        cout << "\n| " << x.getPlayerName();
+        /*if (armorSets[i].getItemName() != default_item_name){
             cout << " (" << armorSets[i].getItemName() << ")";
+        }*/
+        if (x.getEquippedArmor().getItemName() != default_item_name){
+            cout << " (" << x.getEquippedArmor().getItemName() << ")";
         }
-        cout << " | Health: " << players[i].getPlayerHealth() << " | ";
+        cout << " | Health: " << x.getPlayerHealth() << " | ";
         
         //Displays weapons
-        if (weapon_barracks[i].getItemName() != default_item_name){
+        /*if (weapon_barracks[i].getItemName() != default_item_name){
             cout << "Equipped: " << weapon_barracks[i].getItemName();
             cout << "(Atk: " << weapon_barracks[i].getItemStat() << ")";
+        }*/
+        if (x.getEquippedWeapon().getItemName() != default_item_name){
+            cout << "Equipped: " << x.getEquippedWeapon().getItemName();
+            cout << "(Atk: " << x.getEquippedWeapon().getStat() << ")";
         }
     }
     cout << "\n+-------------+\n\n";
