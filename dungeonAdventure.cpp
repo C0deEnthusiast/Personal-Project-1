@@ -127,14 +127,14 @@ int main(int argc, char *argv[]){
     party.addItem(party.returnItem("Diamond circlet"));
     party.addItem(party.returnItem("Diamond circlet"));
     //party.addItem(party.returnItem("Blighted Dagger")); //Debugging only
-    party.merchant(); //Testing
+    /*party.merchant(); //Testing
     for (int i = 0; i < 23; i++){ //23
         if (fight.encounter(party) == -1){
             party.showPartyStatus();
             return 0;
         }
-    }
-    return 0;
+    }*/
+    //return 0;
     //End of removal
 
 
@@ -246,14 +246,14 @@ int main(int argc, char *argv[]){
             Functions::convenientStop();
         } else if (action == "1"){ //Universal Move Option
             //Starts prompt for player to move
-            dungeon.move(cardinalMove());
-            if (dungeon.move(cardinalMove())){
-                //
+            //dungeon.move(cardinalMove());
+            if (!dungeon.move(cardinalMove())){
+                cout << "Invalid move\n";
             }
 
             //20% for each member to lose 1 health
             for (int i = 0; i < party.getPlayerSize(); i++){
-                if (Functions::createRand(1,100) <= 20){ //Percentage form; random chance for EACH member
+                if (Functions::willOccur(20)){ //20% for given member to lose 1 HP
                     party.modifyPlayerHealth(i, -1);
                     game = party.getLivePlayerCount();
                     if (party.getLivePlayerCount() == 0){

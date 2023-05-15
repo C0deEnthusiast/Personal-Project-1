@@ -111,6 +111,11 @@ namespace Functions{
         srand(time(0));
         return (rand() % (max - min + 1)) + min;
     }
+
+    //Checks if event will occur based on likelihood
+    inline bool willOccur(int probability){
+        return (probability >= createRand(1,100));
+    }
     
     //Checks if input is a number
     inline bool isNumber(string line){ //Checks for digits

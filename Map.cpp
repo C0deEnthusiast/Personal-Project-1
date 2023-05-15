@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
+#include <vector>
 #include "map.h"
 
 using namespace std;
@@ -11,9 +13,81 @@ Map::Map(){
     resetMap();
 }
 
-//Resets positions of player, NPCs, and rooms and clears map_data[][]
+Map::Map(string filename, int new_row, int new_cols, int set_max_npc, int set_max_rooms,
+ int set_max_hunt){
+    raise_rating = 0;
+    monsterFilename = filename; //Remove this once dynamic implementation is complete
+    monsterRush(filename, false);
+
+    num_rows_proto = new_row;
+    if (num_rows_proto <= 0){
+        num_rows_proto = default_Rows;
+    }
+    num_cols_proto = new_cols;
+    if (num_cols_proto <= 0){
+        num_cols_proto = default_Cols;
+    }
+    max_npcs_proto = set_max_npc;
+    if (max_npcs_proto < 0){
+        max_npcs_proto = default_Max_NPC;
+    }
+    max_rooms_proto = set_max_rooms;
+    if (max_rooms_proto < 0){
+        max_rooms_proto = default_Max_Room;
+    }
+    max_hunt_proto = set_max_hunt;
+    if (max_hunt_proto < 0){
+        max_hunt_proto = default_Max_Hunt_Count;
+    }
+
+    max_skulls_proto = max_rooms_proto;
+
+    
+
+    /*Checks if new dimensions for the grid can support player, gate, 
+    NPCs, rooms, and monsters:
+        - If it does not, changes dimensions to square grid to support it*/
+    if ((num_rows_proto * num_cols_proto) <= (2 + max_npcs_proto + max_rooms_proto + max_hunt_proto)){
+        int length = ceil(pow(2 + max_npcs_proto + max_rooms_proto + max_hunt_proto, 1/2));
+        num_rows_proto = length;
+        num_cols_proto = length;
+    }
+
+    player_position[0] = 0;
+    player_position[1] = 0;
+
+    for (int i = 0; i < max_npcs_proto; i++){
+        //
+    }
+
+    /*
+    //Set dungeon gate at fixed point
+    dungeon_gate[0] = num_rows - 1;
+    dungeon_gate[1] = num_cols - 1;
+
+    for (int i = 0; i < max_npcs; i++){
+        npc_positions[i][0] = -1;
+        npc_positions[i][1] = -1;
+        npc_found[i] = false;
+    }
+
+    for (int i = 0; i < max_rooms; i++){
+        room_positions[i][0] = -1;
+        room_positions[i][1] = -1;
+    }
+
+    for (int i = 0; i < num_rows; i++){
+        for (int j = 0; j < num_cols; j++)
+        {
+            map_grid[i][j] = unexplored;
+        }
+    }
+    map_grid[dungeon_gate[0]][dungeon_gate[1]] = gate;
+    return;*/
+}
+
+//Resets positions of player, NPCs, and rooms and clears map grid
 void Map::resetMap(){
-    //Resets player position, count values, and initializes values in position arrays to -1 (out of bounds)
     player_position[0] = 0;
     player_position[1] = 0;
 
@@ -35,16 +109,16 @@ void Map::resetMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++)
         {
-            map_data[i][j] = unexplored;
+            map_grid[i][j] = unexplored;
         }
     }
-    map_data[dungeon_gate[0]][dungeon_gate[1]] = gate;
+    map_grid[dungeon_gate[0]][dungeon_gate[1]] = gate;
     return;
 }
 
 //Checks Map Locations
 
-//Checks if (row,col) positions is on the map
+//Checks if (row, col) positions is on the map
 bool Map::isOnMap(int row, int col){
     return (row >= 0 && row < num_rows && col >= 0 && col < num_cols);
 }
@@ -83,7 +157,7 @@ bool Map::isExplored(int row, int col){
         return false;
     }
 
-    if (map_data[row][col] == explored){
+    if (map_grid[row][col] == explored){
         return true;
     }
 
@@ -136,15 +210,17 @@ void Map::setPlayerPosition(int row, int col){
 
 //Set dungeon exit position, if in range
 void Map::setDungeonGate(int row, int col){
-    if (isOnMap(row, col)){
-        if (dungeon_gate[0] != -1 && dungeon_gate[1] != -1){ //Removes already present gate
-            map_data[dungeon_gate[0]][dungeon_gate[1]] = unexplored;
-        }
-        dungeon_gate[0] = row;
-        dungeon_gate[1] = col;
-
-        map_data[dungeon_gate[0]][dungeon_gate[1]] = gate;
+    if (!isOnMap(row, col)){
+        return;
     }
+    
+    if (dungeon_gate[0] != -1 && dungeon_gate[1] != -1){ //Removes already present gate
+        map_grid[dungeon_gate[0]][dungeon_gate[1]] = unexplored;
+    }
+    dungeon_gate[0] = row;
+    dungeon_gate[1] = col;
+
+    map_grid[dungeon_gate[0]][dungeon_gate[1]] = gate;
     return;
 }
 
@@ -154,21 +230,16 @@ void Map::setDungeonGate(int row, int col){
 void Map::displayMap(){
     for (int i = 0; i < num_rows; i++){
         for (int j = 0; j < num_cols; j++){
-            if (player_position[0] == i && player_position[1] == j){
+            if (i == player_position[0] && j == player_position[1]){
                 cout << party;
-            } else if (map_data[i][j] == npc) { //NPC location, have to check if they were found yet
+            } else if (map_grid[i][j] == npc) { //NPC location, have to check if they were found yet
                 for (int k = 0; k < npc_count; k++){
                     if (npc_positions[k][0] == i && npc_positions[k][1] == j){
-                        /*if (npc_found[k]){
-                            cout << npc;
-                        } else {
-                            cout << unexplored;
-                        }*/
-                        (npc_found[k] ? cout << npc : cout << unexplored);
+                        cout << (npc_found[k] ? npc : unexplored);
                     }
                 }
             } else {
-                cout << map_data[i][j];
+                cout << map_grid[i][j];
             }
         }
         cout << "\n";
@@ -178,36 +249,36 @@ void Map::displayMap(){
 //Make the player move (consider diagonal movement)
 bool Map::move(char direction){
     switch (tolower(direction)){
-    case 'w': //Move up if it is an allowed move
-        if (player_position[0] > 0){
-            player_position[0] -= 1;
-        } else {
+        case 'w': //Move up if it is an allowed move
+            if (player_position[0] > 0){
+                player_position[0] -= 1;
+            } else {
+                return false;
+            }
+            break;
+        case 's': //Move down if it is an allowed move
+            if (player_position[0] < num_rows - 1){
+                player_position[0] += 1;
+            } else {
+                return false;
+            }
+            break;
+        case 'a': //Move left if it is an allowed move
+            if (player_position[1] > 0){
+                player_position[1] -= 1;
+            } else {
+                return false;
+            }
+            break;
+        case 'd': //Move right if it is an allowed move
+            if (player_position[1] < num_cols - 1){
+                player_position[1] += 1;
+            } else {
+                return false;
+            }
+            break;
+        default:
             return false;
-        }
-        break;
-    case 's': //Move down if it is an allowed move
-        if (player_position[0] < num_rows - 1){
-            player_position[0] += 1;
-        } else {
-            return false;
-        }
-        break;
-    case 'a': //Move left if it is an allowed move
-        if (player_position[1] > 0){
-            player_position[1] -= 1;
-        } else {
-            return false;
-        }
-        break;
-    case 'd': //Move right if it is an allowed move
-        if (player_position[1] < num_cols - 1){
-            player_position[1] += 1;
-        } else {
-            return false;
-        }
-        break;
-    default:
-        return false;
     }
     // if new location is an NPC location, mark as explored
     if (isNPCLocation(player_position[0], player_position[1])){
@@ -232,8 +303,8 @@ bool Map::addNPC(int row, int col){
 
     npc_positions[npc_count][0] = row;
     npc_positions[npc_count][1] = col;
-    npc_found[npc_count] = false;
-    map_data[row][col] = npc;
+    npc_found[npc_count] = false; //Disguises NPC
+    map_grid[row][col] = npc;
     npc_count++;
     return true;
 }
@@ -255,8 +326,8 @@ bool Map::addRoom(int row, int col){
 
     room_positions[room_count][0] = row;
     room_positions[room_count][1] = col;
+    map_grid[row][col] = room;
     room_count++;
-    map_data[row][col] = room;
     return true;
 }
 
@@ -274,7 +345,7 @@ bool Map::removeNPC(int row, int col){
             npc_found[npc_count - 1] = false;
 
             npc_count--;
-            map_data[row][col] = explored;
+            map_grid[row][col] = explored;
             return true;
         }
     }
@@ -293,7 +364,7 @@ bool Map::removeRoom(int row, int col){
             room_positions[room_count - 1][1] = -1;
 
             room_count--;
-            map_data[row][col] = explored;
+            map_grid[row][col] = explored;
             return true;
         }
     }
@@ -305,15 +376,261 @@ bool Map::removeRoom(int row, int col){
 void Map::exploreSpace(int row, int col){
     for (int i = 0; i < npc_count; i++){
         if (row == npc_positions[i][0] && col == npc_positions[i][1]){
-            // mark NPC as found
             npc_found[i] = true;
             return;
         }
     }
 
     if (isFreeSpace(row, col)){
-        map_data[row][col] = explored;
+        map_grid[row][col] = explored;
     }
 
     return;
+}
+
+void Map::monsterRush(string filename, bool new_rush){
+    //If all monsters are defeated, they will be 'resurrected' with higher ratings
+    if (new_rush && refillList.size() > 0){
+        setRaiseRating(++raise_rating);
+        cout << "Bloody hell! They're getting back up!" << endl;
+        monsterList = refillList;
+        return;
+    }
+
+    //Opens monster file
+    ifstream file(filename);
+
+    if (!file.is_open()){
+        cout << "File not open" << endl;
+        return;
+    }
+
+    string line;
+
+    while(getline(file,line)){
+        
+        vector<string> temp; //Temporary vector
+        istringstream splice(line);
+
+        while(getline(splice,line,separator)){
+            temp.push_back(line);
+        }
+
+        if (temp.size() == monster_info_count){
+            /*Monster create(monster.at(0),stoi(monster.at(1)),stoi(monster.at(2)),
+            stoi(monster.at(3)),monster.at(4),stoi(monster.at(5)),stoi(monster.at(6)),stoi(monster.at(7)));*/
+            Monster create(temp.at(0),stoi(temp.at(1)),stoi(temp.at(2)),stoi(temp.at(3)),
+            stoi(temp.at(4)),stoi(temp.at(5)),
+            temp.at(6),stoi(temp.at(7)),stoi(temp.at(8)), stoi(temp.at(9)));
+
+            monsterList.push_back(create);
+            refillList.push_back(create);
+        }
+    }
+    file.close(); //Closes file
+
+    return;
+}
+
+void Map::setRaiseRating(int new_raise){
+    raise_rating = new_raise;
+    
+    return;
+}
+
+//Removes monster from roster
+void Map::removeMonster(int index){
+    if (index < 0 || index >= static_cast<int> (monsterList.size())){
+        return;
+    }
+    monsterList.erase(monsterList.begin() + index);
+
+    return;
+}
+
+int Map::countMonsterRating(int rating){
+    int count = 0;
+    for (auto x: monsterList){
+        if (x.difficultyRating == rating){
+            count++;
+        }
+    }
+
+    return count;
+}
+
+
+/*
+-1 if surrender
+-2 if loss
+Monster's rating if win
+*/
+int Map::encounter(Party& party, bool room){
+    if (party.getCurrentWeaponCapacity() == 0){ //Party doesn't have any weapons
+        return -1;
+    }
+
+    Monster temp;
+    //Battle calculation Values
+    int rating, battle = 0;
+    int chosen_rating = 0, search_index = 0, remove_index = 0, random_monster;
+
+    //Random variables for battle outcome
+    int rand_rating = Functions::createRand(minimumRating, bossRating - 1); //1-6
+
+    //Determines monster rating
+    if (room){ //Currently at room location
+        //Boss is encountered only at 5th room, with final form (Rating of 8) at final phase
+        rating = party.getExploredRooms() + 2;
+        party.setExploredRooms(party.getExploredRooms() + 1); //Increments Party Value
+    } else { //Random Encounter from either Investigate or Pick a Fight
+        rating = rand_rating;
+    }
+
+    //Monster is chosen
+    temp = returnMonster(rating, remove_index);
+    //Raises rating based on raise_rating
+    temp.setRating(temp.difficultyRating + raise_rating);
+
+    //For testing
+    cout << "Check monster count ratings: ";
+    for (int i = minimumRating; i <= bossRating; i++){
+        cout << i << "(" << countMonsterRating(i) << ") -- ";
+    }
+    cout << endl;
+
+    //Announces monster
+    cout << temp.monster_name << " (Health: " << temp.monster_health;
+    cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
+    Functions::displayEffect(temp.power);
+
+    //Allows player to fight or surrender
+    cout << "\nFight(1) or surrender(2)? Your call.\n";
+    string choose = "";
+    //choose = "1"; //Debugging only
+    do {
+        getline(cin,choose);
+        if (choose != "1" && choose != "2"){
+            cout << "Make a bloody choice!" << endl;
+        }
+    } while (choose != "1" && choose != "2");
+
+    if (choose == "2"){
+        /*if (surrender){ //Player surrendered
+            cout << "Foolish mortals! With surrender, comes sacrifice!" << endl;
+
+            //Kills random player
+            party.modifyPlayerHealth(kill_index, -100);
+            if (party.getLivePlayerCount() == 0){
+                return false;
+            } else {
+                return true;
+            }
+        }*/
+        return -1;
+    }
+
+    //Calculates battle outcome
+    battle = 1000000;
+
+    //EffectList *system = new EffectList();
+    Battle *system = new Battle(&party, &temp);
+    cout << "system created" << endl;
+
+    int te = system->test();
+
+    //int test_combat = system->playerCombat(party,temp);
+    delete system;
+    system = nullptr;
+    cout << "system destroyed" << endl;
+
+    if (battle > 0){ //Victory
+        removeMonster(remove_index);
+
+        //Rewards (for now)
+        //Money
+        party.setMoney(party.getMoney() + 10 * temp.difficultyRating);
+        cout << "Congrats! You've slain " << temp.monster_name << "!";
+        cout << " You won " << 10 * temp.difficultyRating << " gold!\n\n";
+        
+        if (Functions::createRand(1,100) <= 10){ //Chance for key
+            cout << "You got a key too!" << endl;
+            party.setKeys(party.getKeys() + 1);
+        }
+        
+        return true;
+    } else { //Defeat
+        party.setMoney(party.getMoney() * 3 / 4);
+        cout << "One for all, and all will fall." << endl;
+        for (int i = 1; i < party.getPlayerSize(); i++){
+            if (Functions::createRand(0,100) <= 10){
+                //Kills player
+                party.modifyPlayerHealth(i, -100);
+                if (party.getLivePlayerCount() == 0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
+Monster Map::returnMonster(int rating, int &monster_index){
+    Monster pick;
+
+    //If only the Boss is alive AND if player is not fighting the boss
+    if (bossIsOnlyOneAlive() && rating != bossRating){
+        //cout << "Renews monster roster" << endl;
+        monsterList.clear(); //Removes Boss
+        monsterRush(monsterFilename); //Creates monster roster again
+    }
+
+    int search = 0, remove_index = 0, random_monster = -1;
+
+    if (countMonsterRating(rating) == 0){
+        //Recurs function until there is monster that is alive
+        return returnMonster(ratingReconfiguration(rating), monster_index);
+    } else {
+        random_monster = Functions::createRand(1,countMonsterRating(rating));
+    }
+
+    //Picks monster that hasn't been removed, and has chosen rating
+    for (int i = 0; i < monsterList.size(); i++){
+        if(monsterList[i].difficultyRating == rating){
+            if(++search == random_monster){
+                monster_index = i;
+                return monsterList[i];
+            }
+        }
+    }
+
+    return pick;
+}
+
+//Checks if boss has not yet to be defeated while others have
+bool Map::bossIsOnlyOneAlive(){
+    return (countMonsterRating(bossRating) == 1 && getMonsterCount() == 1);
+}
+
+/*Reconfigures monster rating by first checking if there are monsters with a rating BELOW
+given rating; if so, then it returns the rating. If not, then it searches for monsters
+with rating ABOVE given rating; if so, returns the rating. Otherwise, returns original rating*/
+int Map::ratingReconfiguration(int &original_rating){
+    int old_rating = original_rating;
+    //Monster temp;
+    while (old_rating >= minimumRating){
+        if (countMonsterRating(--original_rating) > 0){
+            return original_rating;
+        }
+    }
+
+    original_rating = old_rating;
+
+    while (old_rating < bossRating){
+        if (countMonsterRating(++original_rating) > 0){
+            return original_rating;
+        }
+    }
+
+    return original_rating;
 }

@@ -37,6 +37,7 @@ struct Monster{
     int crit_chance; //Probability to land a critical hit
     int crit_boost; //Boost damage percentage on critical hit
     Effect power; //Monster's skill/effect
+    //vector<Effect> powers;
 
     Monster(); //Default Constructor
     Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
