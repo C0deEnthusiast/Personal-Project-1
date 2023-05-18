@@ -108,7 +108,6 @@ class Effect{
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
     inline int createRand(int min, int max){
-        srand(time(0));
         return (rand() % (max - min + 1)) + min;
     }
 

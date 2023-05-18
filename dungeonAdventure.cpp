@@ -59,14 +59,14 @@ char cardinalMove(){
 int main(int argc, char *argv[]){
     if (argc != 4){
         cout << "Need in order:\n";
-        cout << "{Program} {Item Text File} {Monster Text File} {Story Text File}" << endl;
+        cout << "{Program} {Item Text File} {Monster Text File} {Story Text File}\n";
         return 0;
     }
 
-    Map dungeon;
+    srand(time(0)); //Refreshes pseudo-random generator every time application starts
+
+    Map dungeon(argv[2]);
     Party party(argv[1]); //User interacts with this
-    //Monster monsters(argv[2]);
-    Combat fight(argv[2]);
 
     bool game = true; //Keeps game running
     string player; //For player names
@@ -89,30 +89,26 @@ int main(int argc, char *argv[]){
         cout << endl;
     }
 
-    cout << "Wonderful, now pick a leader." << endl;
-    cout << "(Enter a name; don't waste my godly patience)" << endl;
+    cout << "Wonderful, now pick a leader.\n(Enter a name; don't waste my godly patience)\n";
 
     do { //Checks for valid name inputs
         getline(cin,player);
         if (player.length() == 0){
-            cout << "Really? Again." << endl;
+            cout << "Really?\nAgain.\n";
         }
     } while (player.length() == 0);
     party.addPlayer(player);
 
 
-    cout << endl;
-    cout << "Oh, so the leader is " << player << ". How peachy" << endl;
-    cout << "How about your 4 comrades?" << endl;
-    cout << "(Enter their names)" << endl;
+    cout << "\nOh, so the leader is " << player << ". How peachy\n";
+    cout << "How about your 4 comrades?\n(Enter their names)\n";
     for (int i = 0; i < 4; i++){
         player = ""; //Resets string
-        cout << endl;
-        cout << "Enter your teammate's name." << endl;
+        cout << "\nEnter your teammate's name.\n";
         do { //Checks for valid name inputs
             getline(cin,player);
             if (player.length() == 0){
-                cout << "Really? Again." << endl;
+                cout << "Really?\nAgain.\n";
             }
         } while (player.length() == 0);
         party.addPlayer(player);
@@ -303,7 +299,7 @@ int main(int argc, char *argv[]){
                 cout << "Oh dear. . . We've got company!" << endl;
                 cout << "Wish you good luck!" << endl;
 
-                int win = fight.encounter(party);
+                int win = dungeon.encounter(party);
                 //game = monsters.monsterEncounter(party);
                 int rand1 = Functions::createRand(1,10);
                 int rand2 = Functions::createRand(2,party.getLivePlayerCount());
@@ -328,7 +324,7 @@ int main(int argc, char *argv[]){
                 continue;
             }
 
-            int win = fight.encounter(party,true);
+            int win = dungeon.encounter(party,true);
             
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
@@ -376,7 +372,7 @@ int main(int argc, char *argv[]){
                 } else if (chance > 30 && chance <= 50){ //Party fights random monster
                     cout << "There's a monster!" << endl;
 
-                    int win = fight.encounter(party);
+                    int win = dungeon.encounter(party);
 
                     int rand1 = Functions::createRand(1,10);
                     int rand2 = Functions::createRand(2,party.getLivePlayerCount());
@@ -419,7 +415,7 @@ int main(int argc, char *argv[]){
             //Fight a Monster
             cout << "There's a monster!" << endl;
 
-            int win = fight.encounter(party);
+            int win = dungeon.encounter(party);
 
             int rand1 = Functions::createRand(1,10);
             int rand2 = Functions::createRand(2,party.getLivePlayerCount());

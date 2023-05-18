@@ -43,44 +43,27 @@ class Map{
         const char gate = 'G'; //Dungeon gate (Boss encounter)
         const char hunt = 'H'; //Monsters chasing the party
 
-        //Change these to dynamic
-        static const int num_rows = 6; //Number of rows in map
-        int num_rows_proto;
+        //Maximums and Constants
+        int num_rows; //Number of rows in map
+        int num_cols; //Number of columns in map
+        int max_npcs; //Max NPC count
+        int max_rooms; //Max number of rooms (at a time)
+        int max_skulls; //Count of skulls party needs to enter gate and fight the boss        
+        int max_hunt; //Max number of monsters chasing party at given moment
 
-        static const int num_cols = 24; //Number of columns in map
-        int num_cols_proto;
-        
-        static const int max_npcs = 5; //Max NPC count
-        int max_npcs_proto;
-        
-        static const int max_rooms = 5; //Max number of rooms (at a time)
-        int max_rooms_proto;
-        
-        static const int max_skulls = 5; //Count of skulls party needs to enter gate and fight the boss
-        int max_skulls_proto;
-        
-        static const int max_hunt = 3; //Max number of monsters chasing party at given moment
-        int max_hunt_proto;
+        //Dynamic arrays
+        char** map_grid; //Stores the character that will be shown at a given (row,col)
+        bool* npc_found; //Checks if npc has been found/spotted
 
-        //[0] = Row position, [1] = Column position
-        int player_position[2]; //Player position
-        int dungeon_gate[2]; //Gate location in dungeon
-
-        int npc_positions[max_npcs][2]; //Stores the (row,col) positions of NPCs present on map
-        int* npc_positions_proto;
-
-        int room_positions[max_rooms][2]; //Stores the (row,col) positions of rooms present on map
-        int* room_positions_proto;
+        //Syntax: arr[2] -> [0] = Row position, [1] = Column position
+        int* player_position; //Player position
+        int* dungeon_gate; //Gate location in dungeon
+        //Syntax: arr[-][2] -> [0] = Row position, [1] = Column position
+        int** npc_positions; //Stores the (row,col) positions of NPCs present on map
+        int** room_positions; //Stores the (row,col) positions of rooms present on map
+        int** hunt_positions; //Stores the (row,col) positions of monsters chasing party
         
-        int hunt_positions[max_hunt][2]; //Stores the (row,col) positions of monsters chasing party
-        int* hunt_positions_proto;
-
-        bool npc_found[max_npcs]; //Checks if npc has been found/spotted
-        //bool* npc_found_proto;
-        
-        char map_grid[num_rows][num_cols]; //Stores the character that will be shown at a given (row,col)
-        char* map_grid_proto;
-
+        //Ever-changing
         int npc_count = 0; //Stores number of misfortunes currently on map
         int room_count = 0; //Stores number of sites currently on map
         int skull_count = 0; //Stores skulls party collected by beating rooms
@@ -97,12 +80,10 @@ class Map{
         vector<Monster> monsterList;
         string monsterFilename;
     public:
-        Map();
-        Map(string filename, int new_row, int new_cols, int set_max_npc, int set_max_rooms,
-        int set_max_hunt);
+        Map(string filename, int new_row = default_Rows, int new_cols = default_Cols, 
+        int set_max_npc = default_Max_NPC, int set_max_rooms = default_Max_Room,
+        int set_max_hunt = default_Max_Hunt_Count); //Constructor
         ~Map(); //Destructor
-        /*void generateMap(int row, int col, int set_max_npc, int set_max_rooms, int set_max_skulls,
-        int set_max_hunt);*/
 
         void resetMap();
 
@@ -137,21 +118,25 @@ class Map{
         //void setHuntLocation(int row, int col);
         //void setSkullCount(int new_count);
 
-        //Other functions related to map grid
-        void displayMap();
-        bool move(char direction);
+        //Adds components to map grid
         bool addNPC(int row, int col);
         bool addRoom(int row, int col);
         //bool addHunt(int row, int col);
+
+        //Removes components from map grid
         bool removeNPC(int row, int col);
         bool removeRoom(int row, int col);
         //bool removeHunt(int row, int col);
+
+        //Other functions related to map grid
+        void displayMap();
+        bool move(char direction);
         void exploreSpace(int row, int col);
         //void moveHunt(int row, int col, int hunt_index); //Idea: Maybe a DFS traversal
 
         //Functions related to Monsters
         int getMonsterCount(){ return monsterList.size();}
-        void monsterRush(string filename, bool new_rush = true); //Fills monsterList
+        void generateMonsterRoster(string filename, bool new_rush = true); //Fills monsterList
         void setRaiseRating(int new_raise);
         void removeMonster(int index);
         int countMonsterRating(int rating);
@@ -163,16 +148,6 @@ class Map{
         Monster returnMonster(int rating, int &monster_index);
         bool bossIsOnlyOneAlive();
         int ratingReconfiguration(int &original_rating);
-};
-
-
-class Test: virtual Map{
-    private:
-    //displayMap();
-    public:
-        Test(){
-            displayMap();
-        }
 };
 
 #endif

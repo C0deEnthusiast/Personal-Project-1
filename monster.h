@@ -47,36 +47,6 @@ struct Monster{
     void setRating(int new_rating);
 };
 
-//Manages construction and set up of monster fights through Battle() class
-class Combat{
-    private:
-        const char separator = ','; //Standard delimiter for monster text files
-        static const int monster_info_count = 10; //Accounts all data sections per monster
-        /*Increases after every consecutive use of monsterRush() after constructor call
-
-        During battle/encounters, it would increment the monster's rating, adjusting
-        rewards as well as monster's damage reduction*/
-        int raise_rating;
-        vector<Monster> refillList; //Designed to skip most of monsterRush() function
-        vector<Monster> monsterList;
-        string monsterFilename;
-    public:
-        Combat(string filename);
-
-        int getMonsterSize(){ return monsterList.size();}
-        void setRaiseRating(int new_raise);
-        void monsterRush(string filename, bool new_rush = true);
-        void removeMonster(int index);
-        int countMonsterRating(int rating);
-
-        //bool monsterAmbush() //Will randomly trigger encounters
-
-        int encounter(Party& party, bool room = false); //Sets up parameters for Battle Class
-        Monster returnMonster(int rating, int &monster_index);
-        bool bossIsOnlyOneAlive();
-        int ratingReconfiguration(int &original_rating);
-};
-
 struct Status{
     int effect_target; //-1 is monster; non-negative values for player index
     Effect power;
@@ -208,7 +178,6 @@ class Battle{
                 player_immuneToDMG = nullptr;
             }
             if (player_charmed != nullptr){
-                cout << "Deleting charm\n";
                 delete[] player_charmed;
                 player_charmed = nullptr;
             }

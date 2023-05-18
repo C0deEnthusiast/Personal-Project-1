@@ -9,111 +9,152 @@
 
 using namespace std;
 
-Map::Map(){
-    resetMap();
-}
-
 Map::Map(string filename, int new_row, int new_cols, int set_max_npc, int set_max_rooms,
  int set_max_hunt){
     raise_rating = 0;
-    monsterFilename = filename; //Remove this once dynamic implementation is complete
-    monsterRush(filename, false);
+    monsterFilename = filename;
+    generateMonsterRoster(filename, false);
 
-    num_rows_proto = new_row;
-    if (num_rows_proto <= 0){
-        num_rows_proto = default_Rows;
+    //Adjusts rows, columns, NPCs, rooms, and hunting groups if invalid
+    num_rows = new_row;
+    if (num_rows <= 0){
+        num_rows = default_Rows;
     }
-    num_cols_proto = new_cols;
-    if (num_cols_proto <= 0){
-        num_cols_proto = default_Cols;
+    num_cols = new_cols;
+    if (num_cols <= 0){
+        num_cols = default_Cols;
     }
-    max_npcs_proto = set_max_npc;
-    if (max_npcs_proto < 0){
-        max_npcs_proto = default_Max_NPC;
+    max_npcs = set_max_npc;
+    if (max_npcs < 0){
+        max_npcs = default_Max_NPC;
     }
-    max_rooms_proto = set_max_rooms;
-    if (max_rooms_proto < 0){
-        max_rooms_proto = default_Max_Room;
+    max_rooms = set_max_rooms;
+    if (max_rooms < 0){
+        max_rooms = default_Max_Room;
     }
-    max_hunt_proto = set_max_hunt;
-    if (max_hunt_proto < 0){
-        max_hunt_proto = default_Max_Hunt_Count;
+    max_hunt = set_max_hunt;
+    if (max_hunt < 0){
+        max_hunt = default_Max_Hunt_Count;
     }
 
-    max_skulls_proto = max_rooms_proto;
+    max_skulls = max_rooms;
 
     
 
-    /*Checks if new dimensions for the grid can support player, gate, 
-    NPCs, rooms, and monsters:
-        - If it does not, changes dimensions to square grid to support it*/
-    if ((num_rows_proto * num_cols_proto) <= (2 + max_npcs_proto + max_rooms_proto + max_hunt_proto)){
-        int length = ceil(pow(2 + max_npcs_proto + max_rooms_proto + max_hunt_proto, 1/2));
-        num_rows_proto = length;
-        num_cols_proto = length;
-    }
-
-    player_position[0] = 0;
-    player_position[1] = 0;
-
-    for (int i = 0; i < max_npcs_proto; i++){
-        //
-    }
-
     /*
-    //Set dungeon gate at fixed point
-    dungeon_gate[0] = num_rows - 1;
-    dungeon_gate[1] = num_cols - 1;
-
-    for (int i = 0; i < max_npcs; i++){
-        npc_positions[i][0] = -1;
-        npc_positions[i][1] = -1;
-        npc_found[i] = false;
+    Checks if new dimensions for the grid can support player, gate, NPCs, rooms, and monsters.
+    If it does not, changes dimensions to square grid to support it
+    */
+    if ((num_rows * num_cols) <= (2 + max_npcs + max_rooms + max_hunt)){
+        int length = ceil(pow(2 + max_npcs + max_rooms + max_hunt, 1/2));
+        num_rows = length;
+        num_cols = length;
     }
 
-    for (int i = 0; i < max_rooms; i++){
-        room_positions[i][0] = -1;
-        room_positions[i][1] = -1;
-    }
-
-    for (int i = 0; i < num_rows; i++){
-        for (int j = 0; j < num_cols; j++)
-        {
-            map_grid[i][j] = unexplored;
-        }
-    }
-    map_grid[dungeon_gate[0]][dungeon_gate[1]] = gate;
-    return;*/
+    resetMap(); //Generates new map
 }
 
 //Resets positions of player, NPCs, and rooms and clears map grid
 void Map::resetMap(){
+    //Sets player at fixed point
+    player_position = new int[2];
     player_position[0] = 0;
     player_position[1] = 0;
 
-    //Set dungeon gate at fixed point
+    //Sets dungeon gate at fixed point
+    dungeon_gate = new int[2];
     dungeon_gate[0] = num_rows - 1;
     dungeon_gate[1] = num_cols - 1;
 
+    //Creates NPC arrays
+    npc_positions = new int*[max_npcs];
+    npc_found = new bool[max_npcs];
     for (int i = 0; i < max_npcs; i++){
+        npc_positions[i] = new int[2];
+        //Sets NPC out of bounds
         npc_positions[i][0] = -1;
         npc_positions[i][1] = -1;
+        //Sets NPC out of sight
         npc_found[i] = false;
     }
 
+    //Creates room array
+    room_positions = new int*[max_rooms];
     for (int i = 0; i < max_rooms; i++){
+        room_positions[i] = new int[2];
+        //Sets room out of bounds
         room_positions[i][0] = -1;
         room_positions[i][1] = -1;
     }
 
+    //Creates hunt arrays
+    hunt_positions = new int*[max_hunt];
+    for (int i = 0; i < max_hunt; i++){
+        hunt_positions[i] = new int[2];
+        //Sets hunting group out of bounds
+        hunt_positions[i][0] = -1;
+        hunt_positions[i][1] = -1;
+    }
+
+    //Creates map grid
+    map_grid = new char*[num_rows];
     for (int i = 0; i < num_rows; i++){
-        for (int j = 0; j < num_cols; j++)
-        {
+        map_grid[i] = new char[num_cols];
+
+        for (int j = 0; j < num_cols; j++){
             map_grid[i][j] = unexplored;
         }
     }
+
+    //Sets dungeon gate on map grid
     map_grid[dungeon_gate[0]][dungeon_gate[1]] = gate;
+
     return;
+}
+
+Map::~Map(){ //Destructor
+    //Deletes player position
+    delete[] player_position;
+    player_position = nullptr;
+
+    //Deletes dungeon gate position
+    delete[] dungeon_gate;
+    dungeon_gate = nullptr;
+
+    //Deletes NPC arrays
+    for (int i = 0; i < max_npcs; i++){
+        delete[] npc_positions[i];
+    }
+    delete[] npc_positions;
+    npc_positions = nullptr;
+
+    delete[] npc_found;
+    npc_found = nullptr;
+
+    //Deletes room array
+    for (int i = 0; i < max_rooms; i++){
+        delete[] room_positions[i];
+    }
+    delete[] room_positions;
+    room_positions = nullptr;
+
+    //Deletes hunt array
+    for (int i = 0; i < max_hunt; i++){
+        delete[] hunt_positions[i];
+    }
+    delete[] hunt_positions;
+    hunt_positions = nullptr;
+
+    //Deletes map grid
+    for (int i = 0; i < num_rows; i++){
+        delete[] map_grid[i];
+    }
+    delete[] map_grid;
+    map_grid = nullptr;
+
+    //Clears monster vectors/lists
+    monsterList.clear();
+    refillList.clear();
 }
 
 //Checks Map Locations
@@ -388,7 +429,7 @@ void Map::exploreSpace(int row, int col){
     return;
 }
 
-void Map::monsterRush(string filename, bool new_rush){
+void Map::generateMonsterRoster(string filename, bool new_rush){
     //If all monsters are defeated, they will be 'resurrected' with higher ratings
     if (new_rush && refillList.size() > 0){
         setRaiseRating(++raise_rating);
@@ -450,7 +491,7 @@ void Map::removeMonster(int index){
 
 int Map::countMonsterRating(int rating){
     int count = 0;
-    for (auto x: monsterList){
+    for (const auto x: monsterList){
         if (x.difficultyRating == rating){
             count++;
         }
@@ -582,7 +623,7 @@ Monster Map::returnMonster(int rating, int &monster_index){
     if (bossIsOnlyOneAlive() && rating != bossRating){
         //cout << "Renews monster roster" << endl;
         monsterList.clear(); //Removes Boss
-        monsterRush(monsterFilename); //Creates monster roster again
+        generateMonsterRoster(monsterFilename); //Creates monster roster again
     }
 
     int search = 0, remove_index = 0, random_monster = -1;
