@@ -104,7 +104,7 @@ class Party{
         int getCurrentArmorCapacity(){ return current_armor_capacity;}
         int getMerchantCapacity(){ return merchantList.size();}
         int getLivePlayerCount();
-        bool isPlayer(int index){ return (index >= 0 && index < player_size);}
+        bool isPlayerIndex(int index){ return (index >= 0 && index < player_size);}
         vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
         Item getWeapon(int index);

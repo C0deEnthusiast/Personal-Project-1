@@ -29,6 +29,8 @@ using namespace std;
 //Defines boss' attack after Resurrection (2nd phase)
 #define bossFinalAttack 30
 
+
+
 struct Monster{
     string monster_name; //Monster Name
     int difficultyRating; //Determines likelihood of encounter, rewards, and monster's damage reduction
@@ -62,6 +64,8 @@ struct Status{
     }
 };
 
+
+//Manages Battle
 class Battle{
     private:
         //For the sake of brevity, parties and monsters will be passed by reference
@@ -72,25 +76,26 @@ class Battle{
         vector<Status> monster_0; //Monster statuses
         vector<Status> playerStatuses[playerCount]; //Player statuses
 
+        //Attack adjustments for weaponsa and monster will be ONLY in battle (unless in 'updates')
+        /*Alternative choice: Let monster stats be updated after battle so as to give
+        player/user an easier/harder time dealing with prior monster after retreat*/
+        Monster temp_monster;
+
+        Item* altered_weapons; //Copies weapons currently equipped; used for damage calculation instead
+
         int player_actions_counter = 0;
         static const int player_actions_max = 7; //Includes taking potions, attacking, and blocking
 
         //Player Modifiers
 
-        bool* player_active = nullptr; //Determines which player can attack/take action
-        bool* player_charmed = nullptr; //Determines which player is charmed into attacking allies
-
-        //Array; determines whether a given player is immune to damage
-        bool* player_immuneToDMG = nullptr; //Determines which player is immune to damage
-
-        //Array; determines whether damage taken accounts for defenses like armor
-        bool* player_defensesUp = nullptr;
-
-        //Determines whether player is blocking
-        bool* player_blocking = nullptr;
-
-        //Array; determines how many times a given player can attack per turn
-        int* player_attack_max = nullptr;
+        //Arrays (Default)
+        bool* player_active; //Determines which player can attack/take action (True)
+        bool* player_charmed; //Determines which player is charmed into attacking allies (False)
+        bool* player_immuneToDMG; //Determines which player is immune to damage (False)
+        bool* player_defensesUp; //Determines whether defense applies during damage calculation (True)
+        bool* player_blocking; //Determines whether player is blocking; see block_reduction (False)
+        int* player_attack_max; //Determines how many times given player can attack per turn (1)
+        
 
         //Monster Modifiers
         
@@ -101,7 +106,7 @@ class Battle{
         //If possible, make another bool for if two monster combat can be implemented
 
         //DMG % reduced if a player chooses to block rather than attack; stacks multiplicately with armor
-        double block_reduction = 0.25;
+        double block_reduction = 25; //Percent form
 
         //Determines who attacks in current turn; player always starts first
         bool player_turn = true;
@@ -119,6 +124,7 @@ class Battle{
                 * Armor? (TBD)
             */
             curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficultyRating);
+            //vector<Item> accessReward = curParty->copyMerchantList();
             return;
         }
 
@@ -137,31 +143,52 @@ class Battle{
             }
             return;
         }
+
+        void removeStatusesHelper(vector<Status> &vect, int target_duration){
+            for (int i = 0; i < vect.size(); i++){
+                if (vect[i].power.getEffectDuration() == target_duration){
+                    vect.erase(vect.begin() + i);
+                    i--;
+                }
+            }
+
+            return;
+        }
         
     public:
         Battle(Party *party, Monster *monster){ //Pass memory addresses
             curParty = party;
             curMonster = monster;
-            player_active = new bool[playerCount];
-            player_charmed = new bool[playerCount];
-            player_immuneToDMG = new bool[playerCount];
-            player_defensesUp = new bool[playerCount];
-            player_blocking = new bool[playerCount];
-            player_attack_max = new int[playerCount];
 
-            for (int i = 0; i < playerCount; i++){
+            int size = curParty->getPlayerSize();
+            //Player modifiers
+            player_active = new bool[size];
+            player_charmed = new bool[size];
+            player_immuneToDMG = new bool[size];
+            player_defensesUp = new bool[size];
+            player_blocking = new bool[size];
+            player_attack_max = new int[size];
+
+            //Weapons
+            altered_weapons = new Item[size];
+
+            for (int i = 0; i < size; i++){
                 player_active[i] = true;
                 player_charmed[i] = false;
                 player_immuneToDMG[i] = false;
                 player_defensesUp[i] = true;
                 player_blocking[i] = false;
                 player_attack_max[i] = 1;
+                altered_weapons[i] = curParty->getPlayer(i).getEquippedWeapon();
+                cout << "altered_weapons[" << i << "] Attack: " << altered_weapons[i].getStat() << "\n";
             }
 
             monster_innate_armor = curMonster->difficultyRating * 10;
-            if (monster_innate_armor > 90){
-                monster_innate_armor = 90;
+            if (monster_innate_armor > maxArmorValue || monster_innate_armor < 0){
+                monster_innate_armor = maxArmorValue;
             }
+
+            temp_monster = *curMonster;
         }
 
         ~Battle(){
@@ -172,14 +199,13 @@ class Battle{
                 delete[] player_active;
                 player_active = nullptr;
             }
-            if (player_immuneToDMG != nullptr){
-                cout << "Deleting immune\n";
-                delete[] player_immuneToDMG;
-                player_immuneToDMG = nullptr;
-            }
             if (player_charmed != nullptr){
                 delete[] player_charmed;
                 player_charmed = nullptr;
+            }
+            if (player_immuneToDMG != nullptr){
+                delete[] player_immuneToDMG;
+                player_immuneToDMG = nullptr;
             }
             if (player_defensesUp != nullptr){
                 delete[] player_defensesUp;
@@ -193,32 +219,28 @@ class Battle{
                 delete[] player_attack_max;
                 player_attack_max = nullptr;
             }
+
+            if (altered_weapons != nullptr){
+                delete[] altered_weapons;
+                altered_weapons = nullptr;
+            }
         }
 
-        //target_index: -1 for monster, otherwise [0,5] for player
+        bool isMonsterIndex(int index){ return (index == -1);} //Update with more monsters per battle
+
+
         void addStatus(Effect new_effect, int target_index){
             Status temp = Status(target_index, new_effect);
-            if (target_index == -1){ //Monster
-                monster_0.push_back(temp);
-            } else if (target_index >= 0 && target_index <= curParty->getPlayerSize()){ //Player
+            if (curParty->isPlayerIndex(target_index)){ //Player
                 playerStatuses[target_index].push_back(temp);
+            } else if (target_index == -1){ //Monster
+                monster_0.push_back(temp);
             }
-            return;
-        }
-
-        void removeStatusesHelper(vector<Status> &vect, int target_duration){
-            for (int i = 0; i < vect.size(); i++){
-                if (vect[i].power.getEffectDuration() == target_duration){
-                    vect.erase(vect.begin() + i);
-                    i--;
-                }
-            }
-
             return;
         }
 
         void removeStatuses(int target_index, int target_duration){
-            if (target_index >= 0 && target_index <= curParty->getPlayerSize()){
+            if (curParty->isPlayerIndex(target_index)){
                 removeStatusesHelper(playerStatuses[target_index],target_duration);
             } else if (target_index == -1) {
                 removeStatusesHelper(monster_0,target_duration);
@@ -230,7 +252,7 @@ class Battle{
         void displayEffects(string name, int health, vector<Status> vect){
             cout << "| " << name << " | " << health << " | ";
             int i = 0;
-            for (auto& x: vect){
+            for (auto x: vect){
                 cout << x.power.getEffectName() << "(" << x.power.getEffectDuration() << ") ";
                 if (x.power.getEffectName() == effect_Burn || x.power.getEffectName() == effect_Bleed){
                     cout << ">> DMG(" << x.power.getEffectValue() << ") ";
@@ -244,11 +266,7 @@ class Battle{
 
         //void activateZeroDurationEffect(Effect effect, int target_index);
 
-        //Used for effects and critical hits
-        bool willOccur(int chance);
-
-        void activateEffect(Status effectData);
-        //Fix node configuration
+        void activateEffect(Status T);
 
         //Update this and monsterCombat
         int playerCombat();
@@ -256,7 +274,7 @@ class Battle{
         //Calculates how monster attacks
         int monsterCombat();
 
-        int adjustAttack(int base_attack, int target_index, int attacker_index);
+        int adjustAttack(int target_index, int attacker_index);
 
 
         //void activateEffect(Party &party, Monster &monster, Effect effect, int target, bool in_effect);

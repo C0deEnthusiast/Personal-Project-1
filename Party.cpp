@@ -44,7 +44,7 @@ vector<Item> Party::copyMerchantList(){
 }
 
 Player Party::getPlayer(int index){
-    if (isPlayer(index)){
+    if (isPlayerIndex(index)){
         return players[index];
     } else {
         return Player();
@@ -52,7 +52,7 @@ Player Party::getPlayer(int index){
 }
 
 Item Party::getWeapon(int index){
-    if (isPlayer(index)){ //Each player has individual weapon
+    if (isPlayerIndex(index)){ //Each player has individual weapon
         return weapon_barracks[index];
     } else {
         return Item();
@@ -60,7 +60,7 @@ Item Party::getWeapon(int index){
 }
 
 Item Party::getArmor(int index){
-    if (isPlayer(index)){ //Each player has individual armor
+    if (isPlayerIndex(index)){ //Each player has individual armor
         return armorSets[index];
     } else {
         return Item();
@@ -141,7 +141,7 @@ Item Party::returnItem(string item_name){
     4) If player is dead and is leader, activates a function regarding this
     Returns: void*/
 void Party::modifyPlayerHealth(int index, int health_change){
-    if (!isPlayer(index)){
+    if (!isPlayerIndex(index)){
         return;
     }
     //This is if a dead player takes lethal health, thereby "dying again"
@@ -150,6 +150,11 @@ void Party::modifyPlayerHealth(int index, int health_change){
         return;
     }
 
+    //Resurrects player
+    /*if (players[index].getPlayerHealth() == 0 && health_change > 0){
+        player_count++;
+    }*/
+
     //Changes specified player's health if the player is not dead
     players[index].setPlayerHealth(players[index].getPlayerHealth() + health_change);
     
@@ -157,6 +162,10 @@ void Party::modifyPlayerHealth(int index, int health_change){
     if (players[index].getPlayerHealth() == 0 && health_change < 0){ //Player is killed
         //Announces player is dead
         cout << players[index].getPlayerName() << " is dead! Stay cautious!" << endl;
+        //Swaps last player with dead player
+        /*Player temp = players[index];
+        players[index] = players[player_count - 1];
+        players[player_count - 1] = temp;*/
         player_count--;
 
         if (players[index].getLeaderStatus()){ //Checks if dead player is the 'leader'
@@ -169,7 +178,7 @@ void Party::modifyPlayerHealth(int index, int health_change){
 }
 
 void Party::modifyWeaponAttack(int index, int attack_change){
-    if (!isPlayer(index)){
+    if (!isPlayerIndex(index)){
         return;
     }
 

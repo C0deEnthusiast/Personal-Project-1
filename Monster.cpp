@@ -108,43 +108,40 @@ int Battle::test(){
     displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
     cout << "Monster attack: " << curMonster->attack_power << endl;
 
+    cout << "\nTesting AdjustAttack():\nBefore: " << altered_weapons[0].getStat();
+    int temp = adjustAttack(0,0);
+    cout << "\nAfter: " << temp << endl;
+
     return 0;
 }
 
-bool Battle::willOccur(int chance){
-    if (chance == 100){ //Bypasses pseudo-random input
-        return true;
-    } else if (chance >= Functions::createRand(1,100)){
-        return true;
-    }
-    return false;
-}
+void Battle::activateEffect(Status T){
+    int target = T.effect_target;
+    Effect effect = T.power;
 
-void Battle::activateEffect(Status effectData){
-    int target = effectData.effect_target;
-    Effect effect = effectData.power;
-
-    bool atMaxDuration = (effect.getEffectDuration() == effectData.max_duration);
+    bool atMaxDuration = (effect.getEffectDuration() == T.max_duration);
     bool atEnd = (effect.getEffectDuration() == 0);
 
     //Bleed and Burn (both behave identically)
     if (effect.getEffectName() == effect_Bleed || effect.getEffectName() == effect_Burn){
-        if (target == -1){ //Targets monster
+        if (curParty->isPlayerIndex(target)){ //Targets player
+            if (!player_immuneToDMG[target]){
+                curParty->modifyPlayerHealth(target,-effect.getEffectValue());
+            }
+        } else if (target == -1){ //Targets player
             curMonster->monster_health -= effect.getEffectValue();
-        } else if (!player_immuneToDMG[target]) { //Targets player (if they can take damage)
-            curParty->modifyPlayerHealth(target,-effect.getEffectValue());
         }
     }
     
-    //Unholy Judgement
+    //Unholy Judgement (activates when effect ends)
     if (effect.getEffectName() == effect_Unholy_Judgement && atEnd){
         //Sets health to 0 when Unholy Judgement ends
-        if (target == -1 && monster_turn){
-            curMonster->monster_health = 0;
-        } else if (player_turn && target >= 0 && target < curParty->getPlayerSize()){
+        if (player_turn && curParty->isPlayerIndex(target)){ //Targets player on their turn
             if (!player_immuneToDMG[target]){
                 curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
             }
+        } else if (target == -1 && monster_turn){ //Targets monster on their turn
+            curMonster->monster_health = 0;
         }
     }
 
@@ -166,8 +163,22 @@ void Battle::activateEffect(Status effectData){
         bool depleteHealth = false;
 
         //Savage Wrath's negative side effect
-        if (effect.getEffectName() == effect_Savage_Wrath == willOccur(effect.getEffectChance())){
-            depleteHealth = true;
+        if (effect.getEffectName() == effect_Savage_Wrath){
+            if (Functions::willOccur(effect.getEffectChance())){
+                depleteHealth = true;
+            }
+        }
+
+        if (curParty->isPlayerIndex(target)){ //Targets player
+            curParty->modifyWeaponAttack(target, changeAtk);
+            if (depleteHealth){
+                curParty->modifyPlayerHealth(target, -changeAtk);
+            }
+        } else if (target == -1){ //Targets monster
+            curMonster->attack_power += changeAtk;
+            if (depleteHealth){
+                curMonster->monster_health -= changeAtk;
+            }
         }
 
         if (target == -1){ //Targets monster
@@ -307,44 +318,59 @@ int Battle::monsterCombat(){
     return 0;
 }
 
-//Note: Monster will not attack itself
-int Battle::adjustAttack(int base_attack, int target_index, int attacker_index){
-    double curAttack = base_attack;
+/*Note: Monster will not attack itself
 
-    if (target_index == -1){
-        //Damage Reduction
-        if (monster_defensesUp){ //Accounts for armor IF defensesUp is true
-            curAttack *= (1 - (static_cast<double> (monster_innate_armor) / 100));
-        } else { //Bypasses armor
-            monster_defensesUp = false;
-        }
+Adjusts attack in following order:
+ - Target's defenses
+ - Attacker's attack power*/
+int Battle::adjustAttack(int target_index, int attacker_index){
+    double curAttack = 0;
 
-        //Damage Boost
-        if (willOccur(curParty->getWeapon(attacker_index).getCritChance())){
-            curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
-        }
-    } else {
-        //Damage Reduction
+    if (curParty->isPlayerIndex(attacker_index)){
+        curAttack = altered_weapons[attacker_index].getStat();
+    } else if (isMonsterIndex(target_index)){
+        curAttack = temp_monster.attack_power;
+    }
+
+    if (curAttack == 0){
+        return 0;
+    }
+
+
+    //Adjusts starting with target's defenses
+    if (curParty->isPlayerIndex(target_index)){
         if (player_immuneToDMG[target_index]){ //Doesn't take damage
             return 0;
         }
         if (player_defensesUp[target_index]){ //Accounts for armor IF defensesUp is true
-            curAttack *= (1 - (static_cast<double> (curParty->getWeapon(target_index).getStat()) / 100));
-            //curParty->getPlayer(target_index).getEquippedWeapon().getStat();
+            double player_armor_value = curParty->getPlayer(target_index).getEquippedArmor().getStat();
+            curAttack *= (1 - Functions::percentToDecimal(player_armor_value));
         } else { //Bypasses armor
             player_defensesUp[target_index] = false;
         }
         if (player_blocking[target_index]){ //Player is blocking
-            curAttack *= (1 - (static_cast<double> (block_reduction) / 100));
+            curAttack *= (1 - Functions::percentToDecimal(block_reduction));
         }
-
-        //Damage Boost
-        if (attacker_index == -1 && willOccur(curMonster->crit_chance)){
-            curAttack *= (1.0 + curMonster->crit_boost);
-        } else if (willOccur(curParty->getWeapon(attacker_index).getCritChance())){
-            curAttack *= (1.0 + curParty->getWeapon(attacker_index).getCritBoost());
+    } else if (isMonsterIndex(target_index)){
+        if (monster_defensesUp){ //Accounts for armor IF defensesUp is true
+            curAttack *= (1 - Functions::percentToDecimal(monster_innate_armor));
+        } else { //Bypasses armor
+            monster_defensesUp = false;
         }
     }
+
+
+    //Adjusts by attacker's stats
+    if (curParty->isPlayerIndex(attacker_index)){
+        if (Functions::willOccur(altered_weapons[attacker_index].getCritChance())){
+            curAttack *= (1 + Functions::percentToDecimal(altered_weapons[attacker_index].getCritBoost()));
+        }
+    } else if (isMonsterIndex(attacker_index)){
+        if (Functions::willOccur(temp_monster.crit_chance)){
+            curAttack *= (1 + Functions::percentToDecimal(temp_monster.crit_boost));
+        }
+    }
+
     //Deducts based on target's armor
     return (int)round(curAttack);
 }

@@ -104,7 +104,7 @@ class Effect{
 };
 
 
-//General Functions to use
+//General functions to use
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
     inline int createRand(int min, int max){
@@ -113,16 +113,19 @@ namespace Functions{
 
     //Checks if event will occur based on likelihood
     inline bool willOccur(int probability){
+        if (probability == 100){ //Bypasses createRand()
+            return true;
+        }
         return (probability >= createRand(1,100));
     }
     
-    //Checks if input is a number
+    //Checks if input line is a number
     inline bool isNumber(string line){ //Checks for digits
         if (line.length() == 0){
             return false;
         }
-        for (int i = 0; i < line.length(); i++){ //Checks if amount is a number
-            if (!isdigit(line[i])){
+        for (auto x: line){ //Checks if amount is a number
+            if (!isdigit(x)){
                 return false;
             }
         }
@@ -213,7 +216,8 @@ namespace Functions{
         return v;
     }
 
-    inline void convenientStop(string stop = ""){ //Intended to let user read what exposition goddamn says
+    //Intended to let user read what exposition goddamn says
+    inline void convenientStop(string stop = ""){
         cout << "(Enter a character to continue)" << endl;
         getline(cin, stop);
 
@@ -222,7 +226,7 @@ namespace Functions{
 
     //Returns splice count of input string
     inline int arraySplit(string input_string, char separator, string arr[], int arr_size){
-        if (input_string.length() == 0){ //Makes sure input_string is proper length
+        if (input_string.length() == 0 || arr_size <= 0){ //Makes sure input_string is proper length
             return 0;
         }
 
@@ -252,6 +256,8 @@ namespace Functions{
 
         return;
     }
+
+    inline double percentToDecimal(int value){ return (static_cast<double> (value) / 100);}
 };
 
 

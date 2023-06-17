@@ -34,7 +34,7 @@ void Player::setPlayerName(string new_name){
 void Player::setPlayerHealth(int new_health){
     health = new_health;
 
-    //Changess health if outside of bounds
+    //Changes health if outside of bounds
     if (health > defaultPlayerHealth){
         health = defaultPlayerHealth;
     } else if (health <= 0){

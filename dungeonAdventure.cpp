@@ -157,7 +157,7 @@ int main(int argc, char *argv[]){
         cout << endl;
     }
 
-    cout << "Give our merchant a second to prepare his goods..." << endl;
+    cout << "Give our merchant a second to prepare his goods...\n\n";
 
     //NPC Generation
     for (int i = 0; i < dungeon.getMaxNPC(); i++){

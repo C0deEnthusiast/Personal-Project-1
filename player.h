@@ -21,10 +21,10 @@ class Player{ //Consider whether to have Monster class inherit this
         string name;
         int health;
         //Currently not important; maybe will implement a leader effect
-        bool leader; //False for four companions
-    public:
+        bool leader; //False for companions
         Item equipped_weapon;
         Item equipped_armor;
+    public:
         
         Player();
         Player(string new_name, int new_health, bool leader);
@@ -42,6 +42,8 @@ class Player{ //Consider whether to have Monster class inherit this
         void setLeaderStatus(bool new_status);
         void setEquippedWeapon(Item item);
         void setEquippedArmor(Item item);
+
+        //Item modifiers
 };
 
 #endif
