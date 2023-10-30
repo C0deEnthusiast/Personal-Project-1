@@ -53,11 +53,28 @@ struct Status{
     int effect_target; //-1 is monster; non-negative values for player index
     Effect power;
     int max_duration;
+    //Status* next;
     Status(){
         effect_target = -2;
         max_duration = 0;
     }
     Status(int new_target, Effect new_power){
+        effect_target = new_target;
+        power = new_power;
+        max_duration = new_power.getEffectDuration();
+    }
+};
+
+struct pStatus{
+    int effect_target; //-1 is monster; non-negative values for player index
+    Effect power;
+    int max_duration;
+    pStatus* next;
+    pStatus(){
+        effect_target = -2;
+        max_duration = 0;
+    }
+    pStatus(int new_target, Effect new_power){
         effect_target = new_target;
         power = new_power;
         max_duration = new_power.getEffectDuration();
@@ -76,7 +93,11 @@ class Battle{
         vector<Status> monster_0; //Monster statuses
         vector<Status> playerStatuses[playerCount]; //Player statuses
 
-        //Attack adjustments for weaponsa and monster will be ONLY in battle (unless in 'updates')
+        //Effect Tracker (updated)
+        pStatus** playerStatusArray;
+        pStatus* first_monster_head;
+
+        //Attack adjustments for weapons and monster will be ONLY in battle (unless in 'updates')
         /*Alternative choice: Let monster stats be updated after battle so as to give
         player/user an easier/harder time dealing with prior monster after retreat*/
         Monster temp_monster;
@@ -88,7 +109,7 @@ class Battle{
 
         //Player Modifiers
 
-        //Arrays (Default)
+        //Arrays (Default Value)
         bool* player_active; //Determines which player can attack/take action (True)
         bool* player_charmed; //Determines which player is charmed into attacking allies (False)
         bool* player_immuneToDMG; //Determines which player is immune to damage (False)
@@ -156,7 +177,7 @@ class Battle{
         }
         
     public:
-        Battle(Party *party, Monster *monster){ //Pass memory addresses
+        Battle(Party *party, Monster *monster){ //Constructor; pass memory addresses
             curParty = party;
             curMonster = monster;
 
@@ -171,6 +192,10 @@ class Battle{
 
             //Weapons
             altered_weapons = new Item[size];
+
+            //Updated Status tracker
+            playerStatusArray = new pStatus*[size];
+            //first_monster_head = new pStatus();
 
             for (int i = 0; i < size; i++){
                 player_active[i] = true;
@@ -191,7 +216,8 @@ class Battle{
             temp_monster = *curMonster;
         }
 
-        ~Battle(){
+        ~Battle(){ //Destructor
+            int size = curParty->getPlayerSize(); //For destruction of player status array
             curParty = nullptr;
             curMonster = nullptr;
 
@@ -223,6 +249,32 @@ class Battle{
             if (altered_weapons != nullptr){
                 delete[] altered_weapons;
                 altered_weapons = nullptr;
+            }
+
+            pStatus* del = nullptr;
+
+            //Updated Status Tracker
+            if (playerStatusArray != nullptr){
+                //Create efficient delete function later
+                for (int i = 0; i < size; i++){
+                    //Deletes each chain
+                    while (playerStatusArray[i] != nullptr){
+                        del = playerStatusArray[i];
+                        playerStatusArray[i] = playerStatusArray[i]->next;
+                        delete del;
+                        del = nullptr;
+                    }
+                }
+                delete[] playerStatusArray;
+                playerStatusArray = nullptr;
+            }
+
+            //Again, create efficient delete function later
+            while (first_monster_head != nullptr){
+                del = first_monster_head;
+                first_monster_head = first_monster_head->next;
+                delete del;
+                del = nullptr;
             }
         }
 
@@ -282,10 +334,15 @@ class Battle{
         void postBattleActivate(Party &party, Monster &monster);
 };
 
+
+//Update Battle class to use <Status> single link lists instead of <Status> vectors
+//  - If necessary, use templates
+
+
 //Ideas for effects to implement
 /*
  *Effect that any damage taken from player heals monster instead
- *Experiment: Replace "Crit Multiplier" effect with another; make crit innate to weapons and monsters
+ *Replace "Crit Multiplier" effect with another; make crit innate to weapons and monsters (Ongoing)
  *Implement <Item> weapon into Player Class Implementation (if possible)
 */
 

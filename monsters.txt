@@ -1,6 +1,6 @@
 Update all monsters
 
-Monster Information
+Monster Schema
 Name => Rating => Attack => Health => Crit Chance => Crit Boost
 => Ability => Ability Strength/Value => Chance => Duration
  - Name: Self-explanatory
@@ -40,11 +40,13 @@ Blighted Peasant,1,5,10,25,40,Bleed,1,100,10
 Bribed Guards,1,5,5,100,100,Rampage,3,10,1
 Sinful Clergy,1,5,15,50,80,Condemnation,0,20,1
 
+
 Rating: 2
 False Prophet,2,10,20,10,20,Condemnation,0,30,2
 Traitorous Priest,2,0,80,100,50,Savage Wrath,10,40,-1
 Blighted Clergy,2,10,20,60,40,Bleed,5,100,4
 Undead Soldier,2,10,20,10,50,Rampage,2,40,1
+
 
 Rating: 3
 Warped Human,3,10,30,25,20,Wrath,10,50,1
@@ -52,23 +54,28 @@ Undead Soldier,3,5,40,50,100,Rampage,3,80,1
 Greedy Lord,3,1,100,0,0,Condemnation,0,50,2
 Hellhound,3,0,300,100,20,Savage Wrath,15,100,-1
 
+
 Rating: 4
 Assassin,4,10,200,40,120,Bleed,5,100,10
 Summoned Demon,4,15,350,20,200,Unholy Judgement,0,100,15
 Heathenous Bishop,4,20,360,100,150,Savage Wrath,10,50,-1
 Tainted Maiden,4,10,400,25,150,Unholy Judgement,0,100,10
 
+
 Rating: 5
 Ravenous Shadow,5,1,400,0,0,Bleed,10,100,100
 Skeleton Dragon,5,20,250,10,150,Rampage,3,100,1
 Corrupted Knight,5,20,300,25,100,Unholy Judgement,0,100,7
 
+
 Rating: 6 (Hardest non-Boss)
 Archbishop of Sin,6,10,700,75,50,Condemnation,0,100,3
 Nightmare Saintess,6,40,500,50,100,Unholy Judgement,1,100,5
 
+
 Rating: 7 (Boss)
 Wicked God,7,20,1000,50,200,Final Requiem,1,100,1
 
+
 Boss' Transformation (2nd phase)
-The Condemned One,0,0,0,100,300,,Final Requiem,1,0,1
+The Condemned One,8,0,0,50,300,Final Requiem,1,0,1

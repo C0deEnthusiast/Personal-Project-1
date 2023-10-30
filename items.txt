@@ -17,7 +17,7 @@ Weapon Effect List:
     - None: Literally does nothing (Default Constructor)
     - Burn: Inflicts x DMG every turn for z turns
     - Freeze: Immobilizes enemy from attacking for z turns
-    - Pierce: Weapon DMG ignores enemy armor
+    - Pierce: Weapon DMG ignores enemy armor when attacking
         - Note: 0 for effect Value and 100% for effect chance
     - Enemy Current HP DMG: Inflicts DMG based on x percentage of enemy's current health
 
@@ -107,3 +107,4 @@ Armor List:
 Tattered Armor,armor,5,10,0,0,None,0,0,0
 Steel Armor,armor,15,25,0,0,None,0,0,0
 King's Armor,armor,40,50,0,0,None,0,0,0
+Test Armor,armor,1,17,0,0,None,0,0,0

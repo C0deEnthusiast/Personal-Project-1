@@ -117,45 +117,45 @@ int Battle::test(){
 
 void Battle::activateEffect(Status T){
     int target = T.effect_target;
-    Effect effect = T.power;
+    //Effect effect = T.power;
 
-    bool atMaxDuration = (effect.getEffectDuration() == T.max_duration);
-    bool atEnd = (effect.getEffectDuration() == 0);
+    bool atMaxDuration = (T.power.getEffectDuration() == T.max_duration);
+    bool atEnd = (T.power.getEffectDuration() == 0);
 
     //Bleed and Burn (both behave identically)
-    if (effect.getEffectName() == effect_Bleed || effect.getEffectName() == effect_Burn){
+    if (T.power.getEffectName() == effect_Bleed || T.power.getEffectName() == effect_Burn){
         if (curParty->isPlayerIndex(target)){ //Targets player
             if (!player_immuneToDMG[target]){
-                curParty->modifyPlayerHealth(target,-effect.getEffectValue());
+                curParty->modifyPlayerHealth(target,-T.power.getEffectValue());
             }
         } else if (target == -1){ //Targets player
-            curMonster->monster_health -= effect.getEffectValue();
+            curMonster->monster_health -= T.power.getEffectValue();
         }
     }
     
     //Unholy Judgement (activates when effect ends)
-    if (effect.getEffectName() == effect_Unholy_Judgement && atEnd){
+    if (T.power.getEffectName() == effect_Unholy_Judgement && atEnd){
         //Sets health to 0 when Unholy Judgement ends
         if (player_turn && curParty->isPlayerIndex(target)){ //Targets player on their turn
             if (!player_immuneToDMG[target]){
                 curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
             }
-        } else if (target == -1 && monster_turn){ //Targets monster on their turn
+        } else if (isMonsterIndex(target) && monster_turn){ //Targets monster on their turn
             curMonster->monster_health = 0;
         }
     }
 
     //Wrath and Savage Wrath
-    if (effect.getEffectName() == effect_Wrath || effect.getEffectName() == effect_Savage_Wrath){
+    if (T.power.getEffectName() == effect_Wrath || T.power.getEffectName() == effect_Savage_Wrath){
         //cout << "Activating Wrath" << endl;
         if (!(atMaxDuration || atEnd)){ //Neither activated or at end of duration
             return;
         }
         //cout << "Modifying Attack" << endl;
 
-        int changeAtk = effect.getEffectValue();
+        int changeAtk = T.power.getEffectValue();
 
-        if (effect.getEffectName() == effect_Wrath && atEnd){ //Removes attack boost if it is normal Wrath
+        if (T.power.getEffectName() == effect_Wrath && atEnd){ //Removes attack boost if it is normal Wrath
             cout << "Removing Wrath" << endl;
             changeAtk = -changeAtk;
         }
@@ -163,145 +163,142 @@ void Battle::activateEffect(Status T){
         bool depleteHealth = false;
 
         //Savage Wrath's negative side effect
-        if (effect.getEffectName() == effect_Savage_Wrath){
-            if (Functions::willOccur(effect.getEffectChance())){
+        if (T.power.getEffectName() == effect_Savage_Wrath && atMaxDuration){
+            if (Functions::willOccur(T.power.getEffectChance())){
                 depleteHealth = true;
             }
         }
 
         if (curParty->isPlayerIndex(target)){ //Targets player
-            curParty->modifyWeaponAttack(target, changeAtk);
+            //curParty->modifyWeaponAttack(target, changeAtk);
+            altered_weapons[target].setStat(altered_weapons[target].getStat() + changeAtk);
             if (depleteHealth){
                 curParty->modifyPlayerHealth(target, -changeAtk);
             }
-        } else if (target == -1){ //Targets monster
+        } else if (isMonsterIndex(target)){ //Targets monster
             curMonster->attack_power += changeAtk;
             if (depleteHealth){
                 curMonster->monster_health -= changeAtk;
-            }
-        }
-
-        if (target == -1){ //Targets monster
-            curMonster->attack_power += changeAtk;
-            if (depleteHealth){
-                curMonster->monster_health -= changeAtk;
-            }
-        } else { //Targets player
-            curParty->modifyWeaponAttack(target, changeAtk);
-            if (depleteHealth){
-                curParty->modifyPlayerHealth(target, -changeAtk);
             }
         }
     }
 
     //Condemnation
-    if (effect.getEffectName() == effect_Condemnation){
-        if (target == -1){ //Will NOT activate on monster (for now)
+    if (T.power.getEffectName() == effect_Condemnation){
+        if (isMonsterIndex(target)){ //Will NOT activate on monster (for now)
             return;
         }
-        if (atMaxDuration && player_turn){
+        if (atMaxDuration && player_turn && curParty->isPlayerIndex(target)){ //Applies charm
             player_charmed[target] = true;
-        } else if (atEnd && player_turn){
+        } else if (atEnd && player_turn && curParty->isPlayerIndex(target)){ //Removes charm
             player_charmed[target] = false;
         }
     }
 
     //Enemy Current Health Damage
-    if (effect.getEffectName() == effect_EnemyHP){
+    if (T.power.getEffectName() == effect_EnemyHP){
         double curHealth;
-        if (target == -1){
-            curHealth = static_cast <double> (curMonster->monster_health);
-        } else {
+        if (curParty->isPlayerIndex(target)){
             if (player_immuneToDMG[target]){
                 return;
             }
             curHealth = static_cast <double> (curParty->getPlayer(target).getPlayerHealth());
+        } else if (isMonsterIndex(target)){
+            curHealth = static_cast <double> (curMonster->monster_health);
         }
 
-        double healthDMG = (effect.getEffectValue() / 100) * curHealth; //Determines damage
+        //double healthDMG = (effect.getEffectValue() / 100) * curHealth; //Determines damage
+        curHealth *= (T.power.getEffectValue() / 100); //Determines damage
 
-        if (target == -1){
-            curMonster->monster_health -= healthDMG;
-        } else {
-            curParty->modifyPlayerHealth(target, -healthDMG);
+        if (curParty->isPlayerIndex(target)){
+            curParty->modifyPlayerHealth(target, -curHealth);
+        } else if (isMonsterIndex(target)){
+           curMonster->monster_health -= curHealth;
+
         }
     }
 
     //Freeze
-    if (effect.getEffectName() == effect_Freeze){
+    if (T.power.getEffectName() == effect_Freeze){
         if (atMaxDuration){ //Applies freeze
-            if (target == -1){
-                monster_active = false;
-            } else {
+            if (curParty->isPlayerIndex(target)){
                 player_active[target] = false;
+            } else if (isMonsterIndex(target)){
+                monster_active = false;
             }
         } else if (atEnd){ //Removes freeze
-            if (target == -1){
-                monster_active = true;
-            } else {
+            if (curParty->isPlayerIndex(target)){
                 player_active[target] = true;
+            } else if (isMonsterIndex(target)){
+                monster_active = true;
             }
         }
     }
 
     //Heal
-    if (effect.getEffectName() == effect_Heal){
+    if (T.power.getEffectName() == effect_Heal){
         //Heal will NOT work on dead monster/players
-        if (target == -1 && curMonster->monster_health != 0){
-            curMonster->monster_health += effect.getEffectValue();
-        } else if (curParty->getPlayer(target).getPlayerHealth() != 0){
-            curParty->modifyPlayerHealth(target, effect.getEffectValue());
+        if (curParty->isPlayerIndex(target)){
+            if (curParty->getPlayer(target).getPlayerHealth() > 0){
+                curParty->modifyPlayerHealth(target, T.power.getEffectValue());
+            }
+        } else if (isMonsterIndex(target) && curMonster->monster_health > 0){
+            curMonster->monster_health += T.power.getEffectValue();
         }
     }
 
-    //Pierce activates here; after attack (seperate) occurs, bool is manually changed to true
-    if (effect.getEffectName() == effect_Pierce){
-        if (target == -1){
-            monster_defensesUp = false;
-        } else {
+    //Pierce activates here; defensesUp changes to true in adjustAttack() function
+    if (T.power.getEffectName() == effect_Pierce){
+        if (curParty->isPlayerIndex(target)){
             player_defensesUp[target] = false;
+        } else if (isMonsterIndex(target)){
+            monster_defensesUp = false;
         }
     }
 
     //Attacking more than once
-    if (effect.getEffectName() == effect_Rage || effect.getEffectName() == effect_Rampage){
+    if (T.power.getEffectName() == effect_Rage || T.power.getEffectName() == effect_Rampage){
         if (atMaxDuration){ //Applies Rage or Rampage
-            if (target == -1){
-                monster_attack_max = effect.getEffectValue();
-            } else {
-                player_attack_max[target] = effect.getEffectValue();
+            if (curParty->isPlayerIndex(target)){
+                player_attack_max[target] = T.power.getEffectValue();
+            } else if (isMonsterIndex(target)){
+                monster_attack_max = T.power.getEffectValue();
             }
         } else if (atEnd){ //Removes effect
-            if (target == -1){
-                monster_attack_max = 1;
-            } else {
+            if (curParty->isPlayerIndex(target)){
                 player_attack_max[target] = 1;
+            } else if (isMonsterIndex(target)){
+                monster_attack_max = 1;
             }
         }
     }
 
-    if (effect.getEffectName() == effect_Resurrection){
-        //Applies to boss monster
-        if (target == -1 && curMonster->difficultyRating == bossRating && curMonster->monster_health == 0){
-            curMonster->monster_health = bossFinalHealth;
-        } else if (curParty->getPlayer(target).getPlayerHealth() == 0){ //Applies to players
-            curParty->modifyPlayerHealth(target, defaultPlayerHealth);
+    if (T.power.getEffectName() == effect_Resurrection){
+        if (curParty->isPlayerIndex(target)){
+            if (curParty->getPlayer(target).getPlayerHealth() == 0){
+                curParty->modifyPlayerHealth(target, defaultPlayerHealth);
+            }
+        } else if (isMonsterIndex(target)){
+            //Applies to boss monster only
+            if (curMonster->difficultyRating == bossRating && curMonster->monster_health == 0){
+                curMonster->monster_health = bossFinalHealth;
+            }
         }
     }
 
-    if (effect.getEffectName() == effect_Undying && target != -1){
+    if (T.power.getEffectName() == effect_Undying && curParty->isPlayerIndex(target)){
         if (atMaxDuration){
             player_immuneToDMG[target] = true;
-        } else {
+        } else if (atEnd) {
             player_immuneToDMG[target] = false;
         }
     }
 
-    if (effect.getEffectName() == effect_Godslayer){
+    if (T.power.getEffectName() == effect_Godslayer){
         //
     }
 
-    if (effect.getEffectName() == effect_Final_Requiem){
+    if (T.power.getEffectName() == effect_Final_Requiem){
         //
     }
 
@@ -344,16 +341,19 @@ int Battle::adjustAttack(int target_index, int attacker_index){
         }
         if (player_defensesUp[target_index]){ //Accounts for armor IF defensesUp is true
             double player_armor_value = curParty->getPlayer(target_index).getEquippedArmor().getStat();
-            curAttack *= (1 - Functions::percentToDecimal(player_armor_value));
+            //curAttack *= (1 - Functions::percentToDecimal(player_armor_value));
+            curAttack *= (1 - static_cast<double> (player_armor_value) / 100);
         } else { //Bypasses armor
             player_defensesUp[target_index] = false;
         }
         if (player_blocking[target_index]){ //Player is blocking
-            curAttack *= (1 - Functions::percentToDecimal(block_reduction));
+            //curAttack *= (1 - Functions::percentToDecimal(block_reduction));
+            curAttack *= (1 - static_cast<double> (block_reduction) / 100);
         }
     } else if (isMonsterIndex(target_index)){
         if (monster_defensesUp){ //Accounts for armor IF defensesUp is true
-            curAttack *= (1 - Functions::percentToDecimal(monster_innate_armor));
+            //curAttack *= (1 - Functions::percentToDecimal(monster_innate_armor));
+            curAttack *= (1 - static_cast<double> (monster_innate_armor) / 100);
         } else { //Bypasses armor
             monster_defensesUp = false;
         }
@@ -371,6 +371,6 @@ int Battle::adjustAttack(int target_index, int attacker_index){
         }
     }
 
-    //Deducts based on target's armor
-    return (int)round(curAttack);
+
+    return round(curAttack);
 }

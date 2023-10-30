@@ -151,14 +151,14 @@ namespace Functions{
 
         //Potion
         if (T.getEffectName() == effect_Heal){
-            cout << "Heals chosen player by " << T.getEffectValue() << ".";
+            cout << "Heals Target player by " << T.getEffectValue() << ".";
         } else if (T.getEffectName() == effect_Rage){
-            cout << "Chosen player gets to attack " << T.getEffectValue();
+            cout << "Target player gets to attack " << T.getEffectValue();
             cout << " times. Lasts " << T.getEffectDuration() <<" turns.";
         } else if (T.getEffectName() == effect_Undying){
-            cout << "Chosen player takes no damage for " << T.getEffectDuration() << " turns.";
+            cout << "Target player takes no damage for " << T.getEffectDuration() << " turns.";
         } else if (T.getEffectName() == effect_Resurrection){
-            cout << "Revives chosen dead player.";
+            cout << "Revives target player if health is 0.";
         } else if (T.getEffectName() == effect_Godslayer){
             cout << "No god will stand against you. Not anymore.";
         }
@@ -182,10 +182,10 @@ namespace Functions{
             cout << "Permanently boosts attack by " << T.getEffectValue();
             cout << " every turn; has " << T.getEffectChance();
             cout << "% chance to lose " << T.getEffectValue() << " health.";
-        } else if (T.getEffectName() == effect_Wicked___){
+        } else if (T.getEffectName() == effect_Wicked___){ //Revise effect
             cout << "Complete effect";
         } else if (T.getEffectName() == effect_Unholy_Judgement){
-            cout << "Targeted player will be instantly killed after "; 
+            cout << "Affected player will be instantly killed after "; 
             cout << T.getEffectDuration() << " turns.";
         } else if (T.getEffectName() == effect_Final_Requiem){ //Revise effect
             cout << "Revise effect from monster text file";
@@ -195,7 +195,7 @@ namespace Functions{
         return;
     }
 
-    inline vector<string> copyFile(string fileName){ //Does not close file
+    inline vector<string> copyFile(string fileName){
         ifstream file_(fileName);
         vector<string> v;
         string line;
