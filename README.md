@@ -1,13 +1,18 @@
-# New Documentation Page
+# Personal Project 1 - Dungeon Adventure Game
 
-------------------------
-HOW TO COMPILE AND RUN
-------------------------
+## How to Compile and Run
+
+### (Recall, still in development phase)
+
+Use the following to compile:
+'''
+g++ -std=c++17 dungeonAdventure.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
+'''
 Compile:
+
 g++ -std=c++17 dungeonAdventure.cpp Map.cpp Item.cpp Party.cpp Player.cpp Monster.cpp -o game
 Run: (Exactly four arguments)
 ./game items.txt monsters.txt story.txt
-------------------------
 DEPENDENCIES
 ------------------------
 Header Files: item.h, map.h, monster.h, party.h, player.h
