@@ -104,7 +104,7 @@ class Effect{
 };
 
 
-//General functions to use
+//General-use functions
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
     inline int createRand(int min, int max){
