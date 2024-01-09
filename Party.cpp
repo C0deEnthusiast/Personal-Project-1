@@ -441,7 +441,7 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     }
 
     if (target == isWeapon || target == isPotion){
-        Functions::displayEffect(item.weapon_effect);
+        displayEffect(item.weapon_effect);
     }
 }
 

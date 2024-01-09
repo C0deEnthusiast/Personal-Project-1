@@ -3,12 +3,14 @@
 
 #include <iostream>
 //#include <ctype.h>
-#include <vector>
-#include <fstream>
-#include <sstream>
+//#include <vector>
+//#include <fstream>
+//#include <sstream>
 
 #ifndef ITEM_H
 #define ITEM_H
+
+using namespace std;
 
 //Default item name
 #define default_item_name "Not an Item"
@@ -49,28 +51,27 @@
 #define effect_Taunt "Taunt"
 #define effect_Deflect "Deflect"
 
-using namespace std;
 
 
 //Used by both items and monsters
 class Effect{
     private:
-        string effect_name; //Name of effect
+        std::string effect_name; //Name of effect
         int effect_value; //Varies from effect (e.g. damage)
         int effect_procChance; //Chance of effect occurring
         int effect_duration; //How long effect occurs before expiring
     public:
         Effect();
-        Effect(string name, int value, int chance, int duration);
+        Effect(std::string name, int value, int chance, int duration);
 
         //Effect Getters
-        string getEffectName();
+        std::string getEffectName();
         int getEffectValue();
         int getEffectChance();
         int getEffectDuration();
 
         //Effect Setters
-        void setEffectName(string new_name);
+        void setEffectName(std::string new_name);
         void setEffectValue(int new_value);
         void setEffectChance(int new_chance);
         void setEffectDuration(int new_duration);
@@ -81,8 +82,8 @@ class Effect{
 
 class Item{
     private:
-        string item_name; //Universal attributes
-        string item_type; //Type of Item (weapon, cookware, treasure)
+        std::string item_name; //Universal attributes
+        std::string item_type; //Type of Item (weapon, cookware, treasure)
         int item_cost; //For merchants only; also works for treasures
         int item_stats; //Attack (weapon), DMG Reduction (armor), and potions get other special stats
         int crit_chance;
@@ -91,181 +92,26 @@ class Item{
         Effect weapon_effect;
 
         Item(); //Default constructor
-        Item(string name, string type, int cost, int stat, int critChance, int critBoost, 
-        string effectName, int effectValue, int effectChance, int effectDuration); //Parameterized constructor
+
+        //Parameterized constructor
+        Item(std::string name, string type, int cost, int stat, int critChance, int critBoost, 
+        std::string effectName, int effectValue, int effectChance, int effectDuration);
 
         //Getters
-        string getItemName(){ return item_name;};
-        string getItemType(){ return item_type;};
+        std::string getItemName(){ return item_name;};
+        std::string getItemType(){ return item_type;};
         int getCost(){ return item_cost;};
         int getStat(){ return item_stats;}; //See details in items.txt file
         int getCritChance(){ return crit_chance;};
         int getCritBoost(){ return crit_boost;};
 
         //Setters
-        void setItemName(string new_name);
-        void setItemType(string new_type);
+        void setItemName(std::string new_name);
+        void setItemType(std::string new_type);
         void setCost(int new_cost);
         void setStat(int value);
         void setCritChance(int value);
         void setCritBoost(int value);
-};
-
-
-//General-use functions
-namespace Functions{
-    //Outputs pseudo-random value within a specified interval
-    inline int createRand(int min, int max){ return (rand() % (max - min + 1)) + min;}
-
-    //Checks if event will occur based on likelihood; input probability in percentage form
-    inline bool willOccur(int probability){
-        //Bypasses createRand() if event is essentially guaranteed to occur
-        if (probability >= 100){ return true;}
-
-        return (probability >= createRand(1,100));
-    }
-    
-    //Checks if input string is a number
-    inline bool isNumber(string line){
-        if (line.length() == 0){ return false;}
-
-        for (auto x: line){ //Checks if there are any char that are not numbers
-            if (!isdigit(x)){ return false;}
-        }
-
-        return true;
-    }
-
-    inline void displayEffect(Effect T){
-        cout << "     Ability: " << T.getEffectName() << " - ";
-
-        //Weapon
-        if (T.getEffectName() == effect_Burn){
-            cout << "Inflicts " << T.getEffectValue() << " damage onto enemy every turn. ";
-            cout << "Lasts for " << T.getEffectDuration() << " turn(s).";
-        } else if (T.getEffectName() == effect_EnemyHP){
-            cout << "Inclicts damage equal to " << T.getEffectValue() << "% of the enemy's ";
-            cout << "current health (before base attack calculation).";
-        } else if (T.getEffectName() == effect_Freeze){
-            cout << "Immobilize enemy for " << T.getEffectDuration() << " turns.";
-        } else if (T.getEffectName() == effect_Pierce){
-            cout << "Weapon damage ignores enemy defenses, including armor.";
-        }
-
-        //Potion
-        if (T.getEffectName() == effect_Heal){
-            cout << "Heals Target player by " << T.getEffectValue() << ".";
-        } else if (T.getEffectName() == effect_Rage){
-            cout << "Target player gets to attack " << T.getEffectValue();
-            cout << " times. Lasts " << T.getEffectDuration() <<" turns.";
-        } else if (T.getEffectName() == effect_Undying){
-            cout << "Target player takes no damage for " << T.getEffectDuration() << " turns.";
-        } else if (T.getEffectName() == effect_Resurrection){
-            cout << "Revives target player if they take lethal damage.";
-        } else if (T.getEffectName() == effect_Godslayer){
-            cout << "No god will stand against you. Not anymore.";
-        }
-
-        //Monster
-        if (T.getEffectName() == effect_Wrath){
-            cout << "Has " << T.getEffectChance();
-            cout << "% chance to temporary boost its own attack by " << T.getEffectValue() << ".";
-        } else if (T.getEffectName() == effect_Bleed){
-            cout << "Inflicts " << T.getEffectValue();
-            cout << " damage onto target player every turn. Lasts ";
-            cout << T.getEffectDuration() << " turns.";
-        } else if (T.getEffectName() == effect_Rampage){
-            cout << "Has " << T.getEffectChance() << "% chance to strike ";
-            cout << T.getEffectValue() << " times per turn.";
-        } else if (T.getEffectName() == effect_Condemnation){
-            cout << "Has " << T.getEffectChance();
-            cout << "% chance to confuse target into attacking teammates. Lasts ";
-            cout << T.getEffectDuration() << " turns.";
-        } else if (T.getEffectName() == effect_Savage_Wrath){
-            cout << "Permanently boosts attack by " << T.getEffectValue();
-            cout << " every turn; has " << T.getEffectChance();
-            cout << "% chance to lose " << T.getEffectValue() << " health.";
-        } else if (T.getEffectName() == effect_Wicked___){ //Revise effect
-            cout << "Complete effect";
-        } else if (T.getEffectName() == effect_Unholy_Judgement){
-            cout << "Affected player will be instantly killed after "; 
-            cout << T.getEffectDuration() << " turns.";
-        } else if (T.getEffectName() == effect_Final_Requiem){ //Revise effect
-            cout << "Revise effect from monster text file";
-        }
-        cout << endl;
-
-        return;
-    }
-
-    //Copies lines from the specified file into a string vector and returns the vector
-    inline vector<string> copyFile(string fileName){
-        ifstream file_(fileName);
-        vector<string> v;
-        string line;
-
-        if (!file_.is_open()){
-            cout << "File is not open\n";
-            return v;
-        }
-
-        while (getline(file_,line)){
-            if (line.length() == 0){ continue;}
-
-            v.push_back(line);
-        }
-
-        file_.close();
-
-        return v;
-    }
-
-    //Uses placeholder string as a stall to let user read what the exposition says
-    inline void convenientStop(void){
-        string stop;
-        cout << "(Enter a character to continue)" << endl;
-        getline(cin, stop);
-
-        return;
-    }
-
-    /* Uses 'seperator' to splice input string and stores them into specified 'arr' array
-
-    Returns splice count of input string*/
-    inline int arraySplit(string input_string, char separator, string arr[], int arr_size){
-        if (input_string.length() == 0 || arr_size <= 0){ //Makes sure input_string is proper length
-            return 0;
-        }
-
-        istringstream splice(input_string);
-        int split_count = 0;
-
-        while(getline(splice,arr[split_count],separator)){
-            split_count++;
-            
-            if (split_count == arr_size){
-                break;
-            }
-        }
-        return split_count;
-    }
-
-    // Uses 'seperator' to splice input string and stores them into specified 'vect' vector
-    inline void vectorSplit(string input_string, char separator, vector<string> &vect){
-        if (input_string.length() == 0){ //Makes sure input_string is proper length
-            return;
-        }
-
-        istringstream splice(input_string);
-
-        while (getline(splice,input_string,separator)){
-            vect.push_back(input_string);
-        }
-
-        return;
-    }
-
-    inline double percentToDecimal(int value){ return (static_cast<double> (value) / 100);}
 };
 
 #endif

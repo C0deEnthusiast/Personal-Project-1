@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "item.h"
+#include "functions.h"
 
 #ifndef PLAYER_H
 #define PLAYER_H

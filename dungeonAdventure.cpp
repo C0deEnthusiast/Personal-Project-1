@@ -12,6 +12,8 @@
 #include "monster.h"
 #include "map.h"
 
+//using std::cout;
+
 using namespace std;
 
 //Announces user's defeat; ends game

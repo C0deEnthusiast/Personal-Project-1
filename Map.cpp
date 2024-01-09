@@ -543,7 +543,7 @@ int Map::encounter(Party& party, bool room){
     //Announces monster
     cout << temp.monster_name << " (Health: " << temp.monster_health;
     cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
-    Functions::displayEffect(temp.power);
+    displayEffect(temp.power);
 
     //Allows player to fight or surrender
     cout << "\nFight(1) or surrender(2)? Your call.\n";
