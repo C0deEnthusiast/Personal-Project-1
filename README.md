@@ -21,7 +21,9 @@ When compiled successfully, use the following 4 arguments to run the executable:
 
 Header Files: item.h, map.h, monster.h, party.h, player.h
 
-Text Files: inventoryDisplay.txt (Will likely be removed), items.txt, monsters.txt, story.txt
+Text Files: items.txt, monsters.txt, story.txt
+
+Files to be Removed in near future: inventoryDisplay.txt
 
 Not essential: split.h (in vscode only)
 
