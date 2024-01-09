@@ -7,6 +7,58 @@
 
 using namespace std;
 
+
+//Effect Class Implementation
+
+string Effect::getEffectName(){ return effect_name;}
+
+int Effect::getEffectValue(){ return effect_value;}
+
+int Effect::getEffectChance(){ return effect_procChance;}
+
+int Effect::getEffectDuration(){ return effect_duration;}
+
+Effect::Effect(){
+    effect_name = invalid_effect;
+    effect_value = 0;
+    effect_procChance = 0;
+    effect_duration = 0;
+}
+
+Effect::Effect(string name, int value, int chance, int duration){
+    effect_name = name;
+    effect_value = value;
+    effect_procChance = chance;
+    effect_duration = duration;
+}
+
+void Effect::setEffectName(string new_name){
+    effect_name = new_name;
+
+    return;
+}
+
+void Effect::setEffectValue(int new_value){
+    effect_value = new_value;
+
+    return;
+}
+
+void Effect::setEffectChance(int new_chance){
+    effect_procChance = new_chance;
+
+    return;
+}
+
+void Effect::setEffectDuration(int new_duration){
+    effect_duration = new_duration;
+
+    return;
+}
+
+
+//Item Class Implementation
+
 Item::Item(){
     item_name = default_item_name;
     item_type = "";

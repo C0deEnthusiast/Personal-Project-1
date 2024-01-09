@@ -51,83 +51,86 @@
 
 using namespace std;
 
+
 //Used by both items and monsters
 class Effect{
     private:
-        string name;
-        int value;
-        int chance;
-        int duration;
+        string effect_name; //Name of effect
+        int effect_value; //Varies from effect (e.g. damage)
+        int effect_procChance; //Chance of effect occurring
+        int effect_duration; //How long effect occurs before expiring
     public:
-        Effect(){
-            name = invalid_effect;
-            value = 0;
-            chance = 0;
-            duration = 0;
-        };
+        Effect();
+        Effect(string name, int value, int chance, int duration);
 
-        Effect(string effectName, int effectValue, int effectChance, int effectDuration){
-            name = effectName;
-            value = effectValue;
-            chance = effectChance;
-            duration = effectDuration;
-        };
+        //Effect Getters
+        string getEffectName();
+        int getEffectValue();
+        int getEffectChance();
+        int getEffectDuration();
 
-        string getEffectName(){ return name;}
-        int getEffectValue(){ return value;}
-        int getEffectChance(){ return chance;}
-        int getEffectDuration(){ return duration;}
+        //Effect Setters
+        void setEffectName(string new_name);
+        void setEffectValue(int new_value);
+        void setEffectChance(int new_chance);
+        void setEffectDuration(int new_duration);
+};
 
-        void setEffectName(string new_name){
-            name = new_name;
 
-            return;
-        }
 
-        void setEffectValue(int new_value){
-            value = new_value;
 
-            return;
-        }
+class Item{
+    private:
+        string item_name; //Universal attributes
+        string item_type; //Type of Item (weapon, cookware, treasure)
+        int item_cost; //For merchants only; also works for treasures
+        int item_stats; //Attack (weapon), DMG Reduction (armor), and potions get other special stats
+        int crit_chance;
+        int crit_boost;
+    public:
+        Effect weapon_effect;
 
-        void setEffectChance(int new_chance){
-            chance = new_chance;
+        Item(); //Default constructor
+        Item(string name, string type, int cost, int stat, int critChance, int critBoost, 
+        string effectName, int effectValue, int effectChance, int effectDuration); //Parameterized constructor
 
-            return;
-        }
+        //Getters
+        string getItemName(){ return item_name;};
+        string getItemType(){ return item_type;};
+        int getCost(){ return item_cost;};
+        int getStat(){ return item_stats;}; //See details in items.txt file
+        int getCritChance(){ return crit_chance;};
+        int getCritBoost(){ return crit_boost;};
 
-        void setEffectDuration(int new_duration){
-            duration = new_duration;
-
-            return;
-        }
+        //Setters
+        void setItemName(string new_name);
+        void setItemType(string new_type);
+        void setCost(int new_cost);
+        void setStat(int value);
+        void setCritChance(int value);
+        void setCritBoost(int value);
 };
 
 
 //General-use functions
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
-    inline int createRand(int min, int max){
-        return (rand() % (max - min + 1)) + min;
-    }
+    inline int createRand(int min, int max){ return (rand() % (max - min + 1)) + min;}
 
-    //Checks if event will occur based on likelihood
+    //Checks if event will occur based on likelihood; input probability in percentage form
     inline bool willOccur(int probability){
-        if (probability == 100){ //Bypasses createRand()
-            return true;
-        }
+        //Bypasses createRand() if event is essentially guaranteed to occur
+        if (probability >= 100){ return true;}
+
         return (probability >= createRand(1,100));
     }
     
-    //Checks if input line is a number
-    inline bool isNumber(string line){ //Checks for digits
-        if (line.length() == 0){
-            return false;
-        }
-        for (auto x: line){ //Checks if amount is a number
-            if (!isdigit(x)){
-                return false;
-            }
+    //Checks if input string is a number
+    inline bool isNumber(string line){
+        if (line.length() == 0){ return false;}
+
+        for (auto x: line){ //Checks if there are any char that are not numbers
+            if (!isdigit(x)){ return false;}
         }
 
         return true;
@@ -158,7 +161,7 @@ namespace Functions{
         } else if (T.getEffectName() == effect_Undying){
             cout << "Target player takes no damage for " << T.getEffectDuration() << " turns.";
         } else if (T.getEffectName() == effect_Resurrection){
-            cout << "Revives target player if health is 0.";
+            cout << "Revives target player if they take lethal damage.";
         } else if (T.getEffectName() == effect_Godslayer){
             cout << "No god will stand against you. Not anymore.";
         }
@@ -195,36 +198,40 @@ namespace Functions{
         return;
     }
 
+    //Copies lines from the specified file into a string vector and returns the vector
     inline vector<string> copyFile(string fileName){
         ifstream file_(fileName);
         vector<string> v;
         string line;
+
         if (!file_.is_open()){
             cout << "File is not open\n";
             return v;
         }
 
         while (getline(file_,line)){
-            if (line.length() == 0){
-                continue;
-            }
+            if (line.length() == 0){ continue;}
 
             v.push_back(line);
         }
+
         file_.close();
 
         return v;
     }
 
-    //Intended to let user read what exposition goddamn says
-    inline void convenientStop(string stop = ""){
+    //Uses placeholder string as a stall to let user read what the exposition says
+    inline void convenientStop(void){
+        string stop;
         cout << "(Enter a character to continue)" << endl;
         getline(cin, stop);
 
         return;
     }
 
-    //Returns splice count of input string
+    /* Uses 'seperator' to splice input string and stores them into specified 'arr' array
+
+    Returns splice count of input string*/
     inline int arraySplit(string input_string, char separator, string arr[], int arr_size){
         if (input_string.length() == 0 || arr_size <= 0){ //Makes sure input_string is proper length
             return 0;
@@ -243,6 +250,7 @@ namespace Functions{
         return split_count;
     }
 
+    // Uses 'seperator' to splice input string and stores them into specified 'vect' vector
     inline void vectorSplit(string input_string, char separator, vector<string> &vect){
         if (input_string.length() == 0){ //Makes sure input_string is proper length
             return;
@@ -258,40 +266,6 @@ namespace Functions{
     }
 
     inline double percentToDecimal(int value){ return (static_cast<double> (value) / 100);}
-};
-
-
-class Item{
-    private:
-        string item_name; //Universal attributes
-        string item_type; //Type of Item (weapon, cookware, treasure)
-        int item_cost; //For merchants only; also works for treasures
-        int item_stats; //Attack (weapon), DMG Reduction (armor), and potions get other special stats
-        int crit_chance;
-        int crit_boost;
-    public:
-        Effect weapon_effect;
-
-        Item(); //Default constructor
-        //Parameterized constructor
-        Item(string name, string type, int cost, int stat, int critChance, int critBoost, 
-        string effectName, int effectValue, int effectChance, int effectDuration);
-
-        //Getters
-        string getItemName(){ return item_name;}
-        string getItemType(){ return item_type;}
-        int getCost(){ return item_cost;}
-        int getStat(){ return item_stats;} //See details in items.txt file
-        int getCritChance(){ return crit_chance;}
-        int getCritBoost(){ return crit_boost;}
-
-        //Setters
-        void setItemName(string new_name);
-        void setItemType(string new_type);
-        void setCost(int new_cost);
-        void setStat(int value);
-        void setCritChance(int value);
-        void setCritBoost(int value);
 };
 
 #endif
