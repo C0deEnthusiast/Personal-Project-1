@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 //Effect Class Implementation
 
 string Effect::getEffectName(){ return effect_name;}

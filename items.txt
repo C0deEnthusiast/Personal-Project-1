@@ -6,20 +6,20 @@ Name => Type => Cost => Special Stats* => Crit Chance => Crit Boost*
 => Effect (if any) => Effect Value => Effect Chance => Effect Duration
 
 Special Stats*: Attack (weapon), DMG Reduction (armor), 0 for everything else
-Crit Boost*: Cumulative percentage to base value
+Crit Boost*: Cumulative percentage to base value (i.e. 1 + Crit Boost)
 
 
 Weapon Effect Key:
-    - Effect Value: x
-    - Effect Chance: y
-    - Effect Duration: z
+    - Effect Value: _x_
+    - Effect Chance: _y_
+    - Effect Duration: _z_
 Weapon Effect List:
-    - None: Literally does nothing (Default Constructor)
-    - Burn: Inflicts x DMG every turn for z turns
-    - Freeze: Immobilizes enemy from attacking for z turns
+    - None: Does nothing (Default Constructor)
+    - Burn: Inflicts _x_ DMG every turn for _z_ turns
+    - Freeze: Immobilizes enemy from attacking for _z_ turns
     - Pierce: Weapon DMG ignores enemy armor when attacking
         - Note: 0 for effect Value and 100% for effect chance
-    - Enemy Current HP DMG: Inflicts DMG based on x percentage of enemy's current health
+    - Enemy Current HP DMG: Inflicts DMG based on _x_ percentage of enemy's current health
 
 For weapons: Prototype Anti-Fiend Rifle and _, consider if adding lore would be interesting
 

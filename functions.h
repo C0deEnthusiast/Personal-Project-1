@@ -9,7 +9,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-//General-use functions
+//Basic helper functions
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
     inline int createRand(int min, int max){ return (rand() % (max - min + 1)) + min;}

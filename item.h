@@ -82,8 +82,8 @@ class Effect{
 
 class Item{
     private:
-        std::string item_name; //Universal attributes
-        std::string item_type; //Type of Item (weapon, cookware, treasure)
+        std::string item_name; //Name of Item
+        std::string item_type; //Type of Item
         int item_cost; //For merchants only; also works for treasures
         int item_stats; //Attack (weapon), DMG Reduction (armor), and potions get other special stats
         int crit_chance;
