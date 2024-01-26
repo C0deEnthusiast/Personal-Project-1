@@ -10,6 +10,7 @@
 #include "party.h"
 #include "player.h"
 #include "item.h"
+#include "functions.h"
 
 //Overhaul everything in this cpp file AND main driver
 
@@ -391,7 +392,7 @@ void Party::createMerchantList(string filename){
 
         vector<string> temp;
 
-        Functions::vectorSplit(line, separator, temp);
+        Functions::vectorSplit(line, std_delimiter, temp);
 
         if (temp.size() != data_count){
             continue;

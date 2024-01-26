@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include "map.h"
+#include "functions.h"
 
 using namespace std;
 
@@ -492,7 +493,7 @@ void Map::removeMonster(int index){
 int Map::countMonsterRating(int rating){
     int count = 0;
     for (const auto x: monsterList){
-        if (x.difficultyRating == rating){
+        if (x.difficulty_rating == rating){
             count++;
         }
     }
@@ -531,7 +532,7 @@ int Map::encounter(Party& party, bool room){
     //Monster is chosen
     temp = returnMonster(rating, remove_index);
     //Raises rating based on raise_rating
-    temp.setRating(temp.difficultyRating + raise_rating);
+    temp.setRating(temp.difficulty_rating + raise_rating);
 
     //For testing
     cout << "Check monster count ratings: ";
@@ -542,7 +543,7 @@ int Map::encounter(Party& party, bool room){
 
     //Announces monster
     cout << temp.monster_name << " (Health: " << temp.monster_health;
-    cout << ") (Rating: "<< temp.difficultyRating << ") ahead! Keep all eyes open!" << endl;
+    cout << ") (Rating: "<< temp.difficulty_rating << ") ahead! Keep all eyes open!" << endl;
     displayEffect(temp.power);
 
     //Allows player to fight or surrender
@@ -590,9 +591,9 @@ int Map::encounter(Party& party, bool room){
 
         //Rewards (for now)
         //Money
-        party.setMoney(party.getMoney() + 10 * temp.difficultyRating);
+        party.setMoney(party.getMoney() + 10 * temp.difficulty_rating);
         cout << "Congrats! You've slain " << temp.monster_name << "!";
-        cout << " You won " << 10 * temp.difficultyRating << " gold!\n\n";
+        cout << " You won " << 10 * temp.difficulty_rating << " gold!\n\n";
         
         if (Functions::createRand(1,100) <= 10){ //Chance for key
             cout << "You got a key too!" << endl;
@@ -637,7 +638,7 @@ Monster Map::returnMonster(int rating, int &monster_index){
 
     //Picks monster that hasn't been removed, and has chosen rating
     for (int i = 0; i < monsterList.size(); i++){
-        if(monsterList[i].difficultyRating == rating){
+        if(monsterList[i].difficulty_rating == rating){
             if(++search == random_monster){
                 monster_index = i;
                 return monsterList[i];

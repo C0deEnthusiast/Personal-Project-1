@@ -11,13 +11,14 @@
 #include "party.h"
 #include "player.h"
 #include "item.h"
+#include "functions.h"
 
 using namespace std;
 
 
 Monster::Monster(){
     monster_name = "NaM";
-    difficultyRating = 0;
+    difficulty_rating = 0;
     attack_power = 0;
     monster_health = 0;
     crit_chance = 0;
@@ -28,7 +29,7 @@ Monster::Monster(){
 Monster::Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
 string effect, int effectValue, int effectChance, int effectDuration){
     monster_name = name;
-    difficultyRating = rating;
+    difficulty_rating = rating;
     attack_power = attkPwr;
     monster_health = health;
     crit_chance = critChance;
@@ -40,12 +41,12 @@ string effect, int effectValue, int effectChance, int effectDuration){
 }
 
 void Monster::setRating(int new_rating){
-    difficultyRating = new_rating;
+    difficulty_rating = new_rating;
 
-    if (difficultyRating < minimumRating){
-        difficultyRating = minimumRating;
-    } else if (difficultyRating > bossRating){
-        difficultyRating = bossRating;
+    if (difficulty_rating < minimumRating){
+        difficulty_rating = minimumRating;
+    } else if (difficulty_rating > bossRating){
+        difficulty_rating = bossRating;
     }
 }
 
@@ -280,7 +281,7 @@ void Battle::activateEffect(Status T){
             }
         } else if (isMonsterIndex(target)){
             //Applies to boss monster only
-            if (curMonster->difficultyRating == bossRating && curMonster->monster_health == 0){
+            if (curMonster->difficulty_rating == bossRating && curMonster->monster_health == 0){
                 curMonster->monster_health = bossFinalHealth;
             }
         }

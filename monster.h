@@ -8,6 +8,7 @@
 #include "party.h"
 #include "player.h"
 #include "item.h"
+#include "functions.h"
 
 #ifndef MONSTER_H
 #define MONSTER_H
@@ -32,8 +33,8 @@ using namespace std;
 
 
 struct Monster{
-    string monster_name; //Monster Name
-    int difficultyRating; //Determines likelihood of encounter, rewards, and monster's damage reduction
+    std::string monster_name; //Monster Name
+    int difficulty_rating; //Determines likelihood of encounter, rewards, and monster's damage reduction
     int attack_power; //Monster's attack value
     int monster_health; //Monster's hitpoints before death
     int crit_chance; //Probability to land a critical hit
@@ -42,8 +43,8 @@ struct Monster{
     //vector<Effect> powers;
 
     Monster(); //Default Constructor
-    Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
-    string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
+    Monster(std::string name, int rating, int attkPwr, int health, int critChance, int critBoost,
+    std::string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
 
     //Setter
     void setRating(int new_rating);
@@ -85,7 +86,7 @@ struct pStatus{
 //Manages Battle
 class Battle{
     private:
-        //For the sake of brevity, parties and monsters will be passed by reference
+        //Parties and monsters will be passed by reference
         Party *curParty;
         Monster *curMonster;
 
@@ -144,7 +145,7 @@ class Battle{
                 * One of the special potions (chances TBD)
                 * Armor? (TBD)
             */
-            curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficultyRating);
+            curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficulty_rating);
             //vector<Item> accessReward = curParty->copyMerchantList();
             return;
         }
@@ -208,7 +209,7 @@ class Battle{
                 cout << "altered_weapons[" << i << "] Attack: " << altered_weapons[i].getStat() << "\n";
             }
 
-            monster_innate_armor = curMonster->difficultyRating * 10;
+            monster_innate_armor = curMonster->difficulty_rating * 10;
             if (monster_innate_armor > maxArmorValue || monster_innate_armor < 0){
                 monster_innate_armor = maxArmorValue;
             }
@@ -241,6 +242,7 @@ class Battle{
                 delete[] player_blocking;
                 player_blocking = nullptr;
             }
+            
             if (player_attack_max != nullptr){
                 delete[] player_attack_max;
                 player_attack_max = nullptr;

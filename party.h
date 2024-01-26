@@ -9,8 +9,14 @@
 #ifndef PARTY_H
 #define PARTY_H
 
-//Defines how many players are in game
+//Defines maximum count of players per game
 #define playerCount 5
+
+//Defines how many splices per line in item text file are needed for a complete item
+#define data_count 10
+
+//Standard delimiter for splitting data in required text files
+#define std_delimiter ','
 
 //Item Type Constants
 #define isWeapon "weapon"
@@ -18,20 +24,20 @@
 #define isPotion "potion"
 #define isArmor "armor"
 
+#define New_isWeapon 'W'
+#define New_isTreasure 'T'
+#define New_isPotion 'P'
+#define New_isArmor 'A'
+
 using namespace std;
 
 class Party{
     private:
-        /*Relates to how data sections per line in item text file
-        are needed for a complete item*/
-        static const int data_count = 10;
-
         //Maximums and constants
         static const int player_size = playerCount; //Count for players[]
         static const int max_inventory_capacity = 30; //Max capacity of inventory[]
         static const int max_weapon_capacity = player_size;
         static const int max_armor_capacity = player_size;
-        char separator = ','; //Standard delimiter for splitting data in text files
 
         //Game stats
         int player_count = player_size; //Count of players that are ALIVE

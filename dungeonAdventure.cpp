@@ -11,6 +11,7 @@
 #include "party.h"
 #include "monster.h"
 #include "map.h"
+#include "functions.h"
 
 //using std::cout;
 

@@ -1,5 +1,5 @@
 // Author: Rodolfo Martinez-Maldonado
-// Personal Project 1 - Player Implementation
+// Personal Project 1 - Player Class Implementation
 
 #include <iostream>
 #include "player.h"
@@ -13,15 +13,11 @@ Player::Player(){
     leader = false;
 }
 
-Player::Player(string new_name, int new_health, bool leader_status){
+Player::Player(string new_name, int new_health, bool new_leader_status){
     name = new_name;
     //Checks for valid health input (i.e. health that won't immediately kill player)
-    if (new_health > 0 && new_health <= defaultPlayerHealth){
-        health = new_health;
-    } else {
-        health = defaultPlayerHealth; //Resets health
-    }
-    leader = leader_status;
+    health = ((new_health > 0 && new_health <= defaultPlayerHealth) ? new_health : defaultPlayerHealth);
+    leader = new_leader_status;
 }
 
 //Setters

@@ -2,10 +2,6 @@
 // Personal Project 1 - Item Class
 
 #include <iostream>
-//#include <ctype.h>
-//#include <vector>
-//#include <fstream>
-//#include <sstream>
 
 #ifndef ITEM_H
 #define ITEM_H
@@ -65,10 +61,10 @@ class Effect{
         Effect(std::string name, int value, int chance, int duration);
 
         //Effect Getters
-        std::string getEffectName();
-        int getEffectValue();
-        int getEffectChance();
-        int getEffectDuration();
+        std::string getEffectName(){ return effect_name;}
+        int getEffectValue(){ return effect_value;}
+        int getEffectChance(){ return effect_procChance;}
+        int getEffectDuration(){ return effect_duration;}
 
         //Effect Setters
         void setEffectName(std::string new_name);

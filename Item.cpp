@@ -9,14 +9,6 @@ using namespace std;
 
 //Effect Class Implementation
 
-string Effect::getEffectName(){ return effect_name;}
-
-int Effect::getEffectValue(){ return effect_value;}
-
-int Effect::getEffectChance(){ return effect_procChance;}
-
-int Effect::getEffectDuration(){ return effect_duration;}
-
 Effect::Effect(){
     effect_name = invalid_effect;
     effect_value = 0;
