@@ -29,18 +29,19 @@
 #define New_isPotion 'P'
 #define New_isArmor 'A'
 
-using namespace std;
+//using namespace std;
+using std::cout, std::endl;
 
 class Party{
     private:
         //Maximums and constants
-        static const int player_size = playerCount; //Count for players[]
+        //static const int player_size = playerCount; //Count for players[]
         static const int max_inventory_capacity = 30; //Max capacity of inventory[]
-        static const int max_weapon_capacity = player_size;
-        static const int max_armor_capacity = player_size;
+        static const int max_weapon_capacity = playerCount;
+        static const int max_armor_capacity = playerCount;
 
         //Game stats
-        int player_count = player_size; //Count of players that are ALIVE
+        int player_count = playerCount; //Count of players that are ALIVE
         int money = 100; //In gold
         int danger_level = 100; //0 - 100
         int explored_rooms = 0; //Count of how many rooms have been explored
@@ -50,9 +51,9 @@ class Party{
         int current_armor_capacity = 0;
 
         //Arrays
-        Player players[player_size]; //Player list
+        Player players[playerCount]; //Player list
         Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
-        vector<Item> merchantList; //Used to allow players to access and add items through merchant
+        std::vector<Item> merchantList; //Used to allow players to access and add items through merchant
         Item weapon_barracks[max_weapon_capacity]; //Quick access to weapons
         Item armorSets[max_armor_capacity];
 
@@ -90,12 +91,12 @@ class Party{
             return false; //This occurs only if item is not found for deletion
         }
     public:
-        Party(); //Default constructor
-        Party(string filename); //Parameterized Constructor
+        Party(); //Default constructor; "items.txt" is default text file
+        Party(std::string filename); //Parameterized Constructor
         //Party(); //Dynamic Parameterized Constructor
 
         //Getters (Maximums and Constants)
-        int getPlayerSize(){ return player_size;}
+        int getPlayerSize(){ return playerCount;}
         int getMaxInventoryCapacity(){ return max_inventory_capacity;}
         int getMaxWeaponCapacity(){ return max_weapon_capacity;}
         int getMaxArmorCapacity(){ return max_armor_capacity;}
@@ -110,8 +111,8 @@ class Party{
         int getCurrentArmorCapacity(){ return current_armor_capacity;}
         int getMerchantCapacity(){ return merchantList.size();}
         int getLivePlayerCount();
-        bool isPlayerIndex(int index){ return (index >= 0 && index < player_size);}
-        vector<Item> copyMerchantList(); //For Battle Rewards
+        bool isPlayerIndex(int index){ return (index >= 0 && index < playerCount);}
+        std::vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
         Item getWeapon(int index);
         Item getArmor(int index);
@@ -126,7 +127,7 @@ class Party{
         //Other functions
 
         bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
-        Item returnItem(string item_name);
+        Item returnItem(std::string item_name);
         
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
@@ -139,12 +140,12 @@ class Party{
         bool addItem(Item item);
         bool removeItem(Item item);
         void showInventory();
-        int countItem(string item_name);
+        int countItem(std::string item_name);
 
         void purchaseProcess(int amount, int total_cost, Item purchasedItem);
 
-        void createMerchantList(string filename);
-        void presentMerchantItem(Item item, string target, double tax);
+        void createMerchantList(std::string filename);
+        void presentMerchantItem(Item item, std::string target, double tax);
         void merchant();
 
         void showPartyStatus();

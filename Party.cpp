@@ -115,7 +115,7 @@ void Party::setKeys(int new_keys){
 
 //Returns false if at least one player is alive; true if all are literally dead
 bool Party::areAllPlayersDead(){
-    for (int i = 0; i < player_size; i++){
+    for (int i = 0; i < playerCount; i++){
         if (players[i].getPlayerHealth() > 0){
             return false;
         }
@@ -193,7 +193,7 @@ void Party::modifyWeaponAttack(int index, int attack_change){
 
 //Adds player to players[] array
 void Party::addPlayer(string player_name){
-    for (int i = 0; i < player_size; i++){ //Searches for available Player 'slots'
+    for (int i = 0; i < playerCount; i++){ //Searches for available Player 'slots'
         if (players[i].getPlayerName() == ""){ //Checks for empty player slot/index
             players[i].setPlayerName(player_name);
             if (i == 0){//First Player will be a 'leader'
@@ -744,7 +744,7 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
     } else if (outcome == -2){ //Defeat
         setMoney(getMoney()/4);
         cout << "One for all, and all will fall." << endl;
-        for (int i = 1; i < player_size; i++){
+        for (int i = 1; i < playerCount; i++){
             if (health_chance <= 10){
                 //Kills player
                 modifyPlayerHealth(i, -100);
