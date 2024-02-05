@@ -182,7 +182,17 @@ class Battle{
             curParty = party;
             curMonster = monster;
 
+            //Terminate battle preemptively if either pointers are null
+            if (curParty == nullptr || curMonster == nullptr){
+                cout << "Terminating battle due to missing necessary information\n";
+                return;
+            }
+
             int size = curParty->getPlayerSize();
+            if (size <= 0){
+                cout << "Terminating battle due to invalid player count\n";
+                return;
+            }
             //Player modifiers
             player_active = new bool[size];
             player_charmed = new bool[size];

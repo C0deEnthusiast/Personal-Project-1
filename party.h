@@ -49,48 +49,18 @@ class Party{
         int current_inventory_capacity = 0;
         int current_weapon_capacity = 0;
         int current_armor_capacity = 0;
+        int living_player_count = playerCount;
 
-        //Arrays
+        //Private Arrays
         Player players[playerCount]; //Player list
         Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
         std::vector<Item> merchantList; //Used to allow players to access and add items through merchant
         Item weapon_barracks[max_weapon_capacity]; //Quick access to weapons
         Item armorSets[max_armor_capacity];
-
-        bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-            if (list_current_capacity >= list_max_capacity){
-                return false;
-            }
-
-            for (int i = 0; i < list_max_capacity; i++){
-                if (itemList[i].getItemName() == default_item_name){
-                    //Creates new item in inventory
-                    itemList[i] = item;
-                    list_current_capacity++;//Adds to capacity
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        bool removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-            if (list_current_capacity == 0){
-                return false; //Quickly returns false to give efficient output rather than wait for loop
-            }
-
-            for (int i = 0; i < list_max_capacity; i++){
-                if (itemList[i].getItemName() == item.getItemName()){
-                    //Default constructor is used to override current item; effectively removing it
-                    itemList[i] = Item();
-                    list_current_capacity--;//Reduces capacity
-                    return true;
-                }
-            }
-
-            return false; //This occurs only if item is not found for deletion
-        }
     public:
+        //Public Arrays
+        //Player players[playerCount]; //Player list
+
         Party(); //Default constructor; "items.txt" is default text file
         Party(std::string filename); //Parameterized Constructor
         //Party(); //Dynamic Parameterized Constructor
@@ -114,6 +84,7 @@ class Party{
         bool isPlayerIndex(int index){ return (index >= 0 && index < playerCount);}
         std::vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
+        Player new_getPlayer(int index, int &retrieved_status);
         Item getWeapon(int index);
         Item getArmor(int index);
 
@@ -132,7 +103,7 @@ class Party{
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
 
-        void addPlayer(string player_name);
+        void addPlayer(std::string player_name);
 
         bool addItemProto(Item item);
         bool removeItemProto(Item item);

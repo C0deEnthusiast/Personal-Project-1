@@ -16,6 +16,42 @@
 
 using namespace std;
 
+
+
+bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
+    if (list_current_capacity >= list_max_capacity){
+        return false;
+    }
+
+    for (int i = 0; i < list_max_capacity; i++){
+        if (itemList[i].getItemName() == default_item_name){
+            //Creates new item in inventory
+            itemList[i] = item;
+            list_current_capacity++;//Adds to capacity
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
+    if (list_current_capacity == 0){
+        return false; //Quickly returns false to give efficient output rather than wait for loop
+    }
+
+    for (int i = 0; i < list_max_capacity; i++){
+        if (itemList[i].getItemName() == item.getItemName()){
+            //Default constructor is used to override current item; effectively removing it
+            itemList[i] = Item();
+            list_current_capacity--;//Reduces capacity
+            return true;
+        }
+    }
+
+    return false; //This occurs only if item is not found for deletion
+}
+
 Party::Party(){ //Default constructor
     createMerchantList("items.txt"); //Default items text file
 }
@@ -44,12 +80,13 @@ vector<Item> Party::copyMerchantList(){
     return merchantList;
 }
 
+
 Player Party::getPlayer(int index){
-    if (isPlayerIndex(index)){
-        return players[index];
-    } else {
-        return Player();
-    }
+    return (isPlayerIndex(index) ? players[index] : Player());
+}
+
+Player Party::new_getPlayer(int index, int &retrieved_status){
+    return ((retrieved_status = isPlayerIndex(index)) ? players[index] : Player());
 }
 
 Item Party::getWeapon(int index){
@@ -207,6 +244,47 @@ void Party::addPlayer(string player_name){
 }
 
 bool Party::addItemProto(Item item){
+
+    //Adding Weapon to empty weapon slot in player list
+    if (item.getItemType() == isWeapon){
+        for (auto& x: players){
+            if (x.getEquippedWeapon().getItemName() == default_item_name){
+                x.setEquippedWeapon(item);
+                current_weapon_capacity++;
+                return true;
+            }
+        }
+    }
+
+    //Adding Armor to empty armor slot in player list
+    if (item.getItemType() == isArmor){
+        for (auto& x: players){
+            //Equips new armor
+            if (x.getEquippedArmor().getItemName() == default_item_name){
+                x.setEquippedArmor(item);
+                current_armor_capacity++;
+                return true;
+            }
+        }
+    }
+
+    /*//Adding weapon or armor
+    for (auto& x: players){
+        //Equips new armor
+        if (x.getEquippedArmor().getItemName() == default_item_name){
+            x.setEquippedArmor(item);
+            current_armor_capacity++;
+            return true;
+        }
+        //Equips new weapon
+        if (x.getEquippedWeapon().getItemName() == default_item_name && item.getItemType() == isWeapon){
+            x.setEquippedWeapon(item);
+            current_weapon_capacity++;
+            return true;
+        }
+    }*/
+
+
     //Checks if item should go into inventory
     if (!(item.getItemType() == isWeapon || item.getItemType() == isArmor)){ //Adds to inventory
         if (current_inventory_capacity >= max_inventory_capacity){ //Full inventory

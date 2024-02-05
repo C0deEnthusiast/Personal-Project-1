@@ -125,6 +125,7 @@ int main(int argc, char *argv[]){
     party.setMoney(1000000);
     party.addItem(party.returnItem("Diamond circlet"));
     party.addItem(party.returnItem("Diamond circlet"));
+    party.setKeys(3);
     //party.addItem(party.returnItem("Blighted Dagger")); //Debugging only
     /*party.merchant(); //Testing
     for (int i = 0; i < 23; i++){ //23
