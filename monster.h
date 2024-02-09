@@ -158,7 +158,7 @@ class Battle{
             double moneyLoss = 0.25 * static_cast<double> (curParty->getMoney());
             curParty->setMoney(curParty->getMoney() - static_cast<int> (moneyLoss));
 
-            for (int i = 0; i < curParty->getPlayerSize(); i++){
+            for (int i = 0; i < curParty->getMaxPlayerSize(); i++){
                 if (Functions::createRand(0,100) <= 50){
                     curParty->modifyPlayerHealth(i, -5);
                 }
@@ -188,7 +188,7 @@ class Battle{
                 return;
             }
 
-            int size = curParty->getPlayerSize();
+            int size = curParty->getMaxPlayerSize();
             if (size <= 0){
                 cout << "Terminating battle due to invalid player count\n";
                 return;
@@ -228,7 +228,7 @@ class Battle{
         }
 
         ~Battle(){ //Destructor
-            int size = curParty->getPlayerSize(); //For destruction of player status array
+            int size = curParty->getMaxPlayerSize(); //For destruction of player status array
             curParty = nullptr;
             curMonster = nullptr;
 

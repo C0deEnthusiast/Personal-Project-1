@@ -604,7 +604,7 @@ int Map::encounter(Party& party, bool room){
     } else { //Defeat
         party.setMoney(party.getMoney() * 3 / 4);
         cout << "One for all, and all will fall." << endl;
-        for (int i = 1; i < party.getPlayerSize(); i++){
+        for (int i = 1; i < party.getMaxPlayerSize(); i++){
             if (Functions::createRand(0,100) <= 10){
                 //Kills player
                 party.modifyPlayerHealth(i, -100);

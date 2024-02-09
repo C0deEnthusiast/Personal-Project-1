@@ -55,7 +55,8 @@ class Party{
         Player players[playerCount]; //Player list
         Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
         std::vector<Item> merchantList; //Used to allow players to access and add items through merchant
-        Item weapon_barracks[max_weapon_capacity]; //Quick access to weapons
+        //Integrated into Player(); remove when funcs revolve around Player.Items instead
+        Item weapon_barracks[max_weapon_capacity];
         Item armorSets[max_armor_capacity];
     public:
         //Public Arrays
@@ -66,12 +67,13 @@ class Party{
         //Party(); //Dynamic Parameterized Constructor
 
         //Getters (Maximums and Constants)
-        int getPlayerSize(){ return playerCount;}
+        int getMaxPlayerSize(){ return playerCount;}
         int getMaxInventoryCapacity(){ return max_inventory_capacity;}
         int getMaxWeaponCapacity(){ return max_weapon_capacity;}
         int getMaxArmorCapacity(){ return max_armor_capacity;}
 
         //Normal Getters
+        int getCurrentPlayerCount(){return living_player_count;}
         int getMoney(){ return money;}
         int getDangerLevel(){ return danger_level;}
         int getExploredRooms(){ return explored_rooms;}
@@ -95,32 +97,32 @@ class Party{
         void setExploredRooms(int new_rooms);
         void setKeys(int new_keys);
 
-        //Other functions
+        //Additional Modifiers
 
-        bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
-        Item returnItem(std::string item_name);
-        
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
-
         void addPlayer(std::string player_name);
-
+        void addItems(Item item, int &item_count);
         bool addItemProto(Item item);
         bool removeItemProto(Item item);
-
         bool addItem(Item item);
         bool removeItem(Item item);
+        bool equipItem(Item item, int player_index, Item &retrieved_item);
+
+        //Conditionals
+
+        bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
+
+        //Other functions
+
+        Item returnItem(std::string item_name);
         void showInventory();
         int countItem(std::string item_name);
-
-        void purchaseProcess(int amount, int total_cost, Item purchasedItem);
-
+        void purchaseProcess(int amount, int unit_price, Item purchasedItem);
         void createMerchantList(std::string filename);
         void presentMerchantItem(Item item, std::string target, double tax);
         void merchant();
-
         void showPartyStatus();
-
         bool npcPuzzle(int riddle);
 
         //Monster functions

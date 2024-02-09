@@ -33,7 +33,7 @@ void Player::setPlayerHealth(int new_health){
     //Changes health if outside of bounds
     if (health > defaultPlayerHealth){
         health = defaultPlayerHealth;
-    } else if (health <= 0){
+    } else if (health < 0){
         health = 0;
     }
 

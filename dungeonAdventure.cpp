@@ -252,7 +252,7 @@ int main(int argc, char *argv[]){
             }
 
             //20% for each member to lose 1 health
-            for (int i = 0; i < party.getPlayerSize(); i++){
+            for (int i = 0; i < party.getMaxPlayerSize(); i++){
                 if (Functions::willOccur(20)){ //20% for given member to lose 1 HP
                     party.modifyPlayerHealth(i, -1);
                     game = party.getLivePlayerCount();
@@ -389,7 +389,7 @@ int main(int argc, char *argv[]){
 
                 //50% of losing health
                 if (chance <= 30 || chance > 50){ //All outcomes except fighting a monster
-                    for (int i = 0; i < party.getPlayerSize(); i++){
+                    for (int i = 0; i < party.getMaxPlayerSize(); i++){
                         if (Functions::createRand(1,100) <= 50){ //Percentage form
                             party.modifyPlayerHealth(i, -1);
                             if (party.getLivePlayerCount() == 0){

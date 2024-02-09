@@ -80,7 +80,6 @@ vector<Item> Party::copyMerchantList(){
     return merchantList;
 }
 
-
 Player Party::getPlayer(int index){
     return (isPlayerIndex(index) ? players[index] : Player());
 }
@@ -150,27 +149,7 @@ void Party::setKeys(int new_keys){
     return;
 }
 
-//Returns false if at least one player is alive; true if all are literally dead
-bool Party::areAllPlayersDead(){
-    for (int i = 0; i < playerCount; i++){
-        if (players[i].getPlayerHealth() > 0){
-            return false;
-        }
-    }
-
-    return true;
-}
-
-Item Party::returnItem(string item_name){
-    for (auto& x: merchantList){
-        if (x.getItemName() == item_name){
-            return x;
-        }
-    }
-
-    return Item();
-}
-
+//Additional Modifiers
 
 /*Algorithm: Modifies player's health
     1) Changes the health of player based on health_change
@@ -241,6 +220,39 @@ void Party::addPlayer(string player_name){
     }
 
     return;
+}
+
+/*Adds multiple copies of 'item' into inventory[] (Under Revision)
+    - Rather than return a value, 'item_count' monitors how many items were NOT added to inventory[]
+    - Example:
+        -> Before function call: Set 'item_count' = 7
+        -> After function call: 'item_count' = 3 is returned by reference
+        -> Conclusion: 7-3 = 4 items were successfully added
+    - Meant to circumvent issues of original addItem() where avg time complexity of adding multiple
+        copies behaves similarly to O(n^2)
+        - Further clarification: While addItem() has avg complexity of O(n), it is designed to
+        add only one item per function call. Essentially, when adding multiple copies of said item,
+        a nested loop must be used to execute this job given the original function (i.e. each loop
+        calls the loop inside addItem()). In other words, when adding multiple copies of an item, which
+        is the most common scenario in this project, most situations where addItem() is involved
+        will have a time complexity similar to O(n^2)
+*/
+void Party::addItems(Item item, int &item_count){
+    if (current_inventory_capacity >= max_inventory_capacity){ //Capacity exceeded
+        return;
+    }
+    for (auto& x: inventory){
+        if (item_count == 0){
+            return;
+        }
+        if (x.getItemName() == default_item_name){
+            //Creates new item in inventory
+            x = item;
+            current_inventory_capacity++;//Adds to capacity
+            item_count--; //Item added successfully
+            return;
+        }
+    }
 }
 
 bool Party::addItemProto(Item item){
@@ -354,13 +366,27 @@ bool Party::removeItemProto(Item item){
 /*Adds item to inventory[] array or other relevant Item arrays
 Returns: True if Item is added successfully; false otherwise*/
 bool Party::addItem(Item item){
-    if (item.getItemType() == isWeapon){
+    if (current_inventory_capacity >= max_inventory_capacity){ //Capacity exceeded
+        return false;
+    }
+    for (auto& x: inventory){
+        if (x.getItemName() == default_item_name){
+            //Creates new item in inventory
+            x = item;
+            current_inventory_capacity++;//Adds to capacity
+            return true;
+        }
+    }
+
+    return true;
+
+    /*if (item.getItemType() == isWeapon){
         return addItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
     } else if (item.getItemType() == isArmor){
         return addItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
     } else {
         return addItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
-    }
+    }*/
 }
 
 /*Removes Item from inventory[] array and other relevant Item arrays
@@ -373,6 +399,53 @@ bool Party::removeItem(Item item){
     } else {
         return removeItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
     }
+}
+
+/*Replaces current item of player at specified index with 'item' of corresponding type
+    - Information of replaced item is returned in 'retrieved_item'*/
+bool Party::equipItem(Item item, int player_index, Item &retrieved_item){
+    if (!isPlayerIndex(player_index)){ //Invalid player index
+        return false;
+    }
+
+    if (item.getItemType() == isWeapon){
+        retrieved_item = players[player_index].getEquippedWeapon();
+        players[player_index].setEquippedWeapon(item);
+        return true;
+    } else if (item.getItemType() == isArmor){
+        retrieved_item = players[player_index].getEquippedArmor();
+        players[player_index].setEquippedArmor(item);
+        return true;
+    }
+
+    return false;
+}
+
+
+
+//Conditionals
+
+//Returns false if at least one player is alive; true if all are literally dead
+bool Party::areAllPlayersDead(){
+    for (int i = 0; i < playerCount; i++){
+        if (players[i].getPlayerHealth() > 0){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//Other functions
+
+Item Party::returnItem(string item_name){
+    for (auto& x: merchantList){
+        if (x.getItemName() == item_name){
+            return x;
+        }
+    }
+
+    return Item();
 }
 
 //Shows status information of party inventory
@@ -409,22 +482,32 @@ int Party::countItem(string item_name){
 /*General-purpose purchasing process for all items
     1) At confirmation of purchase, adds item(s); repeats process if invalid confirmation
     2) If successful, deducts party's money based on count of items added to inventory*/
-void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
+void Party::purchaseProcess(int amount, int unit_price, Item purchasedItem){
     string confirm = ""; //Confirms or rejects purchase
 
     cout << "You want to buy " << amount << " ";
     if (purchasedItem.getItemType() == isWeapon){
         cout << "(+" << purchasedItem.getStat() << ") ";
     }
-    cout << purchasedItem.getItemName() << "(s) for " << total_cost << " Gold? (y/n)" << endl;
+    cout << purchasedItem.getItemName() << "(s) for " << (amount * unit_price) << " Gold? (y/n)" << endl;
     getline(cin,confirm);
 
     cout << endl;
 
     //Checks confirmation and if party has enough money
-    if ((confirm == "Y" || confirm == "y") && total_cost <= getMoney()){ //Purchase is successful
+    if ((confirm == "Y" || confirm == "y") && (amount * unit_price) <= getMoney()){ //Purchase is successful
         //Adds weapon to party's inventory list until all are added or inventory is full
-        for (int i = 0; i < amount; i++){
+        int temp = amount;
+        addItems(purchasedItem, amount);
+        
+        if (amount > 0){
+            //Informs player of adjusted price and item count
+            cout << "It appears you don't have enough inventory space.\nAs such, I added ";
+            cout << (temp - amount) << " out of the " << temp << " items that you requested.\n";
+            cout << "I also adjusted the cost to reflect this!\nNo need to thank me!\n";
+        }
+        
+        /*for (int i = 0; i < amount; i++){
             if (!addItemProto(purchasedItem)){ //!addItem(purchasedItem)
                 //This occurs if desired count of items can NOT entirely be added
                 //Adjusts total cost if necessary
@@ -437,20 +520,21 @@ void Party::purchaseProcess(int amount, int total_cost, Item purchasedItem){
                 cout << "I also adjusted the cost to reflect this!\nNo need to thank me!\n";
                 break;
             }
-        }
+        }*/
         
-        setMoney(getMoney() - total_cost); //Deducts money from party
+        //'amount' is adjusted by addItems() to reflect how much money will be actually spent
+        setMoney(getMoney() - ((temp - amount) * unit_price)); //Deducts money from party
         //Show inventory capacity
         cout << "Thank you for your patronage! What else can I get for you?\n";
     } else if (confirm == "n" || confirm == "N"){ //Denies purchase
         cout << "Oh well. I won't judge you, for now.\n";
-    } else if (total_cost > getMoney()){ //Low on money
+    } else if ((amount * unit_price) > getMoney()){ //Low on money
         cout << "Sorry, my friend, but you need more money for that.\n";
         cout << "I recommend purchasing less quantity.\n";
         cout << "Let's negotiate again.\n";
     } else {
         cout << "Valid input please.\n";
-        purchaseProcess(amount,total_cost,purchasedItem);
+        purchaseProcess(amount,unit_price,purchasedItem);
     }
 
     return;
@@ -554,12 +638,14 @@ void Party::merchant(){
         cout << "I would be happy to take it off your hands.\n";
         cout << "5. Leave: Make sure you get everything you need, I'm leaving after this sale!\n\n";
 
-        getline(cin,choice);
-
-        while (!Functions::isNumber(choice)){
-            cout << "I need a valid choice!\n";
+        bool isChoice;
+        do {
             getline(cin,choice);
-        }
+            isChoice = Functions::isNumber(choice);
+            if (!isChoice){
+                cout << "I need a valid choice!\n";
+            }
+        } while (!isChoice);
 
         if (stoi(choice) >= 1 && stoi(choice) <= 4){
             //Weapons, Treasures, or Potions
@@ -596,7 +682,7 @@ void Party::merchant(){
             }
 
             //Prints all items in merchant array with target item type
-            for (auto& x: merchantList){
+            for (auto x: merchantList){
                 if (x.getItemType() == target){
                     displayed_items.push_back(x);
 
@@ -645,7 +731,7 @@ void Party::merchant(){
                 confirm_total = adjustTax * stoi(amount);
 
                 if (stoi(amount) != 0){ //0 is Cancel
-                    purchaseProcess(stoi(amount),confirm_total,target_item);
+                    purchaseProcess(stoi(amount),static_cast<int> (adjustTax),target_item);
                 }
             } else { //Treasure; selling
                 while (true){
@@ -834,7 +920,7 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
         }
     }
 
-    for (int i = 0; i < getPlayerSize(); i++){
+    for (int i = 0; i < getMaxPlayerSize(); i++){
         if (health_chance <= 50){ //Percentage form; random chance for EACH member
             modifyPlayerHealth(i, -1);
             if (getLivePlayerCount() == 0){
