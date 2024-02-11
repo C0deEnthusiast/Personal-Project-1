@@ -5,11 +5,12 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <limits>
 
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-//Basic helper functions
+//Helper functions
 namespace Functions{
     //Outputs pseudo-random value within a specified interval
     inline int createRand(int min, int max){ return (rand() % (max - min + 1)) + min;}
@@ -58,8 +59,11 @@ namespace Functions{
     //Uses placeholder string as a stall to let user read what the exposition says
     inline void convenientStop(void){
         std::string stop;
-        std::cout << "(Enter a character to continue)\n";
+        std::cout << "(Enter a character to continue)" << std::endl;
         std::getline(std::cin, stop);
+
+        //Flush input buffer
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         return;
     }

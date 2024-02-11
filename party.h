@@ -37,8 +37,6 @@ class Party{
         //Maximums and constants
         //static const int player_size = playerCount; //Count for players[]
         static const int max_inventory_capacity = 30; //Max capacity of inventory[]
-        static const int max_weapon_capacity = playerCount;
-        static const int max_armor_capacity = playerCount;
 
         //Game stats
         int player_count = playerCount; //Count of players that are ALIVE
@@ -56,12 +54,9 @@ class Party{
         Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
         std::vector<Item> merchantList; //Used to allow players to access and add items through merchant
         //Integrated into Player(); remove when funcs revolve around Player.Items instead
-        Item weapon_barracks[max_weapon_capacity];
-        Item armorSets[max_armor_capacity];
+        //Item weapon_barracks[max_weapon_capacity];
+        //Item armorSets[max_armor_capacity];
     public:
-        //Public Arrays
-        //Player players[playerCount]; //Player list
-
         Party(); //Default constructor; "items.txt" is default text file
         Party(std::string filename); //Parameterized Constructor
         //Party(); //Dynamic Parameterized Constructor
@@ -69,17 +64,22 @@ class Party{
         //Getters (Maximums and Constants)
         int getMaxPlayerSize(){ return playerCount;}
         int getMaxInventoryCapacity(){ return max_inventory_capacity;}
-        int getMaxWeaponCapacity(){ return max_weapon_capacity;}
-        int getMaxArmorCapacity(){ return max_armor_capacity;}
+        //Max number of equipped weapons will always be equal to the max number of players
+        int getMaxEquippedWeaponCapacity(){ return playerCount;}
+        //Max number of equipped armor will always be equal to the max number of players
+        int getMaxEquippedArmorCapacity(){ return playerCount;}
 
         //Normal Getters
+
         int getCurrentPlayerCount(){return living_player_count;}
         int getMoney(){ return money;}
         int getDangerLevel(){ return danger_level;}
         int getExploredRooms(){ return explored_rooms;}
         int getKeys(){ return keys;}
         int getCurrentCapacity(){ return current_inventory_capacity;}
+        //Retrieves count of currently EQUIPPED weapons
         int getCurrentWeaponCapacity(){ return current_weapon_capacity;}
+        //Retrieves count of currently EQUIPPED armor
         int getCurrentArmorCapacity(){ return current_armor_capacity;}
         int getMerchantCapacity(){ return merchantList.size();}
         int getLivePlayerCount();
@@ -87,6 +87,8 @@ class Party{
         std::vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
         Player new_getPlayer(int index, int &retrieved_status);
+        //Item new_getWeapon(int index, int &retrieved_status);
+        //Item new_getArmor(int index, int &retrieved_status);
         Item getWeapon(int index);
         Item getArmor(int index);
 
@@ -102,11 +104,8 @@ class Party{
         void modifyPlayerHealth(int index, int health_change);
         void modifyWeaponAttack(int index, int attack_change);
         void addPlayer(std::string player_name);
-        void addItems(Item item, int &item_count);
-        bool addItemProto(Item item);
-        bool removeItemProto(Item item);
-        bool addItem(Item item);
-        bool removeItem(Item item);
+        bool addItems(Item item, int &item_count);
+        bool removeItem(Item item, bool removeFromInventory = true);
         bool equipItem(Item item, int player_index, Item &retrieved_item);
 
         //Conditionals

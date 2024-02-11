@@ -22,7 +22,7 @@ using namespace std;
 #define effect_Heal "Heal" //Heals target
 #define effect_Rage "Rage" //Target can attack multiple times
 #define effect_Undying "Undying" //Target does not receive damage
-#define effect_Resurrection "Resurrection"
+#define effect_Resurrection "Resurrection" //Resurrects previously dead player to full health
 //Add more potion effects here
 #define effect_Muspelheim "Muspelheim"
 #define effect_Godslayer "Godslayer"

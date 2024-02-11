@@ -16,42 +16,6 @@
 
 using namespace std;
 
-
-
-bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-    if (list_current_capacity >= list_max_capacity){
-        return false;
-    }
-
-    for (int i = 0; i < list_max_capacity; i++){
-        if (itemList[i].getItemName() == default_item_name){
-            //Creates new item in inventory
-            itemList[i] = item;
-            list_current_capacity++;//Adds to capacity
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool removeItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
-    if (list_current_capacity == 0){
-        return false; //Quickly returns false to give efficient output rather than wait for loop
-    }
-
-    for (int i = 0; i < list_max_capacity; i++){
-        if (itemList[i].getItemName() == item.getItemName()){
-            //Default constructor is used to override current item; effectively removing it
-            itemList[i] = Item();
-            list_current_capacity--;//Reduces capacity
-            return true;
-        }
-    }
-
-    return false; //This occurs only if item is not found for deletion
-}
-
 Party::Party(){ //Default constructor
     createMerchantList("items.txt"); //Default items text file
 }
@@ -90,7 +54,7 @@ Player Party::new_getPlayer(int index, int &retrieved_status){
 
 Item Party::getWeapon(int index){
     if (isPlayerIndex(index)){ //Each player has individual weapon
-        return weapon_barracks[index];
+        return players[index].getEquippedWeapon();
     } else {
         return Item();
     }
@@ -98,7 +62,7 @@ Item Party::getWeapon(int index){
 
 Item Party::getArmor(int index){
     if (isPlayerIndex(index)){ //Each player has individual armor
-        return armorSets[index];
+        return players[index].getEquippedArmor();
     } else {
         return Item();
     }
@@ -222,151 +186,25 @@ void Party::addPlayer(string player_name){
     return;
 }
 
-/*Adds multiple copies of 'item' into inventory[] (Under Revision)
-    - Rather than return a value, 'item_count' monitors how many items were NOT added to inventory[]
+/*
+Adds multiple copies of 'item' into inventory[]
+    - Average Time Complexity: O(n)
+    - Returns true if ALL copies of 'item' are added to inventory[]
+    - Returns false if:
+        -> Not ALL copies of 'item' are added to inventory[]
+        -> inventory[] is at max capacity
+        -> 'item_count' <= 0 as input of function
+    - 'item_count' helps monitor how many items were NOT added to inventory[]
     - Example:
         -> Before function call: Set 'item_count' = 7
         -> After function call: 'item_count' = 3 is returned by reference
         -> Conclusion: 7-3 = 4 items were successfully added
-    - Meant to circumvent issues of original addItem() where avg time complexity of adding multiple
-        copies behaves similarly to O(n^2)
-        - Further clarification: While addItem() has avg complexity of O(n), it is designed to
-        add only one item per function call. Essentially, when adding multiple copies of said item,
-        a nested loop must be used to execute this job given the original function (i.e. each loop
-        calls the loop inside addItem()). In other words, when adding multiple copies of an item, which
-        is the most common scenario in this project, most situations where addItem() is involved
-        will have a time complexity similar to O(n^2)
 */
-void Party::addItems(Item item, int &item_count){
+bool Party::addItems(Item item, int &item_count){
     if (current_inventory_capacity >= max_inventory_capacity){ //Capacity exceeded
-        return;
+        return false;
     }
-    for (auto& x: inventory){
-        if (item_count == 0){
-            return;
-        }
-        if (x.getItemName() == default_item_name){
-            //Creates new item in inventory
-            x = item;
-            current_inventory_capacity++;//Adds to capacity
-            item_count--; //Item added successfully
-            return;
-        }
-    }
-}
-
-bool Party::addItemProto(Item item){
-
-    //Adding Weapon to empty weapon slot in player list
-    if (item.getItemType() == isWeapon){
-        for (auto& x: players){
-            if (x.getEquippedWeapon().getItemName() == default_item_name){
-                x.setEquippedWeapon(item);
-                current_weapon_capacity++;
-                return true;
-            }
-        }
-    }
-
-    //Adding Armor to empty armor slot in player list
-    if (item.getItemType() == isArmor){
-        for (auto& x: players){
-            //Equips new armor
-            if (x.getEquippedArmor().getItemName() == default_item_name){
-                x.setEquippedArmor(item);
-                current_armor_capacity++;
-                return true;
-            }
-        }
-    }
-
-    /*//Adding weapon or armor
-    for (auto& x: players){
-        //Equips new armor
-        if (x.getEquippedArmor().getItemName() == default_item_name){
-            x.setEquippedArmor(item);
-            current_armor_capacity++;
-            return true;
-        }
-        //Equips new weapon
-        if (x.getEquippedWeapon().getItemName() == default_item_name && item.getItemType() == isWeapon){
-            x.setEquippedWeapon(item);
-            current_weapon_capacity++;
-            return true;
-        }
-    }*/
-
-
-    //Checks if item should go into inventory
-    if (!(item.getItemType() == isWeapon || item.getItemType() == isArmor)){ //Adds to inventory
-        if (current_inventory_capacity >= max_inventory_capacity){ //Full inventory
-            return false;
-        }
-
-        for (auto& x: inventory){
-            if (x.getItemName() == default_item_name){
-                //Adds item to inventory
-                x = item;
-                current_inventory_capacity++;
-                return true;
-            }
-        }
-    }
-
-    //Adding weapon or armor
-    for (auto& x: players){
-        //Equips new armor
-        if (x.getEquippedArmor().getItemName() == default_item_name && item.getItemType() == isArmor){
-            x.setEquippedArmor(item);
-            current_armor_capacity++;
-            return true;
-        }
-        //Equips new weapon
-        if (x.getEquippedWeapon().getItemName() == default_item_name && item.getItemType() == isWeapon){
-            x.setEquippedWeapon(item);
-            current_weapon_capacity++;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool Party::removeItemProto(Item item){
-    //Removes from inventory
-    if (!(item.getItemType() == isWeapon || item.getItemType() == isArmor)){
-        for (auto& x: inventory){
-            if (x.getItemName() == item.getItemName()){
-                x = Item();
-                current_inventory_capacity--;
-                return true;
-            }
-        }
-    }
-
-    //Adding weapon or armor
-    for (auto& x: players){
-        //Removes armor
-        if (x.getEquippedArmor().getItemName() == item.getItemType()){
-            x.setEquippedArmor(Item());
-            current_armor_capacity--;
-            return true;
-        }
-        //Removes weapon
-        if (x.getEquippedWeapon().getItemName() == item.getItemType()){
-            x.setEquippedWeapon(Item());
-            current_weapon_capacity--;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/*Adds item to inventory[] array or other relevant Item arrays
-Returns: True if Item is added successfully; false otherwise*/
-bool Party::addItem(Item item){
-    if (current_inventory_capacity >= max_inventory_capacity){ //Capacity exceeded
+    if (item_count <= 0){ //Will not accept inputs at most 0
         return false;
     }
     for (auto& x: inventory){
@@ -374,31 +212,61 @@ bool Party::addItem(Item item){
             //Creates new item in inventory
             x = item;
             current_inventory_capacity++;//Adds to capacity
+            item_count--; //Item added successfully
+        }
+        if (item_count == 0){
             return true;
         }
     }
-
-    return true;
-
-    /*if (item.getItemType() == isWeapon){
-        return addItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
-    } else if (item.getItemType() == isArmor){
-        return addItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
-    } else {
-        return addItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
-    }*/
+    return false;
 }
 
-/*Removes Item from inventory[] array and other relevant Item arrays
-Returns: False if current capacity is 0 or item is not found; true if item is removed successfully*/
-bool Party::removeItem(Item item){
-    if (item.getItemType() == isWeapon){
-        return removeItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
-    } else if (item.getItemType() == isArmor){
-        return removeItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
-    } else {
-        return removeItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
+/*
+Removes 'item' based on input for parameter 'removeFromInventory':
+    - True: removes from inventory[]
+    - False: removes from Players[]
+
+Returns false if:
+    - Current inventory capacity is 0
+    - 'item' is not found
+    - 'item' is not an in-game item (i.e. uses only the default constructor)
+
+True if item is removed successfully
+*/
+bool Party::removeItem(Item item, bool removeFromInventory){
+    if (removeFromInventory && current_inventory_capacity == 0){ //No items to delete
+        return false;
     }
+
+    if (item.getItemName() == default_item_name){
+        return false;
+    }
+
+    //Removes item from inventory
+    if (removeFromInventory){
+        for (auto& x: inventory){
+            if (x.getItemName() == item.getItemName()){
+                x = Item();
+                current_inventory_capacity--;
+                return true;
+            }
+        }
+    } else { //Removing item in Players[]
+        for (auto& x: players){
+            //Removes target weapon
+            if (x.getEquippedWeapon().getItemName() == item.getItemName()){
+                x.setEquippedWeapon(Item());
+                current_weapon_capacity--;
+                return true;
+            } else if (x.getEquippedArmor().getItemName() == item.getItemName()){ //Removes target armor
+                x.setEquippedArmor(Item());
+                current_armor_capacity--;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /*Replaces current item of player at specified index with 'item' of corresponding type
@@ -411,10 +279,12 @@ bool Party::equipItem(Item item, int player_index, Item &retrieved_item){
     if (item.getItemType() == isWeapon){
         retrieved_item = players[player_index].getEquippedWeapon();
         players[player_index].setEquippedWeapon(item);
+        current_weapon_capacity++;
         return true;
     } else if (item.getItemType() == isArmor){
         retrieved_item = players[player_index].getEquippedArmor();
         players[player_index].setEquippedArmor(item);
+        current_armor_capacity++;
         return true;
     }
 
@@ -454,8 +324,8 @@ void Party::showInventory(){
     cout << "| INVENTORY   | " << current_inventory_capacity << "/" << max_inventory_capacity;
     cout << "\n+-------------+";
     cout << "\n| Gold        | " << money;
-    cout << "\n| Weapons     | " << current_weapon_capacity << "/" << max_weapon_capacity;
-    cout << "\n| Armor       | " << current_armor_capacity << "/" << max_armor_capacity;
+    cout << "\n| Weapons     | " << current_weapon_capacity << "/" << getMaxEquippedWeaponCapacity();
+    cout << "\n| Armor       | " << current_armor_capacity << "/" << getMaxEquippedWeaponCapacity();
     //cout << "| Potions     | " << endl;
     cout << "\n| Treasures   | R: " << countItem("Silver ring");
     cout << " | N: " << countItem("Ruby necklace");
@@ -506,21 +376,6 @@ void Party::purchaseProcess(int amount, int unit_price, Item purchasedItem){
             cout << (temp - amount) << " out of the " << temp << " items that you requested.\n";
             cout << "I also adjusted the cost to reflect this!\nNo need to thank me!\n";
         }
-        
-        /*for (int i = 0; i < amount; i++){
-            if (!addItemProto(purchasedItem)){ //!addItem(purchasedItem)
-                //This occurs if desired count of items can NOT entirely be added
-                //Adjusts total cost if necessary
-                total_cost *= i;
-                total_cost /= amount;
-
-                //Informs player of adjusted price and item count
-                cout << "It appears you don't have enough inventory space.\nAs such, I added ";
-                cout << i << " out of the " << amount << " items that you requested.\n";
-                cout << "I also adjusted the cost to reflect this!\nNo need to thank me!\n";
-                break;
-            }
-        }*/
         
         //'amount' is adjusted by addItems() to reflect how much money will be actually spent
         setMoney(getMoney() - ((temp - amount) * unit_price)); //Deducts money from party
@@ -664,7 +519,7 @@ void Party::merchant(){
                 cout << "None of these will make you look like a dashing knight in shining armor";
                 cout << " (except a few), but they do well in keeping you alive.\n";
                 cout << "Keep in mind that you can only carry a maximum of ";
-                cout << max_armor_capacity << " sets of armor.\n\n";
+                cout << getMaxEquippedArmorCapacity() << " sets of armor.\n\n";
                 cout << "Have a look:\n";
 
                 target = isArmor;
@@ -931,3 +786,51 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
 
     return true;
 }
+
+
+
+
+//Commented Code (likely to be removed)
+
+/*bool Party::addItem(Item item){
+    if (current_inventory_capacity >= max_inventory_capacity){ //Capacity exceeded
+        return false;
+    }
+    for (auto& x: inventory){
+        if (x.getItemName() == default_item_name){
+            //Creates new item in inventory
+            x = item;
+            current_inventory_capacity++;//Adds to capacity
+            return true;
+        }
+    }
+
+    return true;
+
+    if (item.getItemType() == isWeapon){
+        return addItemHelper(weapon_barracks, max_weapon_capacity, current_weapon_capacity, item);
+    } else if (item.getItemType() == isArmor){
+        return addItemHelper(armorSets, max_armor_capacity, current_armor_capacity, item);
+    } else {
+        return addItemHelper(inventory, max_inventory_capacity, current_inventory_capacity, item);
+    }
+}*/
+
+/*
+bool addItemHelper(Item itemList[], int list_max_capacity, int &list_current_capacity, Item item){
+    if (list_current_capacity >= list_max_capacity){
+        return false;
+    }
+
+    for (int i = 0; i < list_max_capacity; i++){
+        if (itemList[i].getItemName() == default_item_name){
+            //Creates new item in inventory
+            itemList[i] = item;
+            list_current_capacity++;//Adds to capacity
+            return true;
+        }
+    }
+
+    return false;
+}
+*/

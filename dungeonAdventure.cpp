@@ -123,8 +123,8 @@ int main(int argc, char *argv[]){
 
     //Remove this later; testing only
     party.setMoney(1000000);
-    party.addItem(party.returnItem("Diamond circlet"));
-    party.addItem(party.returnItem("Diamond circlet"));
+    int val = 2;
+    party.addItems(party.returnItem("Diamond circlet"), val);
     party.setKeys(3);
     //party.addItem(party.returnItem("Blighted Dagger")); //Debugging only
     /*party.merchant(); //Testing
@@ -368,7 +368,10 @@ int main(int argc, char *argv[]){
                         treasure = "Gem-encrusted goblet";
                     }
 
-                    if (party.addItem(party.returnItem(treasure))){ //Treasure was added successfully
+                    int val = 1;
+                    party.addItems(party.returnItem(treasure), val);
+
+                    if (val == 0){ //Treasure was added successfully
                         cout << "You got a " << treasure << "!" << endl;
                     } else { //Treasure not added successfully
                         cout << "Treasure couldn't be collected." << endl;

@@ -2,7 +2,6 @@
 // Personal Project 1 - Item Implementation
 
 #include <iostream>
-//#include <fstream>
 #include "item.h"
 
 using namespace std;
@@ -57,7 +56,6 @@ Item::Item(){
     item_stats = 0;
     crit_chance = 0;
     crit_boost = 0;
-    weapon_effect = Effect();
 }
 
 Item::Item(string name, string type, int cost, int stat, int critChance, int critBoost,
