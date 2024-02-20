@@ -110,10 +110,10 @@ class Party{
         int countItem(std::string item_name);
         void purchaseProcess(int amount, int unit_price, Item purchasedItem); //Modify 2nd
         void createMerchantList(std::string filename); //Modify 4th
-        void presentMerchantItem(Item item, double tax); //Modify 5th
+        void presentItem(Item item, double tax, bool forMerchant = true); //Modify 5th
         void merchant(); //Modify 1st
         void showPartyStatus();
-        void showPartyArsenal();
+        void showPartyArsenal(bool enumerate = false);
         bool npcPuzzle(int riddle); //Modify 6th; consider removing though
 
         void customizeArsenal();

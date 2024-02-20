@@ -79,8 +79,8 @@ Battle::Battle(Party *party, Monster *monster){
         return;
     }
     //Initiate Player and monster Status linked lists
-    //playersStatuses_proto = new Status*[size];
-    //monsterStatuses = nullptr;
+    playersStatuses_proto = new Status*[size];
+    monsterStatuses = nullptr;
 
     //Player modifiers
     player_active = new bool[size];
@@ -98,7 +98,7 @@ Battle::Battle(Party *party, Monster *monster){
     //first_monster_head = new pStatus();
 
     for (int i = 0; i < size; i++){
-        //playersStatuses_proto[i] = nullptr;
+        playersStatuses_proto[i] = nullptr;
         player_active[i] = true;
         player_charmed[i] = false;
         player_immuneToDMG[i] = false;
@@ -122,32 +122,17 @@ Battle::~Battle(){
     curParty = nullptr;
     curMonster = nullptr;
 
-    /*
-    Status* del = nullptr;
-
     if (playersStatuses_proto != nullptr){
         //Create efficient delete function later
         for (int i = 0; i < size; i++){
             //Deletes each chain
-            while (playersStatuses_proto[i] != nullptr){
-                del = playersStatuses_proto[i];
-                playersStatuses_proto[i] = playersStatuses_proto[i]->next;
-                delete del;
-                del = nullptr;
-            }
+            fullDelete(playersStatuses_proto[i]);
         }
         delete[] playersStatuses_proto;
-        playersStatuses_proto = nullptr;
     }
 
     //Again, create efficient delete function later
-    while (monsterStatuses != nullptr){
-        del = monsterStatuses;
-        monsterStatuses = monsterStatuses->next;
-        delete del;
-        del = nullptr;
-    }
-    */
+    fullDelete(monsterStatuses);
 
     if (player_active != nullptr){
         delete[] player_active;
@@ -279,6 +264,23 @@ void Battle::removeStatuses(int target_index, int target_duration){
     }
 }
 
+void Battle::updated_addStatuses(Effect new_effect, int target_index){
+    Status* list;
+    if (curParty->isPlayerIndex(target_index)){ //Player
+        list = playersStatuses_proto[target_index];
+    } else if (isMonsterIndex(target_index)){ //Monster
+        list = monsterStatuses;
+    } else {
+        return;
+    }
+
+    Status* new_node = new Status(target_index, new_effect);
+
+    new_node->next = list;
+    list = new_node;
+    return;
+}
+
 void Battle::updated_removeStatuses(int target_index, int target_duration){
     //
 }
@@ -287,9 +289,11 @@ int Battle::test(){
     //Test
     for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power,-1);
+        //updated_addStatuses(curMonster->power, -1);
     }
     for (int i = 0; i < Functions::createRand(2,3); i++){
         addStatus(curMonster->power, 0);
+        updated_addStatuses(curMonster->power, 0);
     }
     for (int i = 0; i < Functions::createRand(1,3); i++){
         addStatus(curMonster->power, 1);

@@ -375,7 +375,7 @@ void Party::createMerchantList(string filename){
     return;
 }
 
-void Party::presentMerchantItem(Item item, double tax){
+void Party::presentItem(Item item, double tax, bool forMerchant){
     string target = item.getItemType();
     if (target == isWeapon){
         cout << "(+";
@@ -393,22 +393,27 @@ void Party::presentMerchantItem(Item item, double tax){
         cout << ") ";
     }
 
-    cout << item.getItemName() << " [";
+    cout << item.getItemName();
 
-    if (target != isTreasure){
-        cout << item.getCost() * tax;
-    } else {
-        cout << item.getCost();
+    if (forMerchant){
+        cout << " [";
+        if (target != isTreasure){
+            cout << item.getCost() * tax;
+        } else {
+            cout << item.getCost();
+        }
+
+        cout << " Gold]";
     }
 
-    cout << " Gold]\n";
+    cout << endl;
 
     if (target == isTreasure){
         cout << " - Current Quantity: " << countItem(item.getItemName()) << endl;
     }
 
     if (target == isWeapon){
-        cout << " - Crit Information - Chance: " << item.getCritChance();
+        cout << " - Critical Hit Information - Chance: " << item.getCritChance();
         cout << "%; Boost: " << item.getCritBoost() << "%" << endl;
     }
 
@@ -499,7 +504,7 @@ void Party::merchant(){
                 displayed_items.push_back(x);
 
                 cout << displayed_items.size() << ". ";
-                presentMerchantItem(displayed_items.at(displayed_items.size() - 1), tax);
+                presentItem(displayed_items.at(displayed_items.size() - 1), tax);
                 cout << "\n";
             }
         }
@@ -589,26 +594,32 @@ void Party::showPartyStatus(){
     cout << "\n+-------------+";
     cout << "\n| PARTY       |";
     cout << "\n+-------------+";
-    cout << "\n+-------------+\n\n";
+    //cout << "\n+-------------+\n\n";
 
     return;
 }
 
-void Party::showPartyArsenal(){
+void Party::showPartyArsenal(bool enumerate){
     //Main player is first displayed
-    for (auto x: players){
-        cout << "\n| " << x.getPlayerName();
-        if (x.getEquippedArmor().getItemName() != default_item_name){
-            cout << " (" << x.getEquippedArmor().getItemName() << ")";
+    cout << "\n+-------------+";
+    for (int i = 0; i < playerCount; i++){
+        cout << "\n| ";
+        if (enumerate){
+            cout << i << ". ";
         }
-        cout << " | Health: " << x.getPlayerHealth() << " | ";
+        cout << players[i].getPlayerName();
+        if (players[i].getEquippedArmor().getItemName() != default_item_name){
+            cout << " (" << players[i].getEquippedArmor().getItemName() << ")";
+        }
+        cout << " | Health: " << players[i].getPlayerHealth() << " | ";
         
         //Displays weapons
-        if (x.getEquippedWeapon().getItemName() != default_item_name){
-            cout << "Equipped: " << x.getEquippedWeapon().getItemName();
-            cout << "(Atk: " << x.getEquippedWeapon().getStat() << ")";
+        if (players[i].getEquippedWeapon().getItemName() != default_item_name){
+            cout << "Equipped: " << players[i].getEquippedWeapon().getItemName();
+            cout << "(Atk: " << players[i].getEquippedWeapon().getStat() << ")";
         }
     }
+    cout << "\n+-------------+\n\n";
     
     return;
 }
@@ -676,14 +687,19 @@ bool Party::npcPuzzle(int riddle){
 }
 
 void Party::customizeArsenal(){
+    int* indexList = nullptr; //Stores array of indexes pointing to weapons or armor in inventory[]
+    int chosenIndex;
+    string choice, target;
+
     while (true){
+        chosenIndex = 0;
         showPartyArsenal();
 
-        cout << "\n\nWhat would you like to equip/replace?\n";
+        cout << "What would you like to equip/replace?\n";
         cout << "1. Weapons\n";
         cout << "2. Armor\n";
         cout << "3. Exit\n" << endl;
-        string choice = "";
+        choice = "";
 
         do {
             getline(cin,choice);
@@ -692,12 +708,80 @@ void Party::customizeArsenal(){
             }
         } while (choice != "1" && choice != "2" && choice != "3");
 
+        if (indexList != nullptr){
+            delete[] indexList;
+            indexList = nullptr;
+        }
+
         if (choice == "1"){ //Equip a weapon
-            //
+            target = isWeapon;
         } else if (choice == "2"){ //Equip armor
-            //
+            target = isArmor;
         } else { //Leave Arsenal Customization
             break;
+        }
+
+        indexList = new int[max_inventory_capacity];
+
+
+        for (int i = 0; i < max_inventory_capacity; i++){
+            if (inventory[i].getItemType() == target){
+                cout << (chosenIndex + 1) << ". ";
+                presentItem(inventory[i], 0, false);
+                cout << "\n";
+                indexList[chosenIndex++] = i;
+            }
+        }
+
+        cout << (chosenIndex + 1) << ". Cancel\n";
+
+        cout << "Select the item that you would like to equip:" << endl;
+        while (true){
+            getline(cin,choice);
+
+            if (Functions::isNumber(choice)){
+                if (stoi(choice) >= 1 && stoi(choice) <= chosenIndex + 1){
+                    break;
+                }
+            }
+
+            cout << "Invalid input" << endl;
+        }
+
+        if (stoi(choice) == chosenIndex + 1){ //Cancel option
+            continue;
+        }
+
+        chosenIndex = stoi(choice) - 1; //Selects index of chosen item
+
+        //Choose player to equip item to
+        showPartyArsenal(true);
+        cout << playerCount << ". Cancel\n";
+
+        cout << "Select the player that you would like to equip the item to\n";
+        cout << "(Use the number on the far left that corresponds to the given player)\n";
+
+        while (true){
+            getline(cin, choice);
+
+            if (Functions::isNumber(choice)){
+                if (stoi(choice) >= 0 && stoi(choice) <= playerCount){
+                    break;
+                }
+            }
+
+            cout << "Invalid input.\n";
+        }
+        cout << endl;
+
+        if (stoi(choice) == playerCount){ //Cancel option
+            continue;
+        }
+
+        //Equip the item
+        Item returnToInventory;
+        if (equipItem(inventory[indexList[chosenIndex]], stoi(choice),returnToInventory)){
+            inventory[indexList[chosenIndex]] = returnToInventory;
         }
     }
 }

@@ -93,8 +93,8 @@ class Battle{
         vector<Status> monster_0; //Monster statuses
         vector<Status> playerStatuses[playerCount]; //Player statuses
 
-        //Status** playersStatuses_proto;
-        //Status* monsterStatuses;
+        Status** playersStatuses_proto;
+        Status* monsterStatuses;
 
         //Effect Tracker (updated)
         //pStatus** playerStatusArray;
@@ -147,6 +147,7 @@ class Battle{
         bool isMonsterIndex(int index){ return (index == -1);} //Update with more monsters per battle
         void addStatus(Effect new_effect, int target_index);
         void removeStatuses(int target_index, int target_duration);
+        void updated_addStatuses(Effect new_effect, int target_index);
         void updated_removeStatuses(int target_index, int target_duration);
         int test();
         void displayEffects(string name, int health, vector<Status> vect);
