@@ -27,19 +27,6 @@ Party::Party(string filename){ //Parameterized Constructor
 
 //Special Getters
 
-//Counts how many players are alive
-int Party::getLivePlayerCount(){
-    int player_count = 0;
-
-    for (auto& x: players){
-        if (x.getPlayerHealth() > 0){ //Player is alive
-            player_count++;
-        }
-    }
-
-    return player_count;
-}
-
 vector<Item> Party::copyMerchantList(){
     return merchantList;
 }
@@ -48,33 +35,17 @@ Player Party::getPlayer(int index){
     return (isPlayerIndex(index) ? players[index] : Player());
 }
 
-Player Party::new_getPlayer(int index, int &retrieved_status){
-    return ((retrieved_status = isPlayerIndex(index)) ? players[index] : Player());
-}
-
-Item Party::getWeapon(int index){
-    if (isPlayerIndex(index)){ //Each player has individual weapon
-        return players[index].getEquippedWeapon();
-    } else {
-        return Item();
-    }
+Item Party::getEquippedWeapon(int index){
+    return (isPlayerIndex(index) ? players[index].getEquippedWeapon() : Item());
 }
 
 Item Party::getArmor(int index){
-    if (isPlayerIndex(index)){ //Each player has individual armor
-        return players[index].getEquippedArmor();
-    } else {
-        return Item();
-    }
+    return (isPlayerIndex(index) ? players[index].getEquippedArmor() : Item());
 }
 
 //Setters
 void Party::setMoney(int new_money){
-    if (new_money >= 0){
-        money = new_money;
-    } else{
-        money = 0;
-    }
+    (new_money >= 0 ? money = new_money : money = 0);
 
     return;
 }
@@ -94,21 +65,13 @@ bool Party::setDangerLevel(int new_level){
 }
 
 void Party::setExploredRooms(int new_rooms){
-    if (new_rooms >= 0){
-        explored_rooms = new_rooms;
-    } else {
-        explored_rooms = 0;
-    }
+    (new_rooms >= 0 ? explored_rooms = new_rooms : explored_rooms = 0);
 
     return;
 }
 
 void Party::setKeys(int new_keys){
-    if (new_keys >= 0){
-        keys = new_keys;
-    } else {
-        keys = 0;
-    }
+    (new_keys >= 0 ? keys = new_keys : keys = 0);
 
     return;
 }
@@ -133,7 +96,7 @@ void Party::modifyPlayerHealth(int index, int health_change){
 
     //Resurrects player
     /*if (players[index].getPlayerHealth() == 0 && health_change > 0){
-        player_count++;
+        alive_players_count++;
     }*/
 
     //Changes specified player's health if the player is not dead
@@ -147,7 +110,7 @@ void Party::modifyPlayerHealth(int index, int health_change){
         /*Player temp = players[index];
         players[index] = players[player_count - 1];
         players[player_count - 1] = temp;*/
-        player_count--;
+        alive_players_count--;
 
         if (players[index].getLeaderStatus()){ //Checks if dead player is the 'leader'
             cout << "Leader is dead. (Execute function regarding this.)" << endl;
@@ -174,7 +137,7 @@ void Party::modifyWeaponAttack(int index, int attack_change){
 //Adds player to players[] array
 void Party::addPlayer(string player_name){
     for (int i = 0; i < playerCount; i++){ //Searches for available Player 'slots'
-        if (players[i].getPlayerName() == ""){ //Checks for empty player slot/index
+        if (players[i].getPlayerName() == invalidPlayer){ //Checks for empty player slot/index
             players[i].setPlayerName(player_name);
             if (i == 0){//First Player will be a 'leader'
                 players[i].setLeaderStatus(true);
@@ -292,20 +255,6 @@ bool Party::equipItem(Item item, int player_index, Item &retrieved_item){
 }
 
 
-
-//Conditionals
-
-//Returns false if at least one player is alive; true if all are literally dead
-bool Party::areAllPlayersDead(){
-    for (int i = 0; i < playerCount; i++){
-        if (players[i].getPlayerHealth() > 0){
-            return false;
-        }
-    }
-
-    return true;
-}
-
 //Other functions
 
 Item Party::returnItem(string item_name){
@@ -340,8 +289,8 @@ void Party::showInventory(){
 int Party::countItem(string item_name){
     int count = 0;
 
-    for (int i = 0; i < max_inventory_capacity; i++){
-        if(inventory[i].getItemName() == item_name){
+    for (auto x: inventory){
+        if (x.getItemName() == item_name){
             count++;
         }
     }
@@ -426,7 +375,8 @@ void Party::createMerchantList(string filename){
     return;
 }
 
-void Party::presentMerchantItem(Item item, string target, double tax){
+void Party::presentMerchantItem(Item item, double tax){
+    string target = item.getItemType();
     if (target == isWeapon){
         cout << "(+";
     } else if (target == isArmor){
@@ -453,9 +403,13 @@ void Party::presentMerchantItem(Item item, string target, double tax){
 
     cout << " Gold]\n";
 
+    if (target == isTreasure){
+        cout << " - Current Quantity: " << countItem(item.getItemName()) << endl;
+    }
+
     if (target == isWeapon){
         cout << " - Crit Information - Chance: " << item.getCritChance();
-        cout << "%; Boost: " << item.getCritBoost() << "%\n";
+        cout << "%; Boost: " << item.getCritBoost() << "%" << endl;
     }
 
     if (target == isWeapon || target == isPotion){
@@ -467,10 +421,6 @@ void Party::presentMerchantItem(Item item, string target, double tax){
     1) Sets up a penalty in case user makes deliberate incorrect input for 'wasting' the merchant's time
     2) Sets up the tax that increases prices based on explored rooms*/
 void Party::merchant(){
-    //If players deliberately make wrong inputs (i.e. letters for number input) at certain points
-    //They will be punished
-    int wrong_input = 0;
-
     double tax = 1 + (0.25 * explored_rooms); //Modifies prices based on how many rooms were explored
 
     cout << "If you're looking to get supplies, you've come to the right place.\n";
@@ -478,7 +428,6 @@ void Party::merchant(){
 
     while (true){
         string choice = "", amount = ""; //These are strings in case of invalid input
-        int confirm_total;
 
         //These are for quick access to the names and original costs of items
         vector<Item> displayed_items;
@@ -502,128 +451,127 @@ void Party::merchant(){
             }
         } while (!isChoice);
 
-        if (stoi(choice) >= 1 && stoi(choice) <= 4){
-            //Weapons, Treasures, or Potions
-            string target = ""; //Selected item type
+        int int_choice = stoi(choice);
 
-            if (stoi(choice) == 1){ //Weapons
-                cout << "I have a plentiful collection of weapons to choose from,";
-                cout << " what would you like?\n";
-                cout << "Note that each weapon have base attack power, marked by a (+X).\n";
-                cout << "Plus, each got a little ... bonus.\n\n";
-                cout << "Choose one of the following:\n";
+        if (int_choice < 1 || int_choice > 5){ //Invalid choice
+            cout << "Why are we beating around the bush?\n";
+            cout << "(Enter a character to display merchant's menu)\n";
+            //Flush input buffer
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
 
-                target = isWeapon;
-            } else if (stoi(choice) == 2){ //Armor
-                cout << "Looking for suits of armor, I see.\n";
-                cout << "None of these will make you look like a dashing knight in shining armor";
-                cout << " (except a few), but they do well in keeping you alive.\n";
-                cout << "Keep in mind that you can only carry a maximum of ";
-                cout << getMaxEquippedArmorCapacity() << " sets of armor.\n\n";
-                cout << "Have a look:\n";
+        if (int_choice == 5){ //Leaves merchant interface
+            cout << "Farewell!\n";
+            break;
+        }
 
-                target = isArmor;
-            } else if (stoi(choice) == 3){ //Potions
-                cout << "I have many potions to choose from, what would you like?\n";
-                cout << "Each have their own ... special quirks.\n\n";
-                cout << "Pick and choose:\n";
-                target = isPotion;
-            } else { //Treasures
-                cout << "Oooh! You got treasures? Brilliant!\n";
-                cout << "Let's see, here are the treasures I'm looking for:\n\n";
-                cout << "Which ones do you have?\n";
+        //Weapons, Treasures, or Potions
+        string target = ""; //Selected item type
 
-                target = isTreasure;
+        if (int_choice == 1){ //Weapons
+            cout << "I have a plentiful collection of weapons to choose from, what would you like?\n";
+            cout << "Note that each weapon have base attack power, marked by a (+X).\n";
+            cout << "Plus, each got a little ... bonus.\n\n";
+            cout << "Choose one of the following:\n";
+
+            target = isWeapon;
+        } else if (int_choice == 2){ //Armor
+            cout << "Looking for suits of armor, I see.\n";
+            cout << "None of these will make you look like a dashing knight in shining armor";
+            cout << " (except a few), but they do well in keeping you alive.\nHave a look:\n";
+
+            target = isArmor;
+        } else if (int_choice == 3){ //Potions
+            cout << "I have many potions to choose from, what would you like?\n";
+            cout << "Each have their own ... special quirks.\n\nPick and choose:\n";
+            target = isPotion;
+        } else { //Treasures
+            cout << "Oooh! You got treasures? Brilliant!\n";
+            cout << "Let's see, here are the treasures I'm looking for:\n\nWhich ones do you have?\n";
+
+            target = isTreasure;
+        }
+
+        //Prints all items in merchant array with target item type
+        for (auto x: merchantList){
+            if (x.getItemType() == target){
+                displayed_items.push_back(x);
+
+                cout << displayed_items.size() << ". ";
+                presentMerchantItem(displayed_items.at(displayed_items.size() - 1), tax);
+                cout << "\n";
             }
+        }
+        cout << (displayed_items.size() + 1) << ". Cancel" << endl;
 
-            //Prints all items in merchant array with target item type
-            for (auto x: merchantList){
-                if (x.getItemType() == target){
-                    displayed_items.push_back(x);
+        while (true){
+            getline(cin,choice);
 
-                    cout << displayed_items.size() << ". ";
-                    presentMerchantItem(displayed_items.at(displayed_items.size() - 1),target,tax);
-                    cout << endl;
+            if (Functions::isNumber(choice)){
+                if (stoi(choice) > 0 && stoi(choice) <= (displayed_items.size() + 1)){
+                    break;
                 }
             }
-            cout << (displayed_items.size() + 1) << ". Cancel\n";
 
+            cout << "Valid Input Please\n";
+        }
+
+        //Cancels weapon selection if choice is the Cancel option
+        if (stoi(choice) == (displayed_items.size() + 1)){
+            continue;
+        }
+
+        Item target_item = displayed_items.at(stoi(choice) - 1);
+
+        if (target != isTreasure){ //Purchasing
             while (true){
-                getline(cin,choice);
+                cout << "(Enter how many items you wish to purchase, or 0 to cancel)\n";
+                getline(cin,amount);
 
-                if (Functions::isNumber(choice)){
-                    if (stoi(choice) > 0 && stoi(choice) <= (displayed_items.size() + 1)){
+                if (Functions::isNumber(amount)){ //Valid Number
+                    if (stoi(amount) >= 0){ //Non-negative
                         break;
                     }
                 }
 
-                cout << "Valid Input Please\n";
+                cout << "I need an appropriate amount.\n\n";
             }
 
-            //Cancels weapon selection if choice is the Cancel option
-            if (stoi(choice) == (displayed_items.size() + 1)){
-                continue;
+            //Calculates price
+            double adjustTax = tax * static_cast<double> (target_item.getCost());
+
+            if (stoi(amount) != 0){ //0 is Cancel
+                purchaseProcess(stoi(amount),static_cast<int> (adjustTax),target_item);
             }
+        } else { //Treasure; selling
+            while (true){
+                string confirm = "";
+                do { //Checks for confirmation of selling treasures
+                    cout << "\nYou want to sell " << target_item.getItemName();
+                    cout << " for " << target_item.getCost() << " Gold? (y/n)\n";
 
-            Item target_item = displayed_items.at(stoi(choice) - 1);
+                    getline(cin,confirm);
 
-            if (target != isTreasure){ //Purchasing
-                while (true){
-                    cout << "(Enter how many items you wish to purchase, or 0 to cancel)\n";
-                    getline(cin,amount);
-
-                    if (Functions::isNumber(amount)){ //Valid Number
-                        if (stoi(amount) >= 0){ //Non-negative
-                            break;
-                        }
+                    if (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N"){
+                        cout << "Valid confirmation please.\n";
                     }
+                } while (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N");
 
-                    cout << "I need an appropriate amount.\n\n";
-                }
-
-                //Calculates price
-                double adjustTax = tax * static_cast<double> (target_item.getCost());
-                confirm_total = adjustTax * stoi(amount);
-
-                if (stoi(amount) != 0){ //0 is Cancel
-                    purchaseProcess(stoi(amount),static_cast<int> (adjustTax),target_item);
-                }
-            } else { //Treasure; selling
-                while (true){
-                    string confirm = "";
-                    do { //Checks for confirmation of selling treasures
-                        cout << "\nYou want to sell " << target_item.getItemName();
-                        cout << " for " << target_item.getCost() << " Gold? (y/n)\n";
-
-                        getline(cin,confirm);
-
-                        if (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N"){
-                            cout << "Valid confirmation please.\n";
-                        }
-                    } while (confirm != "y" && confirm != "Y" && confirm != "n" && confirm != "N");
-
-                    cout << endl;
-                    
-                    if (confirm == "y" || confirm == "Y"){ //Sells treasure
-                        if (removeItem(target_item)){ //Sold treasure successfully
-                            setMoney(money + target_item.getCost()); //Gives party more gold
-                        } else {
-                            cout << "How unfortunate, it appears you don't have the treasure.\n";
-                        }
+                cout << endl;
+                
+                if (confirm == "y" || confirm == "Y"){ //Sells treasure
+                    if (removeItem(target_item)){ //Sold treasure successfully
+                        setMoney(money + target_item.getCost()); //Gives party more gold
                     } else {
-                        cout << "Damn. Very well, keep your treasure then.\n";
+                        cout << "How unfortunate, it appears you don't have the treasure.\n";
                     }
-
-                    break;
+                } else {
+                    cout << "Damn. Very well, keep your treasure then.\n";
                 }
+
+                break;
             }
-        } else if (stoi(choice) == 5){ //Leave; Terminates merchant event
-            cout << "Farewell!\n";
-            break;
-        } else {
-            cout << "Why are we beating around the bush?\n";
-            cout << "(Enter a character to display merchant's menu)\n";
-            getline(cin,choice);
         }
     }
     cout << endl;
@@ -641,29 +589,27 @@ void Party::showPartyStatus(){
     cout << "\n+-------------+";
     cout << "\n| PARTY       |";
     cout << "\n+-------------+";
+    cout << "\n+-------------+\n\n";
+
+    return;
+}
+
+void Party::showPartyArsenal(){
     //Main player is first displayed
     for (auto x: players){
         cout << "\n| " << x.getPlayerName();
-        /*if (armorSets[i].getItemName() != default_item_name){
-            cout << " (" << armorSets[i].getItemName() << ")";
-        }*/
         if (x.getEquippedArmor().getItemName() != default_item_name){
             cout << " (" << x.getEquippedArmor().getItemName() << ")";
         }
         cout << " | Health: " << x.getPlayerHealth() << " | ";
         
         //Displays weapons
-        /*if (weapon_barracks[i].getItemName() != default_item_name){
-            cout << "Equipped: " << weapon_barracks[i].getItemName();
-            cout << "(Atk: " << weapon_barracks[i].getItemStat() << ")";
-        }*/
         if (x.getEquippedWeapon().getItemName() != default_item_name){
             cout << "Equipped: " << x.getEquippedWeapon().getItemName();
             cout << "(Atk: " << x.getEquippedWeapon().getStat() << ")";
         }
     }
-    cout << "\n+-------------+\n\n";
-
+    
     return;
 }
 
@@ -696,22 +642,17 @@ bool Party::npcPuzzle(int riddle){
         }
 
         vector<string> temp;
-        istringstream splice(line);
 
-        while (getline(splice,line,'~')){
-            temp.push_back(line);
-        }
+        Functions::vectorSplit(line,'~',temp);
 
         if (temp.size() != 2){
             continue;
         }
 
-        if (pick_riddle == riddle){ //Exits loop with current temporary array
+        if (pick_riddle++ == riddle){ //Exits loop with current temporary array
             riddleContent[0] = temp[0];
             riddleContent[1] = temp[1];
             break;
-        } else {
-            pick_riddle++; //Goes up line number
         }
     }
 
@@ -719,10 +660,9 @@ bool Party::npcPuzzle(int riddle){
 
     string answer = "";
 
-    cout << endl;
-    cout << "Good day, mate! I see, you're interested in the goods I've got, yes?" << endl;
-    cout << "Truth betold, I'm not impressed so far, so you need to up the ante." << endl;
-    cout << "In which case, solve my riddle, then we'll negotiate. Good? Great!" << endl;
+    cout << "\nGood day, mate! I see, you're interested in the goods I've got, yes?\n";
+    cout << "Truth betold, I'm not impressed so far, so you need to up the ante.\n";
+    cout << "In which case, solve my riddle, then we'll negotiate. Good? Great!\n";
     cout << "Listen well:" << endl;
 
     //Prints riddle
@@ -733,6 +673,33 @@ bool Party::npcPuzzle(int riddle){
 
     //Compares user's answer to actual answer
     return (answer == riddleContent[1]);
+}
+
+void Party::customizeArsenal(){
+    while (true){
+        showPartyArsenal();
+
+        cout << "\n\nWhat would you like to equip/replace?\n";
+        cout << "1. Weapons\n";
+        cout << "2. Armor\n";
+        cout << "3. Exit\n" << endl;
+        string choice = "";
+
+        do {
+            getline(cin,choice);
+            if (choice != "1" && choice != "2" && choice != "3"){
+                cout << "Invalid input. Please try again.\n";
+            }
+        } while (choice != "1" && choice != "2" && choice != "3");
+
+        if (choice == "1"){ //Equip a weapon
+            //
+        } else if (choice == "2"){ //Equip armor
+            //
+        } else { //Leave Arsenal Customization
+            break;
+        }
+    }
 }
 
 //Based on value from Monster::monsterEncounter, different awards/punishments occur
@@ -756,7 +723,7 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
         //Kills random player (that is alive, rather than beating a dead horse)
         if (players[kill_index].getPlayerHealth() > 0){
             modifyPlayerHealth(kill_index, -100); //Kills player
-            if (getLivePlayerCount() == 0){
+            if (getLivingPlayerCount() == 0){
                 return false;
             }
         }
@@ -768,7 +735,7 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
                 //Kills player
                 modifyPlayerHealth(i, -100);
 
-                if (getLivePlayerCount() == 0){
+                if (getLivingPlayerCount() == 0){
                     return false;
                 }
             }
@@ -778,7 +745,7 @@ bool Party::monsterOutcome(int outcome, int key_chance, int kill_index, int heal
     for (int i = 0; i < getMaxPlayerSize(); i++){
         if (health_chance <= 50){ //Percentage form; random chance for EACH member
             modifyPlayerHealth(i, -1);
-            if (getLivePlayerCount() == 0){
+            if (getLivingPlayerCount() == 0){
                 return false;
             }
         }

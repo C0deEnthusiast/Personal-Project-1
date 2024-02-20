@@ -30,6 +30,10 @@ using namespace std;
 //Defines boss' attack after Resurrection (2nd phase)
 #define bossFinalAttack 30
 
+//Status buffs and debuffs
+#define isBuff 1
+#define isDebuff -1
+#define isNotBuffOrDebuff 0
 
 
 struct Monster{
@@ -44,29 +48,24 @@ struct Monster{
 
     Monster(); //Default Constructor
     Monster(std::string name, int rating, int attkPwr, int health, int critChance, int critBoost,
-    std::string effect, int effectValue, int effectChance, int effectDuration); //Parameterized Constructor
+    Effect new_effect); //Parameterized Constructor
 
     //Setter
     void setRating(int new_rating);
 };
 
 struct Status{
-    int effect_target; //-1 is monster; non-negative values for player index
+    Status* next;
     Effect power;
+    int effect_target; //-1 is monster; non-negative values for player index
     int max_duration;
-    //Status* next;
-    Status(){
-        effect_target = -2;
-        max_duration = 0;
-    }
-    Status(int new_target, Effect new_power){
-        effect_target = new_target;
-        power = new_power;
-        max_duration = new_power.getEffectDuration();
-    }
+    int buffStatus;
+    bool toBeRemoved;
+    Status();
+    Status(int new_target, Effect new_power);
 };
 
-struct pStatus{
+/*struct pStatus{
     int effect_target; //-1 is monster; non-negative values for player index
     Effect power;
     int max_duration;
@@ -80,7 +79,7 @@ struct pStatus{
         power = new_power;
         max_duration = new_power.getEffectDuration();
     }
-};
+};*/
 
 
 //Manages Battle
@@ -94,9 +93,12 @@ class Battle{
         vector<Status> monster_0; //Monster statuses
         vector<Status> playerStatuses[playerCount]; //Player statuses
 
+        //Status** playersStatuses_proto;
+        //Status* monsterStatuses;
+
         //Effect Tracker (updated)
-        pStatus** playerStatusArray;
-        pStatus* first_monster_head;
+        //pStatus** playerStatusArray;
+        //pStatus* first_monster_head;
 
         //Attack adjustments for weapons and monster will be ONLY in battle (unless in 'updates')
         /*Alternative choice: Let monster stats be updated after battle so as to give
@@ -134,212 +136,25 @@ class Battle{
         bool player_turn = true;
         bool monster_turn = false;
 
-        void battleRewards(){ //Victory
-            /*
-             * Guaranteed Rewards:
-                * Money (10 * monster's rating)
-             * Common Rewards:
-                * 1 key (20%)
-                * A Heal or Rage potion (chances TBD)
-             * Rare Rewards:
-                * One of the special potions (chances TBD)
-                * Armor? (TBD)
-            */
-            curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficulty_rating);
-            //vector<Item> accessReward = curParty->copyMerchantList();
-            return;
-        }
-
-        void battleRetreat(){ //Retreat
-            /*Party Losses:
-             * Lose 1/4 of money
-             * Random party member loses health
-            */
-            double moneyLoss = 0.25 * static_cast<double> (curParty->getMoney());
-            curParty->setMoney(curParty->getMoney() - static_cast<int> (moneyLoss));
-
-            for (int i = 0; i < curParty->getMaxPlayerSize(); i++){
-                if (Functions::createRand(0,100) <= 50){
-                    curParty->modifyPlayerHealth(i, -5);
-                }
-            }
-            return;
-        }
-
-        void removeStatusesHelper(vector<Status> &vect, int target_duration){
-            for (int i = 0; i < vect.size(); i++){
-                if (vect[i].power.getEffectDuration() == target_duration){
-                    vect.erase(vect.begin() + i);
-                    i--;
-                }
-            }
-
-            return;
-        }
-        
+        void battleRewards(); //Victory
+        void battleRetreat(); //Retreat
+        void removeStatusesHelper(vector<Status> &vect, int target_duration);
+        void fullDelete(Status*& list);
     public:
-        Battle(Party *party, Monster *monster){ //Constructor; pass memory addresses
-            curParty = party;
-            curMonster = monster;
-
-            //Terminate battle preemptively if either pointers are null
-            if (curParty == nullptr || curMonster == nullptr){
-                cout << "Terminating battle due to missing necessary information\n";
-                return;
-            }
-
-            int size = curParty->getMaxPlayerSize();
-            if (size <= 0){
-                cout << "Terminating battle due to invalid player count\n";
-                return;
-            }
-            //Player modifiers
-            player_active = new bool[size];
-            player_charmed = new bool[size];
-            player_immuneToDMG = new bool[size];
-            player_defensesUp = new bool[size];
-            player_blocking = new bool[size];
-            player_attack_max = new int[size];
-
-            //Weapons
-            altered_weapons = new Item[size];
-
-            //Updated Status tracker
-            playerStatusArray = new pStatus*[size];
-            //first_monster_head = new pStatus();
-
-            for (int i = 0; i < size; i++){
-                player_active[i] = true;
-                player_charmed[i] = false;
-                player_immuneToDMG[i] = false;
-                player_defensesUp[i] = true;
-                player_blocking[i] = false;
-                player_attack_max[i] = 1;
-                altered_weapons[i] = curParty->getPlayer(i).getEquippedWeapon();
-                cout << "altered_weapons[" << i << "] Attack: " << altered_weapons[i].getStat() << "\n";
-            }
-
-            monster_innate_armor = curMonster->difficulty_rating * 10;
-            if (monster_innate_armor > maxArmorValue || monster_innate_armor < 0){
-                monster_innate_armor = maxArmorValue;
-            }
-
-            temp_monster = *curMonster;
-        }
-
-        ~Battle(){ //Destructor
-            int size = curParty->getMaxPlayerSize(); //For destruction of player status array
-            curParty = nullptr;
-            curMonster = nullptr;
-
-            if (player_active != nullptr){
-                delete[] player_active;
-                player_active = nullptr;
-            }
-            if (player_charmed != nullptr){
-                delete[] player_charmed;
-                player_charmed = nullptr;
-            }
-            if (player_immuneToDMG != nullptr){
-                delete[] player_immuneToDMG;
-                player_immuneToDMG = nullptr;
-            }
-            if (player_defensesUp != nullptr){
-                delete[] player_defensesUp;
-                player_defensesUp = nullptr;
-            }
-            if (player_blocking != nullptr){
-                delete[] player_blocking;
-                player_blocking = nullptr;
-            }
-            
-            if (player_attack_max != nullptr){
-                delete[] player_attack_max;
-                player_attack_max = nullptr;
-            }
-
-            if (altered_weapons != nullptr){
-                delete[] altered_weapons;
-                altered_weapons = nullptr;
-            }
-
-            pStatus* del = nullptr;
-
-            //Updated Status Tracker
-            if (playerStatusArray != nullptr){
-                //Create efficient delete function later
-                for (int i = 0; i < size; i++){
-                    //Deletes each chain
-                    while (playerStatusArray[i] != nullptr){
-                        del = playerStatusArray[i];
-                        playerStatusArray[i] = playerStatusArray[i]->next;
-                        delete del;
-                        del = nullptr;
-                    }
-                }
-                delete[] playerStatusArray;
-                playerStatusArray = nullptr;
-            }
-
-            //Again, create efficient delete function later
-            while (first_monster_head != nullptr){
-                del = first_monster_head;
-                first_monster_head = first_monster_head->next;
-                delete del;
-                del = nullptr;
-            }
-        }
+        Battle(Party *party, Monster *monster); //Constructor; pass memory addresses
+        ~Battle(); //Destructor
 
         bool isMonsterIndex(int index){ return (index == -1);} //Update with more monsters per battle
-
-
-        void addStatus(Effect new_effect, int target_index){
-            Status temp = Status(target_index, new_effect);
-            if (curParty->isPlayerIndex(target_index)){ //Player
-                playerStatuses[target_index].push_back(temp);
-            } else if (target_index == -1){ //Monster
-                monster_0.push_back(temp);
-            }
-            return;
-        }
-
-        void removeStatuses(int target_index, int target_duration){
-            if (curParty->isPlayerIndex(target_index)){
-                removeStatusesHelper(playerStatuses[target_index],target_duration);
-            } else if (target_index == -1) {
-                removeStatusesHelper(monster_0,target_duration);
-            }
-        }
-
+        void addStatus(Effect new_effect, int target_index);
+        void removeStatuses(int target_index, int target_duration);
+        void updated_removeStatuses(int target_index, int target_duration);
         int test();
-
-        void displayEffects(string name, int health, vector<Status> vect){
-            cout << "| " << name << " | " << health << " | ";
-            int i = 0;
-            for (auto x: vect){
-                cout << x.power.getEffectName() << "(" << x.power.getEffectDuration() << ") ";
-                if (x.power.getEffectName() == effect_Burn || x.power.getEffectName() == effect_Bleed){
-                    cout << ">> DMG(" << x.power.getEffectValue() << ") ";
-                }
-
-                (i != vect.size() - 1) ? cout << "| ": cout << "";
-                i++;
-            }
-            cout << endl;
-        }
-
+        void displayEffects(string name, int health, vector<Status> vect);
         //void activateZeroDurationEffect(Effect effect, int target_index);
-
         void activateEffect(Status T);
-
-        //Update this and monsterCombat
-        int playerCombat();
-
-        //Calculates how monster attacks
-        int monsterCombat();
-
+        int playerCombat(); //Update this and monsterCombat
+        int monsterCombat(); //Calculates how monster attacks
         int adjustAttack(int target_index, int attacker_index);
-
 
         //void activateEffect(Party &party, Monster &monster, Effect effect, int target, bool in_effect);
         void battleActivate(Party &party, Monster &monster, Effect effect, int target);

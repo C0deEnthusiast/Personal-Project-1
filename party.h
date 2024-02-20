@@ -32,6 +32,10 @@
 //using namespace std;
 using std::cout, std::endl;
 
+
+/*Revise funcs with 'Modify' based on priority (Starts with '1st'); look
+at other funcs only when these funcs have been revised sufficiently*/
+
 class Party{
     private:
         //Maximums and constants
@@ -39,7 +43,7 @@ class Party{
         static const int max_inventory_capacity = 30; //Max capacity of inventory[]
 
         //Game stats
-        int player_count = playerCount; //Count of players that are ALIVE
+        int alive_players_count = playerCount; //Count of players that are alive
         int money = 100; //In gold
         int danger_level = 100; //0 - 100
         int explored_rooms = 0; //Count of how many rooms have been explored
@@ -47,19 +51,14 @@ class Party{
         int current_inventory_capacity = 0;
         int current_weapon_capacity = 0;
         int current_armor_capacity = 0;
-        int living_player_count = playerCount;
 
         //Private Arrays
         Player players[playerCount]; //Player list
         Item inventory[max_inventory_capacity]; //Contains ALL player-owned items
         std::vector<Item> merchantList; //Used to allow players to access and add items through merchant
-        //Integrated into Player(); remove when funcs revolve around Player.Items instead
-        //Item weapon_barracks[max_weapon_capacity];
-        //Item armorSets[max_armor_capacity];
     public:
         Party(); //Default constructor; "items.txt" is default text file
         Party(std::string filename); //Parameterized Constructor
-        //Party(); //Dynamic Parameterized Constructor
 
         //Getters (Maximums and Constants)
         int getMaxPlayerSize(){ return playerCount;}
@@ -71,7 +70,7 @@ class Party{
 
         //Normal Getters
 
-        int getCurrentPlayerCount(){return living_player_count;}
+        int getLivingPlayerCount(){return alive_players_count;} //Modify
         int getMoney(){ return money;}
         int getDangerLevel(){ return danger_level;}
         int getExploredRooms(){ return explored_rooms;}
@@ -82,47 +81,42 @@ class Party{
         //Retrieves count of currently EQUIPPED armor
         int getCurrentArmorCapacity(){ return current_armor_capacity;}
         int getMerchantCapacity(){ return merchantList.size();}
-        int getLivePlayerCount();
+        //int getLivePlayerCount(); //Modify 3rd
         bool isPlayerIndex(int index){ return (index >= 0 && index < playerCount);}
         std::vector<Item> copyMerchantList(); //For Battle Rewards
         Player getPlayer(int index);
-        Player new_getPlayer(int index, int &retrieved_status);
-        //Item new_getWeapon(int index, int &retrieved_status);
-        //Item new_getArmor(int index, int &retrieved_status);
-        Item getWeapon(int index);
+        Item getEquippedWeapon(int index);
         Item getArmor(int index);
 
         //Setters
         void setMoney(int new_money);
-        //Remove Danger Level Implementation after Map modifications
-        bool setDangerLevel(int new_level);
+        bool setDangerLevel(int new_level); //Remove Danger Level Implementation after Map modifications
         void setExploredRooms(int new_rooms);
         void setKeys(int new_keys);
 
         //Additional Modifiers
 
-        void modifyPlayerHealth(int index, int health_change);
-        void modifyWeaponAttack(int index, int attack_change);
-        void addPlayer(std::string player_name);
+        void modifyPlayerHealth(int index, int health_change); //Modify 8th
+        void modifyWeaponAttack(int index, int attack_change); //Modify 9th
+        void addPlayer(std::string player_name); //Modify 7th
         bool addItems(Item item, int &item_count);
         bool removeItem(Item item, bool removeFromInventory = true);
         bool equipItem(Item item, int player_index, Item &retrieved_item);
-
-        //Conditionals
-
-        bool areAllPlayersDead(); //Remove this in place of getLivePlayerCount()
 
         //Other functions
 
         Item returnItem(std::string item_name);
         void showInventory();
         int countItem(std::string item_name);
-        void purchaseProcess(int amount, int unit_price, Item purchasedItem);
-        void createMerchantList(std::string filename);
-        void presentMerchantItem(Item item, std::string target, double tax);
-        void merchant();
+        void purchaseProcess(int amount, int unit_price, Item purchasedItem); //Modify 2nd
+        void createMerchantList(std::string filename); //Modify 4th
+        void presentMerchantItem(Item item, double tax); //Modify 5th
+        void merchant(); //Modify 1st
         void showPartyStatus();
-        bool npcPuzzle(int riddle);
+        void showPartyArsenal();
+        bool npcPuzzle(int riddle); //Modify 6th; consider removing though
+
+        void customizeArsenal();
 
         //Monster functions
         //Modify this to account for Monster class change

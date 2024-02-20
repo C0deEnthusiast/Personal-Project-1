@@ -23,21 +23,17 @@ Monster::Monster(){
     monster_health = 0;
     crit_chance = 0;
     crit_boost = 0;
-    power = Effect();
 }
 
-Monster::Monster(string name, int rating, int attkPwr, int health, int critChance, int critBoost,
-string effect, int effectValue, int effectChance, int effectDuration){
+Monster::Monster(std::string name, int rating, int attkPwr, int health, int critChance, int critBoost,
+Effect new_effect){
     monster_name = name;
     difficulty_rating = rating;
     attack_power = attkPwr;
     monster_health = health;
     crit_chance = critChance;
     crit_boost = critBoost;
-    power.setEffectName(effect);
-    power.setEffectValue(effectValue);
-    power.setEffectChance(effectChance);
-    power.setEffectDuration(effectDuration);
+    power = new_effect;
 }
 
 void Monster::setRating(int new_rating){
@@ -48,6 +44,243 @@ void Monster::setRating(int new_rating){
     } else if (difficulty_rating > bossRating){
         difficulty_rating = bossRating;
     }
+}
+
+Status::Status(){
+    next = nullptr;
+    effect_target = -2;
+    max_duration = 0;
+    buffStatus = isNotBuffOrDebuff;
+    toBeRemoved = true;
+    effect_target = -2;
+    max_duration = 0;
+}
+Status::Status(int new_target, Effect new_power){
+    effect_target = new_target;
+    power = new_power;
+    max_duration = new_power.getEffectDuration();
+}
+
+//Battle Implementation
+
+Battle::Battle(Party *party, Monster *monster){
+    curParty = party;
+    curMonster = monster;
+
+    //Terminate battle preemptively if either pointers are null
+    if (curParty == nullptr || curMonster == nullptr){
+        cout << "Terminating battle due to missing necessary information\n";
+        return;
+    }
+
+    int size = curParty->getMaxPlayerSize();
+    if (size <= 0){
+        cout << "Terminating battle due to invalid player count\n";
+        return;
+    }
+    //Initiate Player and monster Status linked lists
+    //playersStatuses_proto = new Status*[size];
+    //monsterStatuses = nullptr;
+
+    //Player modifiers
+    player_active = new bool[size];
+    player_charmed = new bool[size];
+    player_immuneToDMG = new bool[size];
+    player_defensesUp = new bool[size];
+    player_blocking = new bool[size];
+    player_attack_max = new int[size];
+
+    //Weapons
+    altered_weapons = new Item[size];
+
+    //Updated Status tracker
+    //playerStatusArray = new pStatus*[size];
+    //first_monster_head = new pStatus();
+
+    for (int i = 0; i < size; i++){
+        //playersStatuses_proto[i] = nullptr;
+        player_active[i] = true;
+        player_charmed[i] = false;
+        player_immuneToDMG[i] = false;
+        player_defensesUp[i] = true;
+        player_blocking[i] = false;
+        player_attack_max[i] = 1;
+        altered_weapons[i] = curParty->getPlayer(i).getEquippedWeapon();
+        cout << "altered_weapons[" << i << "] Attack: " << altered_weapons[i].getStat() << "\n";
+    }
+
+    monster_innate_armor = curMonster->difficulty_rating * 10;
+    if (monster_innate_armor > maxArmorValue || monster_innate_armor < 0){
+        monster_innate_armor = maxArmorValue;
+    }
+
+    temp_monster = *curMonster;
+}
+
+Battle::~Battle(){
+    int size = curParty->getMaxPlayerSize(); //For destruction of player status array
+    curParty = nullptr;
+    curMonster = nullptr;
+
+    /*
+    Status* del = nullptr;
+
+    if (playersStatuses_proto != nullptr){
+        //Create efficient delete function later
+        for (int i = 0; i < size; i++){
+            //Deletes each chain
+            while (playersStatuses_proto[i] != nullptr){
+                del = playersStatuses_proto[i];
+                playersStatuses_proto[i] = playersStatuses_proto[i]->next;
+                delete del;
+                del = nullptr;
+            }
+        }
+        delete[] playersStatuses_proto;
+        playersStatuses_proto = nullptr;
+    }
+
+    //Again, create efficient delete function later
+    while (monsterStatuses != nullptr){
+        del = monsterStatuses;
+        monsterStatuses = monsterStatuses->next;
+        delete del;
+        del = nullptr;
+    }
+    */
+
+    if (player_active != nullptr){
+        delete[] player_active;
+        player_active = nullptr;
+    }
+    if (player_charmed != nullptr){
+        delete[] player_charmed;
+        player_charmed = nullptr;
+    }
+    if (player_immuneToDMG != nullptr){
+        delete[] player_immuneToDMG;
+        player_immuneToDMG = nullptr;
+    }
+    if (player_defensesUp != nullptr){
+        delete[] player_defensesUp;
+        player_defensesUp = nullptr;
+    }
+    if (player_blocking != nullptr){
+        delete[] player_blocking;
+        player_blocking = nullptr;
+    }
+    
+    if (player_attack_max != nullptr){
+        delete[] player_attack_max;
+        player_attack_max = nullptr;
+    }
+
+    if (altered_weapons != nullptr){
+        delete[] altered_weapons;
+        altered_weapons = nullptr;
+    }
+
+    //pStatus* del = nullptr;
+
+    //Updated Status Tracker
+    /*if (playerStatusArray != nullptr){
+        //Create efficient delete function later
+        for (int i = 0; i < size; i++){
+            //Deletes each chain
+            while (playerStatusArray[i] != nullptr){
+                del = playerStatusArray[i];
+                playerStatusArray[i] = playerStatusArray[i]->next;
+                delete del;
+                del = nullptr;
+            }
+        }
+        delete[] playerStatusArray;
+        playerStatusArray = nullptr;
+    }
+
+    //Again, create efficient delete function later
+    while (first_monster_head != nullptr){
+        del = first_monster_head;
+        first_monster_head = first_monster_head->next;
+        delete del;
+        del = nullptr;
+    }*/
+}
+
+void Battle::battleRewards(){ //Victory
+    /*
+        * Guaranteed Rewards:
+        * Money (10 * monster's rating)
+        * Common Rewards:
+        * 1 key (20%)
+        * A Heal or Rage potion (chances TBD)
+        * Rare Rewards:
+        * One of the special potions (chances TBD)
+        * Armor? (TBD)
+    */
+    curParty->setMoney(curParty->getMoney() + 10 * curMonster->difficulty_rating);
+    //vector<Item> accessReward = curParty->copyMerchantList();
+    return;
+}
+
+void Battle::battleRetreat(){ //Retreat
+    /*Party Losses:
+        * Lose 1/4 of money
+        * Random party member loses health
+    */
+    int moneyLoss = curParty->getMoney() >> 2;
+    curParty->setMoney(curParty->getMoney() - moneyLoss);
+
+    for (int i = 0; i < curParty->getMaxPlayerSize(); i++){
+        if (Functions::createRand(0,100) <= 50){
+            curParty->modifyPlayerHealth(i, -5);
+        }
+    }
+    return;
+}
+
+void Battle::removeStatusesHelper(vector<Status> &vect, int target_duration){
+    for (int i = 0; i < vect.size(); i++){
+        if (vect[i].power.getEffectDuration() == target_duration){
+            vect.erase(vect.begin() + i);
+            i--;
+        }
+    }
+
+    return;
+}
+
+void Battle::fullDelete(Status*& list){
+    Status* del = nullptr;
+
+    while (list != nullptr){
+        del = list;
+        list = list->next;
+        delete del;
+        del = nullptr;
+    }
+}
+
+void Battle::addStatus(Effect new_effect, int target_index){
+    Status temp = Status(target_index, new_effect);
+    if (curParty->isPlayerIndex(target_index)){ //Player
+        playerStatuses[target_index].push_back(temp);
+    } else if (isMonsterIndex(target_index)){ //Monster
+        monster_0.push_back(temp);
+    }
+    return;
+}
+
+void Battle::removeStatuses(int target_index, int target_duration){
+    if (curParty->isPlayerIndex(target_index)){
+        removeStatusesHelper(playerStatuses[target_index],target_duration);
+    } else if (isMonsterIndex(target_index)) {
+        removeStatusesHelper(monster_0,target_duration);
+    }
+}
+
+void Battle::updated_removeStatuses(int target_index, int target_duration){
+    //
 }
 
 int Battle::test(){
@@ -98,12 +331,13 @@ int Battle::test(){
         activateEffect(x);
     }
 
-    Player arr[5] = {curParty->getPlayer(0), curParty->getPlayer(1),
-    curParty->getPlayer(2), curParty->getPlayer(3), curParty->getPlayer(4)};
-
-    for (int i = 0; i < 5; i++){
-        displayEffects(arr[i].getPlayerName(), arr[i].getPlayerHealth(), playerStatuses[i]);
-        cout << "Attack: " << arr[i].getEquippedWeapon().getStat() << endl;
+    for (int i = 0; i < playerCount; i++){
+        Player temp = curParty->getPlayer(i);
+        if (temp.getPlayerName() == invalidPlayer){
+            continue;
+        }
+        displayEffects(temp.getPlayerName(), temp.getPlayerHealth(), playerStatuses[i]);
+        cout << "Attack: " << temp.getEquippedWeapon().getStat() << endl;
     }
 
     displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
@@ -114,6 +348,21 @@ int Battle::test(){
     cout << "\nAfter: " << temp << endl;
 
     return 0;
+}
+
+void Battle::displayEffects(string name, int health, vector<Status> vect){
+    cout << "| " << name << " | " << health << " | ";
+    int i = 0;
+    for (auto x: vect){
+        cout << x.power.getEffectName() << "(" << x.power.getEffectDuration() << ") ";
+        if (x.power.getEffectName() == effect_Burn || x.power.getEffectName() == effect_Bleed){
+            cout << ">> DMG(" << x.power.getEffectValue() << ") ";
+        }
+
+        (i != vect.size() - 1) ? cout << "| ": cout << "";
+        i++;
+    }
+    cout << endl;
 }
 
 void Battle::activateEffect(Status T){
@@ -139,7 +388,8 @@ void Battle::activateEffect(Status T){
         //Sets health to 0 when Unholy Judgement ends
         if (player_turn && curParty->isPlayerIndex(target)){ //Targets player on their turn
             if (!player_immuneToDMG[target]){
-                curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
+                int temp_health = -curParty->getPlayer(target).getPlayerHealth();
+                curParty->modifyPlayerHealth(target, temp_health);
             }
         } else if (isMonsterIndex(target) && monster_turn){ //Targets monster on their turn
             curMonster->monster_health = 0;

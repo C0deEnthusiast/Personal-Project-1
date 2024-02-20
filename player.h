@@ -10,6 +10,8 @@
 //Defines default health of players
 #define defaultPlayerHealth 100
 
+#define invalidPlayer "Not a Player"
+
 class Player{ //Consider whether to have Monster class inherit this
     private:
         std::string name;

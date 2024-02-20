@@ -102,7 +102,6 @@ int main(int argc, char *argv[]){
     } while (player.length() == 0);
     party.addPlayer(player);
 
-
     cout << "\nOh, so the leader is " << player << ". How peachy\n";
     cout << "How about your 4 comrades?\n(Enter their names)\n";
     for (int i = 0; i < 4; i++){
@@ -197,12 +196,13 @@ int main(int argc, char *argv[]){
             game = gameWin();
         }
 
-        if (party.getLivePlayerCount() == 0){ //All Players are dead
+        if (party.getLivingPlayerCount() == 0){ //All Players are dead
             game = gameLose(-3);
         }
 
         cout << endl;
         party.showPartyStatus();
+        party.showPartyArsenal();
         dungeon.displayMap();
 
         //Actions
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]){
         } else { //No NPC or Room
             cout << "2. Investigate" << endl;
             cout << "3. Pick a Fight" << endl;
-            cout << "4. Cook and Eat; soon to be disabled" << endl;
+            cout << "4. Customize Party Arsenal" << endl;
             cout << "5. Give up" << endl;
             cout << "6 (Test). Drink up on heal potions" << endl;
         }
@@ -255,8 +255,8 @@ int main(int argc, char *argv[]){
             for (int i = 0; i < party.getMaxPlayerSize(); i++){
                 if (Functions::willOccur(20)){ //20% for given member to lose 1 HP
                     party.modifyPlayerHealth(i, -1);
-                    game = party.getLivePlayerCount();
-                    if (party.getLivePlayerCount() == 0){
+                    game = party.getLivingPlayerCount();
+                    if (party.getLivingPlayerCount() == 0){
                         game = false;
                     } else {
                         game = true;
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]){
                 int win = dungeon.encounter(party);
                 //game = monsters.monsterEncounter(party);
                 int rand1 = Functions::createRand(1,10);
-                int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+                int rand2 = Functions::createRand(1,party.getMaxPlayerSize());
                 int rand3 = Functions::createRand(1,100);
 
                 party.monsterOutcome(win, rand1, rand2, rand3);
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]){
 
             cout << "Check room count: " << party.getExploredRooms() << endl;
             int rand1 = Functions::createRand(1,10);
-            int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+            int rand2 = Functions::createRand(2,party.getMaxPlayerSize());
             int rand3 = Functions::createRand(1,100);
 
             game = party.monsterOutcome(win,rand1,rand2,rand3);
@@ -382,7 +382,7 @@ int main(int argc, char *argv[]){
                     int win = dungeon.encounter(party);
 
                     int rand1 = Functions::createRand(1,10);
-                    int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+                    int rand2 = Functions::createRand(2,party.getMaxPlayerSize());
                     int rand3 = Functions::createRand(1,100);
                     party.monsterOutcome(win, rand1, rand2, rand3);
 
@@ -395,7 +395,7 @@ int main(int argc, char *argv[]){
                     for (int i = 0; i < party.getMaxPlayerSize(); i++){
                         if (Functions::createRand(1,100) <= 50){ //Percentage form
                             party.modifyPlayerHealth(i, -1);
-                            if (party.getLivePlayerCount() == 0){
+                            if (party.getLivingPlayerCount() == 0){
                                 game = false;
                             } else {
                                 game = true;
@@ -425,15 +425,14 @@ int main(int argc, char *argv[]){
             int win = dungeon.encounter(party);
 
             int rand1 = Functions::createRand(1,10);
-            int rand2 = Functions::createRand(2,party.getLivePlayerCount());
+            int rand2 = Functions::createRand(2,party.getMaxPlayerSize());
             int rand3 = Functions::createRand(1,100);
             party.monsterOutcome(win, rand1, rand2, rand3);
 
             cout << endl;
             Functions::convenientStop();
-        } else if (action == "4" && !npc && !room){ //Eat Food
-            cout << "Food, cookware, and everything related will be replaced by potions" << endl;
-            Functions::convenientStop();
+        } else if (action == "4" && !npc && !room){ //Customize Party Arsenal
+            party.customizeArsenal();
         } else if (action == "5" && !npc && !room){ //Give Up Option for Normal Space
             game = gameLose();
         } else { //Incorrect Input
@@ -444,6 +443,7 @@ int main(int argc, char *argv[]){
     //Print final results
     cout << "Final Results:" << endl;
     party.showPartyStatus();
+    party.showPartyArsenal();
     party.showInventory();
 
     return 0;

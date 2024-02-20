@@ -60,7 +60,6 @@ namespace Functions{
     inline void convenientStop(void){
         std::string stop;
         std::cout << "(Enter a character to continue)" << std::endl;
-        std::getline(std::cin, stop);
 
         //Flush input buffer
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -90,7 +89,8 @@ namespace Functions{
     }
 
     // Uses 'seperator' to splice input string and stores them into specified 'vect' vector
-    inline void vectorSplit(std::string input_string, char separator, std::vector <std::string> &vect){
+    template <class T>
+    inline void vectorSplit(std::string input_string, char separator, std::vector <T> &vect){
         if (input_string.length() == 0){ //Makes sure input_string is proper length
             return;
         }

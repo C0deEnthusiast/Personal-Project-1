@@ -459,11 +459,9 @@ void Map::generateMonsterRoster(string filename, bool new_rush){
         }
 
         if (temp.size() == monster_info_count){
-            /*Monster create(monster.at(0),stoi(monster.at(1)),stoi(monster.at(2)),
-            stoi(monster.at(3)),monster.at(4),stoi(monster.at(5)),stoi(monster.at(6)),stoi(monster.at(7)));*/
+            Effect create_effect(temp.at(6),stoi(temp.at(7)),stoi(temp.at(8)), stoi(temp.at(9)));
             Monster create(temp.at(0),stoi(temp.at(1)),stoi(temp.at(2)),stoi(temp.at(3)),
-            stoi(temp.at(4)),stoi(temp.at(5)),
-            temp.at(6),stoi(temp.at(7)),stoi(temp.at(8)), stoi(temp.at(9)));
+            stoi(temp.at(4)),stoi(temp.at(5)), create_effect);
 
             monsterList.push_back(create);
             refillList.push_back(create);
@@ -608,7 +606,7 @@ int Map::encounter(Party& party, bool room){
             if (Functions::createRand(0,100) <= 10){
                 //Kills player
                 party.modifyPlayerHealth(i, -100);
-                if (party.getLivePlayerCount() == 0){
+                if (party.getLivingPlayerCount() == 0){
                     return false;
                 }
             }

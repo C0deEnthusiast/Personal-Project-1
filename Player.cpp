@@ -8,7 +8,7 @@
 using namespace std;
 
 Player::Player(){
-    name = "";
+    name = invalidPlayer;
     health = defaultPlayerHealth;
     leader = false;
 }
