@@ -266,9 +266,9 @@ void Battle::removeStatuses(int target_index, int target_duration){
 
 void Battle::updated_addStatuses(Effect new_effect, int target_index){
     Status* list;
-    if (curParty->isPlayerIndex(target_index)){ //Player
+    if (curParty->isPlayerIndex(target_index)){ //Is a Player
         list = playersStatuses_proto[target_index];
-    } else if (isMonsterIndex(target_index)){ //Monster
+    } else if (isMonsterIndex(target_index)){ //Is a Monster
         list = monsterStatuses;
     } else {
         return;
