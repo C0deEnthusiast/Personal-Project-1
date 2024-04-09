@@ -65,22 +65,6 @@ struct Status{
     Status(int new_target, Effect new_power);
 };
 
-/*struct pStatus{
-    int effect_target; //-1 is monster; non-negative values for player index
-    Effect power;
-    int max_duration;
-    pStatus* next;
-    pStatus(){
-        effect_target = -2;
-        max_duration = 0;
-    }
-    pStatus(int new_target, Effect new_power){
-        effect_target = new_target;
-        power = new_power;
-        max_duration = new_power.getEffectDuration();
-    }
-};*/
-
 
 //Manages Battle
 class Battle{
@@ -90,8 +74,8 @@ class Battle{
         Monster *curMonster;
 
         //Effect Tracker
-        vector<Status> monster_0; //Monster statuses
-        vector<Status> playerStatuses[playerCount]; //Player statuses
+        //vector<Status> monster_0; //Monster statuses
+        //vector<Status> playerStatuses[playerCount]; //Player statuses
 
         Status** playersStatuses_proto;
         Status* monsterStatuses;
@@ -140,19 +124,22 @@ class Battle{
         void battleRetreat(); //Retreat
         void removeStatusesHelper(vector<Status> &vect, int target_duration);
         void fullDelete(Status*& list);
+        void addStatusHelper(Status*& list, Effect new_effect, int target_index);
     public:
         Battle(Party *party, Monster *monster); //Constructor; pass memory addresses
         ~Battle(); //Destructor
 
         bool isMonsterIndex(int index){ return (index == -1);} //Update with more monsters per battle
-        void addStatus(Effect new_effect, int target_index);
-        void removeStatuses(int target_index, int target_duration);
+        //void addStatus(Effect new_effect, int target_index);
+        //void removeStatuses(int target_index, int target_duration);
         void updated_addStatuses(Effect new_effect, int target_index);
         void updated_removeStatuses(int target_index, int target_duration);
         int test();
         void displayEffects(string name, int health, vector<Status> vect);
+        void updated_displayEffects(string name, int health, Status* list);
         //void activateZeroDurationEffect(Effect effect, int target_index);
         void activateEffect(Status T);
+        void updated_activateEffect(Status* T_);
         int playerCombat(); //Update this and monsterCombat
         int monsterCombat(); //Calculates how monster attacks
         int adjustAttack(int target_index, int attacker_index);
@@ -161,7 +148,6 @@ class Battle{
         void battleActivate(Party &party, Monster &monster, Effect effect, int target);
         void postBattleActivate(Party &party, Monster &monster);
 };
-
 
 //Update Battle class to use <Status> single link lists instead of <Status> vectors
 //  - If necessary, use templates
@@ -208,4 +194,21 @@ Implementation Details (to work on):
         wouldn't make a difference; it is better to have current version to recover MAX duration
         rather than use more memory for redundant effect
 */
+
+/*struct pStatus{
+    int effect_target; //-1 is monster; non-negative values for player index
+    Effect power;
+    int max_duration;
+    pStatus* next;
+    pStatus(){
+        effect_target = -2;
+        max_duration = 0;
+    }
+    pStatus(int new_target, Effect new_power){
+        effect_target = new_target;
+        power = new_power;
+        max_duration = new_power.getEffectDuration();
+    }
+};*/
+
 #endif

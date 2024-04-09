@@ -15,6 +15,17 @@
 
 using namespace std;
 
+string buffList[] = {effect_Heal, effect_Rage, effect_Undying, 
+                     effect_Resurrection, effect_Muspelheim,
+                     effect_Godslayer, effect_Wrath, effect_Savage_Wrath, 
+                     effect_My_Brothers_And_Sisters, effect_Taunt, effect_Deflect};
+/*effect_Eternal_Loyalty is also a buff (if implemented)*/
+
+string debuffList[] = {effect_Burn, effect_Freeze, effect_Pierce, 
+                       effect_EnemyHP, effect_Bleed, effect_Rampage, 
+                       effect_Condemnation, effect_Wicked___, effect_Unholy_Judgement, 
+                       effect_Final_Requiem, effect_Eternal_Rest};
+
 
 Monster::Monster(){
     monster_name = "NaM";
@@ -51,14 +62,35 @@ Status::Status(){
     effect_target = -2;
     max_duration = 0;
     buffStatus = isNotBuffOrDebuff;
-    toBeRemoved = true;
-    effect_target = -2;
-    max_duration = 0;
+    toBeRemoved = true; //This uses the default constructor, so it is an 'invalid' Status
 }
+
 Status::Status(int new_target, Effect new_power){
-    effect_target = new_target;
+    next = nullptr;
     power = new_power;
+    effect_target = new_target;
     max_duration = new_power.getEffectDuration();
+    buffStatus = isNotBuffOrDebuff;
+
+    string check = new_power.getEffectName();
+
+    for (auto x: buffList){
+        if (x == check){
+            buffStatus = isBuff;
+            break;
+        }
+    }
+
+    if (buffStatus != isBuff){
+        for (auto x: debuffList){
+            if (x == check){
+                buffStatus = isDebuff;
+                break;
+            }
+        }
+    }
+    
+    toBeRemoved = false;
 }
 
 //Battle Implementation
@@ -246,7 +278,18 @@ void Battle::fullDelete(Status*& list){
     }
 }
 
-void Battle::addStatus(Effect new_effect, int target_index){
+void Battle::addStatusHelper(Status*& list, Effect new_effect, int target_index){
+    Status* new_node = new Status(target_index, new_effect);
+
+    if (list == nullptr){ //Empty list
+        list = new_node;
+    } else {
+        new_node->next = list;
+        list = new_node;
+    }
+}
+
+/*void Battle::addStatus(Effect new_effect, int target_index){
     Status temp = Status(target_index, new_effect);
     if (curParty->isPlayerIndex(target_index)){ //Player
         playerStatuses[target_index].push_back(temp);
@@ -254,30 +297,22 @@ void Battle::addStatus(Effect new_effect, int target_index){
         monster_0.push_back(temp);
     }
     return;
-}
+}*/
 
-void Battle::removeStatuses(int target_index, int target_duration){
+/*void Battle::removeStatuses(int target_index, int target_duration){
     if (curParty->isPlayerIndex(target_index)){
         removeStatusesHelper(playerStatuses[target_index],target_duration);
     } else if (isMonsterIndex(target_index)) {
         removeStatusesHelper(monster_0,target_duration);
     }
-}
+}*/
 
 void Battle::updated_addStatuses(Effect new_effect, int target_index){
-    Status* list;
     if (curParty->isPlayerIndex(target_index)){ //Is a Player
-        list = playersStatuses_proto[target_index];
+        addStatusHelper(playersStatuses_proto[target_index],new_effect, target_index);
     } else if (isMonsterIndex(target_index)){ //Is a Monster
-        list = monsterStatuses;
-    } else {
-        return;
+        addStatusHelper(monsterStatuses,new_effect, target_index);
     }
-
-    Status* new_node = new Status(target_index, new_effect);
-
-    new_node->next = list;
-    list = new_node;
     return;
 }
 
@@ -288,35 +323,39 @@ void Battle::updated_removeStatuses(int target_index, int target_duration){
 int Battle::test(){
     //Test
     for (int i = 0; i < Functions::createRand(1,3); i++){
-        addStatus(curMonster->power,-1);
-        //updated_addStatuses(curMonster->power, -1);
+        //addStatus(curMonster->power,-1);
+        updated_addStatuses(curMonster->power, -1);
     }
     for (int i = 0; i < Functions::createRand(2,3); i++){
-        addStatus(curMonster->power, 0);
+        //addStatus(curMonster->power, 0);
         updated_addStatuses(curMonster->power, 0);
     }
     for (int i = 0; i < Functions::createRand(1,3); i++){
-        addStatus(curMonster->power, 1);
+        //addStatus(curMonster->power, 1);
+        updated_addStatuses(curMonster->power, 1);
     }
     for (int i = 0; i < Functions::createRand(2,3); i++){
-        addStatus(curMonster->power, 2);
+        //addStatus(curMonster->power, 2);
+        updated_addStatuses(curMonster->power, 2);
     }
     for (int i = 0; i < Functions::createRand(1,3); i++){
-        addStatus(curMonster->power, 3);
+        //addStatus(curMonster->power, 3);
+        updated_addStatuses(curMonster->power, 3);
     }
     for (int i = 0; i < Functions::createRand(1,3); i++){
-        addStatus(curMonster->power, 4);
+        //addStatus(curMonster->power, 4);
+        updated_addStatuses(curMonster->power, 4);
     }
     //End of testing
 
-    removeStatuses(-1,0);
+    /*removeStatuses(-1,0);
     removeStatuses(0,0);
     removeStatuses(1,0);
     removeStatuses(2,0);
     removeStatuses(3,0);
-    removeStatuses(4,0);
+    removeStatuses(4,0);*/
 
-    for (auto& x: playerStatuses[0]){
+    /*for (auto& x: playerStatuses[0]){
         activateEffect(x);
     }
     for (auto& x: playerStatuses[1]){
@@ -333,18 +372,20 @@ int Battle::test(){
     }
     for (auto& x: monster_0){
         activateEffect(x);
-    }
+    }*/
 
     for (int i = 0; i < playerCount; i++){
         Player temp = curParty->getPlayer(i);
         if (temp.getPlayerName() == invalidPlayer){
             continue;
         }
-        displayEffects(temp.getPlayerName(), temp.getPlayerHealth(), playerStatuses[i]);
+        //displayEffects(temp.getPlayerName(), temp.getPlayerHealth(), playerStatuses[i]);
+        updated_displayEffects(temp.getPlayerName(), temp.getPlayerHealth(), playersStatuses_proto[i]);
         cout << "Attack: " << temp.getEquippedWeapon().getStat() << endl;
     }
 
-    displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
+    //displayEffects(curMonster->monster_name, curMonster->monster_health, monster_0);
+    updated_displayEffects(curMonster->monster_name, curMonster->monster_health, monsterStatuses);
     cout << "Monster attack: " << curMonster->attack_power << endl;
 
     cout << "\nTesting AdjustAttack():\nBefore: " << altered_weapons[0].getStat();
@@ -367,6 +408,30 @@ void Battle::displayEffects(string name, int health, vector<Status> vect){
         i++;
     }
     cout << endl;
+}
+
+void Battle::updated_displayEffects(string name, int health, Status* list){
+    cout << "| " << name << " | " << health << " | ";
+    //int i = 0;
+    Status* reader = list;
+
+    while (reader != nullptr){
+        cout << reader->power.getEffectName() << "(" << reader->power.getEffectDuration() << ") ";
+        if (reader->power.getEffectName() == effect_Burn || reader->power.getEffectName() == effect_Bleed){
+            cout << ">> DMG(" << reader->power.getEffectValue() << ") ";
+        }
+
+        (reader->next != nullptr) ? cout << "| ": cout << "";
+
+        //(i != vect.size() - 1) ? cout << "| ": cout << "";
+        //i++;
+        reader = reader->next;
+    }
+    cout << endl;
+
+    reader = nullptr;
+
+    return;
 }
 
 void Battle::activateEffect(Status T){
@@ -499,6 +564,223 @@ void Battle::activateEffect(Status T){
             }
         } else if (isMonsterIndex(target) && curMonster->monster_health > 0){
             curMonster->monster_health += T.power.getEffectValue();
+        }
+    }
+
+    //Pierce activates here; defensesUp changes to true in adjustAttack() function
+    if (T.power.getEffectName() == effect_Pierce){
+        if (curParty->isPlayerIndex(target)){
+            player_defensesUp[target] = false;
+        } else if (isMonsterIndex(target)){
+            monster_defensesUp = false;
+        }
+    }
+
+    //Attacking more than once
+    if (T.power.getEffectName() == effect_Rage || T.power.getEffectName() == effect_Rampage){
+        if (atMaxDuration){ //Applies Rage or Rampage
+            if (curParty->isPlayerIndex(target)){
+                player_attack_max[target] = T.power.getEffectValue();
+            } else if (isMonsterIndex(target)){
+                monster_attack_max = T.power.getEffectValue();
+            }
+        } else if (atEnd){ //Removes effect
+            if (curParty->isPlayerIndex(target)){
+                player_attack_max[target] = 1;
+            } else if (isMonsterIndex(target)){
+                monster_attack_max = 1;
+            }
+        }
+    }
+
+    if (T.power.getEffectName() == effect_Resurrection){
+        if (curParty->isPlayerIndex(target)){
+            if (curParty->getPlayer(target).getPlayerHealth() == 0){
+                curParty->modifyPlayerHealth(target, defaultPlayerHealth);
+            }
+        } else if (isMonsterIndex(target)){
+            //Applies to boss monster only
+            if (curMonster->difficulty_rating == bossRating && curMonster->monster_health == 0){
+                curMonster->monster_health = bossFinalHealth;
+            }
+        }
+    }
+
+    if (T.power.getEffectName() == effect_Undying && curParty->isPlayerIndex(target)){
+        if (atMaxDuration){
+            player_immuneToDMG[target] = true;
+        } else if (atEnd) {
+            player_immuneToDMG[target] = false;
+        }
+    }
+
+    if (T.power.getEffectName() == effect_Godslayer){
+        //
+    }
+
+    if (T.power.getEffectName() == effect_Final_Requiem){
+        //
+    }
+
+    return;
+}
+
+void Battle::updated_activateEffect(Status* T_){
+    Status T = *T_; //This is only to fix func without seeing red squiggly error lines all day
+    int target = T_->effect_target; //T.effect_target;
+    //Effect effect = T.power;
+
+    //Dissect Status pointer to reduce function call redundancy
+    string pickEffect = T_->power.getEffectName();
+    //int bruh = T_->power.getEffectChance();
+
+    bool atMaxDuration = (T.power.getEffectDuration() == T.max_duration);
+    bool atEnd = (T.power.getEffectDuration() == 0);
+
+    /*string buffList[] = {effect_Heal, effect_Rage, effect_Undying, 
+                     effect_Resurrection, effect_Muspelheim,
+                     effect_Godslayer, effect_Wrath, effect_Savage_Wrath, 
+                     effect_My_Brothers_And_Sisters, effect_Taunt, effect_Deflect};
+//effect_Eternal_Loyalty is also a buff (if implemented)
+
+string debuffList[] = {effect_Burn, effect_Freeze, effect_Pierce, 
+                       effect_EnemyHP, effect_Bleed, effect_Rampage, 
+                       effect_Condemnation, effect_Wicked___, effect_Unholy_Judgement, 
+                       effect_Final_Requiem, effect_Eternal_Rest};*/
+
+    /* Armor Effects:
+effect_Taunt "Taunt", effect_Deflect*/
+
+    //Activation of buffs
+
+
+    //Heal
+    if (pickEffect == effect_Heal){
+        //Heal will NOT work on dead monster/players
+        if (curParty->isPlayerIndex(target)){
+            if (curParty->getPlayer(target).getPlayerHealth() > 0){
+                curParty->modifyPlayerHealth(target, T.power.getEffectValue());
+            }
+        } else if (isMonsterIndex(target) && curMonster->monster_health > 0){
+            curMonster->monster_health += T.power.getEffectValue();
+        }
+    }
+
+    //Bleed and Burn (both behave identically)
+    if (pickEffect == effect_Bleed || pickEffect == effect_Burn){
+        if (curParty->isPlayerIndex(target)){ //Targets player
+            if (!player_immuneToDMG[target]){
+                curParty->modifyPlayerHealth(target,-T.power.getEffectValue());
+            }
+        } else if (isMonsterIndex(target)){ //Targets player
+            curMonster->monster_health -= T.power.getEffectValue();
+        }
+    }
+    
+    //Unholy Judgement
+    if (pickEffect == effect_Unholy_Judgement){
+        if (T_->power.getEffectDuration() != 0){ //Activates when effect ends
+            return;
+        }
+        //Sets health to 0 when Unholy Judgement ends
+        if (player_turn && curParty->isPlayerIndex(target)){ //Targets player on their turn
+            if (!player_immuneToDMG[target]){
+                curParty->modifyPlayerHealth(target, -curParty->getPlayer(target).getPlayerHealth());
+            }
+        } else if (isMonsterIndex(target) && monster_turn){ //Targets monster on their turn
+            curMonster->monster_health = 0;
+        }
+    }
+
+    //Wrath and Savage Wrath
+    if (pickEffect == effect_Wrath || pickEffect == effect_Savage_Wrath){
+        //cout << "Activating Wrath" << endl;
+
+        //Activated or at end of duration
+        if (T_->power.getEffectDuration() == T_->max_duration || T_->power.getEffectDuration() == 0){
+            return;
+        }
+        //cout << "Modifying Attack" << endl;
+
+        int changeAtk = T.power.getEffectValue();
+
+        if (T.power.getEffectName() == effect_Wrath && atEnd){ //Removes attack boost if it is normal Wrath
+            cout << "Removing Wrath" << endl;
+            changeAtk = -changeAtk;
+        }
+
+        bool depleteHealth = false;
+
+        //Savage Wrath's negative side effect
+        if (T.power.getEffectName() == effect_Savage_Wrath && atMaxDuration){
+            if (Functions::willOccur(T.power.getEffectChance())){
+                depleteHealth = true;
+            }
+        }
+
+        if (curParty->isPlayerIndex(target)){ //Targets player
+            //curParty->modifyWeaponAttack(target, changeAtk);
+            altered_weapons[target].setStat(altered_weapons[target].getStat() + changeAtk);
+            if (depleteHealth){
+                curParty->modifyPlayerHealth(target, -changeAtk);
+            }
+        } else if (isMonsterIndex(target)){ //Targets monster
+            curMonster->attack_power += changeAtk;
+            if (depleteHealth){
+                curMonster->monster_health -= changeAtk;
+            }
+        }
+    }
+
+    //Condemnation
+    if (T.power.getEffectName() == effect_Condemnation){
+        if (isMonsterIndex(target)){ //Will NOT activate on monster (for now)
+            return;
+        }
+        if (atMaxDuration && player_turn && curParty->isPlayerIndex(target)){ //Applies charm
+            player_charmed[target] = true;
+        } else if (atEnd && player_turn && curParty->isPlayerIndex(target)){ //Removes charm
+            player_charmed[target] = false;
+        }
+    }
+
+    //Enemy Current Health Damage
+    if (T.power.getEffectName() == effect_EnemyHP){
+        double curHealth;
+        if (curParty->isPlayerIndex(target)){
+            if (player_immuneToDMG[target]){
+                return;
+            }
+            curHealth = static_cast <double> (curParty->getPlayer(target).getPlayerHealth());
+        } else if (isMonsterIndex(target)){
+            curHealth = static_cast <double> (curMonster->monster_health);
+        }
+
+        //double healthDMG = (effect.getEffectValue() / 100) * curHealth; //Determines damage
+        curHealth *= (T.power.getEffectValue() / 100); //Determines damage
+
+        if (curParty->isPlayerIndex(target)){
+            curParty->modifyPlayerHealth(target, -curHealth);
+        } else if (isMonsterIndex(target)){
+           curMonster->monster_health -= curHealth;
+
+        }
+    }
+
+    //Freeze
+    if (T.power.getEffectName() == effect_Freeze){
+        if (atMaxDuration){ //Applies freeze
+            if (curParty->isPlayerIndex(target)){
+                player_active[target] = false;
+            } else if (isMonsterIndex(target)){
+                monster_active = false;
+            }
+        } else if (atEnd){ //Removes freeze
+            if (curParty->isPlayerIndex(target)){
+                player_active[target] = true;
+            } else if (isMonsterIndex(target)){
+                monster_active = true;
+            }
         }
     }
 
