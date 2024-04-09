@@ -151,7 +151,7 @@ class Battle{
 
 //Update Battle class to use <Status> single link lists instead of <Status> vectors
 //  - If necessary, use templates
-
+//
 
 //Ideas for effects to implement
 /*

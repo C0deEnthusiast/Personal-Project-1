@@ -695,6 +695,7 @@ effect_Taunt "Taunt", effect_Deflect*/
     //Wrath and Savage Wrath
     if (pickEffect == effect_Wrath || pickEffect == effect_Savage_Wrath){
         //cout << "Activating Wrath" << endl;
+        //
 
         //Activated or at end of duration
         if (T_->power.getEffectDuration() == T_->max_duration || T_->power.getEffectDuration() == 0){
