@@ -283,11 +283,31 @@ void Battle::addStatusHelper(Status*& list, Effect new_effect, int target_index)
 
     if (list == nullptr){ //Empty list
         list = new_node;
-    } else {
+    } else { //Insert as head
         new_node->next = list;
         list = new_node;
     }
 }
+
+void Battle::removeStatusHelper(Status*& list, Effect find_effect){
+    //
+}
+
+Status* Battle::retrieveStatusList(int target_index){
+    if (curParty->isPlayerIndex(target_index)){ //Is a Player
+        return playersStatuses_proto[target_index];
+    } else if (isMonsterIndex(target_index)){ //Is a Monster
+        return monsterStatuses;
+    }
+
+    return nullptr;
+}
+
+/*if (curParty->isPlayerIndex(target_index)){ //Is a Player
+        addStatusHelper(playersStatuses_proto[target_index], new_effect, target_index);
+    } else if (isMonsterIndex(target_index)){ //Is a Monster
+        addStatusHelper(monsterStatuses, new_effect, target_index);
+    }*/
 
 /*void Battle::addStatus(Effect new_effect, int target_index){
     Status temp = Status(target_index, new_effect);
@@ -308,16 +328,31 @@ void Battle::addStatusHelper(Status*& list, Effect new_effect, int target_index)
 }*/
 
 void Battle::updated_addStatuses(Effect new_effect, int target_index){
+    Status* modifyList = retrieveStatusList(target_index);
+
+    if (modifyList == nullptr){
+        return;
+    }
+
     if (curParty->isPlayerIndex(target_index)){ //Is a Player
-        addStatusHelper(playersStatuses_proto[target_index],new_effect, target_index);
+        addStatusHelper(playersStatuses_proto[target_index], new_effect, target_index);
     } else if (isMonsterIndex(target_index)){ //Is a Monster
-        addStatusHelper(monsterStatuses,new_effect, target_index);
+        addStatusHelper(monsterStatuses, new_effect, target_index);
     }
     return;
 }
 
 void Battle::updated_removeStatuses(int target_index, int target_duration){
-    //
+    Status* prev;
+    Status* cur;
+
+    if (curParty->isPlayerIndex(target_index)){ //Is a Player
+        // addStatusHelper(playersStatuses_proto[target_index], new_effect, target_index);
+    } else if (isMonsterIndex(target_index)){ //Is a Monster
+        // addStatusHelper(monsterStatuses, new_effect, target_index);
+    }
+
+    return;
 }
 
 int Battle::test(){

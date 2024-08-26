@@ -125,6 +125,8 @@ class Battle{
         void removeStatusesHelper(vector<Status> &vect, int target_duration);
         void fullDelete(Status*& list);
         void addStatusHelper(Status*& list, Effect new_effect, int target_index);
+        void removeStatusHelper(Status*& list, Effect find_effect);
+        Status* retrieveStatusList(int target_index);
     public:
         Battle(Party *party, Monster *monster); //Constructor; pass memory addresses
         ~Battle(); //Destructor
