@@ -344,7 +344,7 @@ void Battle::updated_addStatuses(Effect new_effect, int target_index){
 
 void Battle::updated_removeStatuses(int target_index, int target_duration){
     Status* prev;
-    Status* cur;
+    Status* cur; //Comment meant to troubleshoot git push
 
     if (curParty->isPlayerIndex(target_index)){ //Is a Player
         // addStatusHelper(playersStatuses_proto[target_index], new_effect, target_index);
